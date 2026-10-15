@@ -202,6 +202,7 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
 - `env.properties` è **escluso da Git**; nel repository c'è `env.properties.example` con le chiavi vuote.
 - Variabili: database, segreto e durata JWT, Cloudinary, mail (SMTP / Brevo), email e password del superadmin.
 - Schema del database: `spring.jpa.hibernate.ddl-auto=update`.
+- `spring.jpa.open-in-view=false`: le relazioni LAZY si leggono solo dentro i service `@Transactional`.
 - Profili:
   - default (locale): PostgreSQL locale; email via SMTP Gmail oppure codici scritti nel log
   - `test`: H2 in memoria, usato dai test di integrazione
