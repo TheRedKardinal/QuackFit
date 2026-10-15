@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html lang="it"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;600;700;800;900&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "tertiary-fixed": "#87fe45",
+          "background": "#f9f9f7",
+          "surface-variant": "#e2e3e1",
+          "on-surface": "#1a1c1b",
+          "on-surface-variant": "#4d4632",
+          "primary-fixed-dim": "#ecc200",
+          "on-background": "#1a1c1b",
+          "on-secondary-fixed-variant": "#6f3800",
+          "on-tertiary": "#ffffff",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-fixed-variant": "#1f5100",
+          "tertiary-container": "#7bf138",
+          "primary": "#725c00",
+          "on-primary-fixed": "#231b00",
+          "surface-tint": "#725c00",
+          "secondary": "#924c00",
+          "on-tertiary-fixed": "#082100",
+          "tertiary": "#2b6c00",
+          "on-secondary": "#ffffff",
+          "on-error-container": "#93000a",
+          "on-primary-fixed-variant": "#564500",
+          "on-primary": "#ffffff",
+          "surface-container-low": "#f4f4f2",
+          "surface": "#f9f9f7",
+          "outline-variant": "#d1c6ab",
+          "on-secondary-container": "#5b2d00",
+          "on-error": "#ffffff",
+          "on-secondary-fixed": "#2f1400",
+          "error": "#ba1a1a",
+          "inverse-on-surface": "#f1f1ef",
+          "outline": "#7f765f",
+          "on-primary-container": "#705b00",
+          "inverse-primary": "#ecc200",
+          "on-tertiary-container": "#2a6a00",
+          "secondary-container": "#f88400",
+          "inverse-surface": "#2f3130",
+          "tertiary-fixed-dim": "#6be026",
+          "surface-container-highest": "#e2e3e1",
+          "primary-fixed": "#ffe07c",
+          "primary-container": "#ffd200",
+          "surface-container": "#eeeeec",
+          "surface-bright": "#f9f9f7",
+          "surface-dim": "#dadad8",
+          "error-container": "#ffdad6",
+          "secondary-fixed-dim": "#ffb781",
+          "secondary-fixed": "#ffdcc4",
+          "surface-container-high": "#e8e8e6"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-sm": "0.5rem",
+          "gutter": "1rem",
+          "space-xl": "2rem",
+          "space-xs": "0.25rem",
+          "space-md": "1rem",
+          "margin": "1rem",
+          "space-lg": "1.5rem"
+        },
+        "fontFamily": {
+          "body-md": ["Nunito Sans"],
+          "headline-lg": ["Nunito Sans"],
+          "headline-xl": ["Nunito Sans"],
+          "label-md": ["Nunito Sans"],
+          "label-lg": ["Nunito Sans"],
+          "body-lg": ["Nunito Sans"],
+          "body-sm": ["Nunito Sans"],
+          "label-sm": ["Nunito Sans"],
+          "headline-lg-mobile": ["Nunito Sans"],
+          "headline-md": ["Nunito Sans"],
+          "headline-sm": ["Nunito Sans"],
+          "headline-xl-mobile": ["Nunito Sans"]
+        },
+        "fontSize": {
+          "body-md": ["15px", {"lineHeight": "22px", "fontWeight": "500"}],
+          "headline-lg": ["28px", {"lineHeight": "34px", "fontWeight": "800"}],
+          "headline-xl": ["36px", {"lineHeight": "44px", "fontWeight": "900"}],
+          "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.3px", "fontWeight": "700"}],
+          "label-lg": ["15px", {"lineHeight": "20px", "letterSpacing": "0.5px", "fontWeight": "800"}],
+          "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "600"}],
+          "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.5px", "fontWeight": "800"}],
+          "headline-lg-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "800"}],
+          "headline-md": ["20px", {"lineHeight": "26px", "fontWeight": "800"}],
+          "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+          "headline-xl-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "900"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between p-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col gap-space-lg"><div class="flex items-center gap-space-sm px-space-xs"><div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-[0_3px_0_#ecc200]"><span class="material-symbols-outlined text-[24px]">fitness_center</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">QuackFit</span><span class="font-label-sm text-label-sm text-primary tracking-wider uppercase">Admin Console</span></div></div><div class="bg-surface-container p-space-sm rounded-xl flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-secondary text-[20px]">verified_user</span><span class="font-label-md text-label-md text-on-surface">Ruolo Attuale</span></div><span class="px-space-xs py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase">SUPERADMIN</span></div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-headline-sm"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all bg-primary-container text-on-primary-container font-headline-sm" data-path="gestione-utenti" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="font-label-lg text-label-lg">Gestione Utenti</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="gestione-contenuti" href="#"><span class="material-symbols-outlined text-[20px]">view_timeline</span><span class="font-label-lg text-label-lg">Gestione Contenuti</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="panoramica-sistema" href="#"><span class="material-symbols-outlined text-[20px]">insights</span><span class="font-label-lg text-label-lg">Panoramica</span></a></nav></div><div class="flex flex-col gap-space-sm"><div class="bg-surface-container-lowest p-space-sm rounded-xl flex flex-col gap-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">API Endpoints</span><span class="font-body-sm text-body-sm text-on-surface-variant font-mono truncate">/api/admin/users</span><span class="font-body-sm text-body-sm text-on-surface-variant font-mono truncate">/api/admin/stages</span></div><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors" data-path="app-switch" href="#"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[20px]">smartphone</span><span class="font-label-md text-label-md">Torna all'App Mobile</span></div><span class="material-symbols-outlined text-[18px]">arrow_forward</span></a></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="w-full h-full px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md"><span class="font-label-md text-label-md text-on-surface-variant">Console di Amministrazione</span></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container border border-outline-variant"><span class="w-2 h-2 rounded-full bg-tertiary-container animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface-variant">Backend Online</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface px-space-lg py-space-lg min-h-screen"><div class="flex flex-col w-full gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase tracking-wider">Console v2.4</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">/api/admin/users</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Gestione Utenti</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Visualizza gli account attivi e gestisci i privilegi di accesso</p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<div class="bg-surface-container-low px-space-md py-space-sm rounded-xl flex items-center gap-space-md shadow-sm">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Operatore corrente</span>
+<span class="font-label-md text-label-md text-on-surface">Tu (Superadmin)</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-md bg-secondary text-on-secondary font-label-sm text-label-sm">ID: 8f4a-01c</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-xl flex items-start sm:items-center gap-space-md shadow-sm">
+<div class="w-10 h-10 rounded-xl bg-secondary-fixed text-on-secondary-fixed flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">shield_lock</span>
+</div>
+<div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Regole di Sicurezza RBAC attive</span>
+<span class="font-body-md text-body-md text-on-surface-variant">La modifica del ruolo comporta l'invalidazione immediata dei token attivi (logout ovunque) per l'utente interessato.</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container-highest px-space-sm py-1 rounded-full whitespace-nowrap self-start sm:self-auto">Enforced via JWT Revocation</span>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Totale Utenti</span>
+<span class="font-headline-lg text-headline-lg text-on-surface">48</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]">groups</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Utenti Base</span>
+<span class="font-headline-lg text-headline-lg text-on-surface">39</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[26px]">person</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Admin di Reparto</span>
+<span class="font-headline-lg text-headline-lg text-secondary">7</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[26px]">manage_accounts</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Superadmin</span>
+<span class="font-headline-lg text-headline-lg text-on-surface">2</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-[0_2px_0_#ecc200]">
+<span class="material-symbols-outlined text-[26px]">military_tech</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex-1 flex items-center bg-surface-container-low rounded-xl px-space-md py-space-xs gap-space-xs">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-outline" id="user-search" placeholder="Cerca per nome, cognome o email (param: q)..." type="text" value=""/>
+<button class="text-on-surface-variant hover:text-on-surface text-label-sm font-label-sm px-space-xs" id="clear-search">Pulisci</button>
+</div>
+<div class="flex items-center gap-space-md flex-wrap sm:flex-nowrap justify-between sm:justify-end">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-md text-label-md text-on-surface-variant whitespace-nowrap">Righe per pagina (size):</span>
+<div class="relative">
+<select class="appearance-none bg-surface-container-low font-label-md text-label-md text-on-surface px-space-md py-space-xs pr-8 rounded-xl outline-none cursor-pointer" id="page-size">
+<option selected="" value="20">20</option>
+<option value="30">30</option>
+<option value="50">50</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-on-surface-variant text-[18px]">expand_more</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1 rounded-xl">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Totale:</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">48 elementi</span>
+<span class="text-outline font-label-sm text-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Pagine:</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">3</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<th class="py-space-md px-space-md">ID</th>
+<th class="py-space-md px-space-md">Nome e Cognome</th>
+<th class="py-space-md px-space-md">Email</th>
+<th class="py-space-md px-space-md text-center">Email Verificata</th>
+<th class="py-space-md px-space-md">Ruolo</th>
+<th class="py-space-md px-space-md">Data Registrazione</th>
+<th class="py-space-md px-space-md text-right">Azioni Ruolo</th>
+</tr>
+</thead>
+<tbody class="divide-y-0" id="users-table-body">
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm font-mono px-space-xs py-0.5 rounded bg-surface-container text-on-surface" title="UUID Completo: 8f4a13d9-93e5-42cf-9610-d021c172f3e1">8f4a...f3e1</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-label-sm text-label-sm font-black">LM</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Lorenzo Moretti</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">(Tu - Sessione attiva)</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant">lorenzo.moretti@quackfit.it</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Sì
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-space-sm py-1 rounded-lg bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase tracking-wide font-black inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">military_tech</span> SUPERADMIN
+              </span>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant font-mono">2023-10-12 09:14</td>
+<td class="py-space-md px-space-md text-right">
+<span class="inline-flex items-center gap-1 px-space-sm py-1 rounded-xl bg-surface-container text-on-surface-variant font-label-sm text-label-sm cursor-not-allowed opacity-80" title="Impossibile modificare il proprio account">
+<span class="material-symbols-outlined text-[16px]">lock</span> Modifica sé stesso vietata
+              </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm font-mono px-space-xs py-0.5 rounded bg-surface-container text-on-surface" title="UUID Completo: 3d719a82-f5c2-491a-b620-80d45aa9f120">3d71...f120</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm font-black">CR</div>
+<span class="font-label-lg text-label-lg text-on-surface">Chiara Rossi</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant">chiara.rossi@quackfit.it</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Sì
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-space-sm py-1 rounded-lg bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase tracking-wide font-black inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">military_tech</span> SUPERADMIN
+              </span>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant font-mono">2023-11-04 11:22</td>
+<td class="py-space-md px-space-md text-right">
+<span class="inline-flex items-center gap-1 px-space-sm py-1 rounded-xl bg-surface-container text-on-surface-variant font-label-sm text-label-sm cursor-not-allowed opacity-80" title="I Superadmin non possono essere modificati da interfaccia">
+<span class="material-symbols-outlined text-[16px]">security</span> Non modificabile
+              </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm font-mono px-space-xs py-0.5 rounded bg-surface-container text-on-surface" title="UUID Completo: 5a29b4e1-789a-41d0-99f2-2b6d194cf89e">5a29...f89e</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-label-sm text-label-sm font-black">MB</div>
+<span class="font-label-lg text-label-lg text-on-surface">Matteo Bianchi</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant">m.bianchi@fitnesslab.io</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Sì
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-space-sm py-1 rounded-lg bg-secondary text-on-secondary font-label-sm text-label-sm uppercase tracking-wide font-black inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">shield</span> ADMIN
+              </span>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant font-mono">2024-01-15 14:03</td>
+<td class="py-space-md px-space-md text-right">
+<button class="px-space-md py-1.5 rounded-xl bg-error-container text-on-error-container font-label-md text-label-md font-bold shadow-[0_2px_0_#ba1a1a] hover:opacity-90 active:translate-y-0.5 active:shadow-none transition-all inline-flex items-center gap-1" onclick="openRoleModal('5a29b4e1-789a-41d0-99f2-2b6d194cf89e', 'Matteo Bianchi', 'ADMIN', 'UTENTE')">
+<span class="material-symbols-outlined text-[16px]">arrow_downward</span> Degrada a UTENTE
+              </button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm font-mono px-space-xs py-0.5 rounded bg-surface-container text-on-surface" title="UUID Completo: 7c881023-e129-45f8-8091-a10df9e94321">7c88...4321</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm font-black">GV</div>
+<span class="font-label-lg text-label-lg text-on-surface">Giulia Verdi</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant">giulia.verdi@gmail.com</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Sì
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-space-sm py-1 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm uppercase tracking-wide font-black inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span> UTENTE
+              </span>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant font-mono">2024-02-01 18:45</td>
+<td class="py-space-md px-space-md text-right">
+<button class="px-space-md py-1.5 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-[0_2px_0_#ecc200] hover:opacity-90 active:translate-y-0.5 active:shadow-none transition-all inline-flex items-center gap-1" onclick="openRoleModal('7c881023-e129-45f8-8091-a10df9e94321', 'Giulia Verdi', 'UTENTE', 'ADMIN')">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span> Promuovi ad ADMIN
+              </button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm font-mono px-space-xs py-0.5 rounded bg-surface-container text-on-surface" title="UUID Completo: 91b0f922-38ef-4176-a084-257de103b447">91b0...b447</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm font-black">AF</div>
+<span class="font-label-lg text-label-lg text-on-surface">Alessandro Ferrari</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant">ale.ferrari@outlook.com</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">cancel</span> No
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-space-sm py-1 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm uppercase tracking-wide font-black inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span> UTENTE
+              </span>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant font-mono">2024-02-19 08:30</td>
+<td class="py-space-md px-space-md text-right">
+<button class="px-space-md py-1.5 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-[0_2px_0_#ecc200] hover:opacity-90 active:translate-y-0.5 active:shadow-none transition-all inline-flex items-center gap-1" onclick="openRoleModal('91b0f922-38ef-4176-a084-257de103b447', 'Alessandro Ferrari', 'UTENTE', 'ADMIN')">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span> Promuovi ad ADMIN
+              </button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<span class="font-body-sm text-body-sm font-mono px-space-xs py-0.5 rounded bg-surface-container text-on-surface" title="UUID Completo: b41a9981-d221-4f1a-8c90-0931df33918a">b41a...918a</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-label-sm text-label-sm font-black">ER</div>
+<span class="font-label-lg text-label-lg text-on-surface">Elena Romano</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant">elena.coach@quackfit.org</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Sì
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-space-sm py-1 rounded-lg bg-secondary text-on-secondary font-label-sm text-label-sm uppercase tracking-wide font-black inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">shield</span> ADMIN
+              </span>
+</td>
+<td class="py-space-md px-space-md font-body-md text-body-md text-on-surface-variant font-mono">2024-03-02 21:10</td>
+<td class="py-space-md px-space-md text-right">
+<button class="px-space-md py-1.5 rounded-xl bg-error-container text-on-error-container font-label-md text-label-md font-bold shadow-[0_2px_0_#ba1a1a] hover:opacity-90 active:translate-y-0.5 active:shadow-none transition-all inline-flex items-center gap-1" onclick="openRoleModal('b41a9981-d221-4f1a-8c90-0931df33918a', 'Elena Romano', 'ADMIN', 'UTENTE')">
+<span class="material-symbols-outlined text-[16px]">arrow_downward</span> Degrada a UTENTE
+              </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<span class="font-body-md text-body-md text-on-surface-variant">
+        Mostrati <span class="font-bold text-on-surface">1-20</span> di <span class="font-bold text-on-surface">48</span> utenti attivi
+      </span>
+<div class="flex items-center gap-space-xs">
+<button class="w-9 h-9 rounded-xl bg-surface-container text-on-surface-variant flex items-center justify-center opacity-60 cursor-not-allowed">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="w-9 h-9 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-[0_2px_0_#ecc200]">1</button>
+<button class="w-9 h-9 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md font-bold transition-colors">2</button>
+<button class="w-9 h-9 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md font-bold transition-colors">3</button>
+<button class="w-9 h-9 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[22px]">terminal</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Endpoint Specificato per la Modifica Ruolo</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono">PATCH /api/admin/users/{id}/role • Payload: { "role": "ADMIN" | "UTENTE" }</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm uppercase">Revocation Hook: Enabled</span>
+</div>
+</div>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-sm hidden p-space-md" id="role-modal">
+<div class="bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-2xl p-space-lg flex flex-col gap-space-md relative">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-[0_2px_0_#ecc200]">
+<span class="material-symbols-outlined text-[22px]">manage_accounts</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Conferma Cambio Ruolo</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Operazione ad alto privilegio</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center" onclick="closeRoleModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Utente selezionato:</span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold" id="modal-user-name">Giulia Verdi</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">UUID:</span>
+<span class="font-body-sm text-body-sm font-mono text-on-surface-variant truncate max-w-[240px]" id="modal-user-id">7c881023-e129-45f8-8091-a10df9e94321</span>
+</div>
+<div class="flex justify-between items-center pt-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Transizione Ruolo:</span>
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-black" id="modal-old-role">UTENTE</span>
+<span class="material-symbols-outlined text-[16px] text-primary">arrow_forward</span>
+<span class="px-space-xs py-0.5 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-black" id="modal-new-role">ADMIN</span>
+</div>
+</div>
+</div>
+<div class="bg-error-container p-space-md rounded-xl flex items-start gap-space-sm text-on-error-container">
+<span class="material-symbols-outlined text-[24px] flex-shrink-0">warning</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">Logout forzato immediato ovunque</span>
+<span class="font-body-sm text-body-sm opacity-90">In accordo con le specs di sicurezza, la modifica del ruolo comporta l'invalidazione immediata di tutti i refresh token e JWT di sessione attivi per questo utente.</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="px-space-md py-space-sm rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-bold transition-all" onclick="closeRoleModal()">
+          Annulla operazione
+        </button>
+<button class="px-space-md py-space-sm rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-extrabold shadow-[0_3px_0_#ecc200] active:translate-y-1 active:shadow-none transition-all flex items-center gap-1" id="modal-confirm-btn" onclick="executeRoleChange()">
+<span class="material-symbols-outlined text-[18px]">verified</span> Conferma e Invalida Sessioni
+        </button>
+</div>
+</div>
+</div>
+<div class="fixed bottom-6 right-6 z-50 bg-inverse-surface text-inverse-on-surface px-space-md py-space-sm rounded-xl shadow-xl flex items-center gap-space-sm transition-all duration-300 opacity-0 pointer-events-none translate-y-2" id="toast-notification">
+<span class="material-symbols-outlined text-tertiary-container text-[20px]">check_circle</span>
+<span class="font-body-md text-body-md font-bold" id="toast-text">Ruolo aggiornato con successo! Sessioni invalidate.</span>
+</div>
+</div>
+<script>
+  let targetUserId = null;
+  let targetUserName = '';
+  let targetOldRole = '';
+  let targetNewRole = '';
+
+  function openRoleModal(id, name, oldRole, newRole) {
+    targetUserId = id;
+    targetUserName = name;
+    targetOldRole = oldRole;
+    targetNewRole = newRole;
+
+    document.getElementById('modal-user-id').textContent = id;
+    document.getElementById('modal-user-name').textContent = name;
+    document.getElementById('modal-old-role').textContent = oldRole;
+    document.getElementById('modal-new-role').textContent = newRole;
+
+    const modal = document.getElementById('role-modal');
+    modal.classList.remove('hidden');
+  }
+
+  function closeRoleModal() {
+    const modal = document.getElementById('role-modal');
+    modal.classList.add('hidden');
+    targetUserId = null;
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast-notification');
+    const toastText = document.getElementById('toast-text');
+    toastText.textContent = message;
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+    }, 3800);
+  }
+
+  function executeRoleChange() {
+    const btn = document.getElementById('modal-confirm-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Salvataggio...';
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">verified</span> Conferma e Invalida Sessioni';
+      closeRoleModal();
+      showToast(`Ruolo di ${targetUserName} cambiato in ${targetNewRole}. Token revocati con successo.`);
+    }, 600);
+  }
+
+  document.getElementById('clear-search')?.addEventListener('click', () => {
+    const input = document.getElementById('user-search');
+    input.value = '';
+    input.focus();
+  });
+</script></main></div></body></html>

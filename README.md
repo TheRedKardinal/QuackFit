@@ -9,5 +9,6 @@ QuackFit/
 ├── backend/    Spring Boot (Java 25, PostgreSQL)
 │   └── docs/   progettazione e spec delle funzionalità
 ├── frontend/   React + TypeScript (Vite)
+│   └── design/ schermate di riferimento (Stitch)
 └── docs/       elenco delle task del progetto
 ```

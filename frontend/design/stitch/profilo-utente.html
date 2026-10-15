@@ -1,0 +1,425 @@
+<!DOCTYPE html><html lang="it"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><title>QuackFit</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;600;700;800;900&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'tertiary-container': '#7bf138', 'on-tertiary-fixed': '#082100', 'tertiary-fixed-dim': '#6be026', 'on-tertiary-fixed-variant': '#1f5100', 'on-tertiary-container': '#2a6a00', 'surface-bright': '#f9f9f7', 'on-tertiary': '#ffffff', 'surface-container-high': '#e8e8e6', 'error-container': '#ffdad6', 'tertiary': '#2b6c00', 'on-secondary-fixed': '#2f1400', 'surface-dim': '#dadad8', 'primary-container': '#ffd200', 'on-error-container': '#93000a', 'error': '#ba1a1a', 'on-secondary-fixed-variant': '#6f3800', 'on-error': '#ffffff', 'surface-container': '#eeeeec', 'on-surface': '#1a1c1b', 'surface': '#f9f9f7', 'on-secondary': '#ffffff', 'surface-variant': '#e2e3e1', 'on-background': '#1a1c1b', 'outline-variant': '#d1c6ab', 'inverse-surface': '#2f3130', 'on-surface-variant': '#4d4632', 'background': '#f9f9f7', 'primary-fixed-dim': '#ecc200', 'outline': '#7f765f', 'on-secondary-container': '#5b2d00', 'on-primary-fixed': '#231b00', 'on-primary': '#ffffff', 'inverse-on-surface': '#f1f1ef', 'on-primary-fixed-variant': '#564500', 'secondary-fixed': '#ffdcc4', 'surface-container-lowest': '#ffffff', 'on-primary-container': '#705b00', 'surface-tint': '#725c00', 'secondary-container': '#f88400', 'surface-container-highest': '#e2e3e1', 'secondary-fixed-dim': '#ffb781', 'inverse-primary': '#ecc200', 'primary': '#725c00', 'tertiary-fixed': '#87fe45', 'secondary': '#924c00', 'primary-fixed': '#ffe07c', 'surface-container-low': '#f4f4f2' }, borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, spacing: { 'space-sm': '0.5rem', 'space-xs': '0.25rem', 'space-xl': '2rem', 'gutter': '1rem', 'space-lg': '1.5rem', 'space-md': '1rem', 'margin': '1rem' }, fontFamily: { 'body-lg': ['Nunito Sans'], 'headline-lg': ['Nunito Sans'], 'label-lg': ['Nunito Sans'], 'headline-xl': ['Nunito Sans'], 'label-md': ['Nunito Sans'], 'body-md': ['Nunito Sans'], 'headline-xl-mobile': ['Nunito Sans'], 'body-sm': ['Nunito Sans'], 'headline-sm': ['Nunito Sans'], 'headline-lg-mobile': ['Nunito Sans'], 'headline-md': ['Nunito Sans'], 'label-sm': ['Nunito Sans'] }, fontSize: { 'body-lg': ['17px', { lineHeight: '24px', fontWeight: '600' }], 'headline-lg': ['28px', { lineHeight: '34px', fontWeight: '800' }], 'label-lg': ['15px', { lineHeight: '20px', letterSpacing: '0.5px', fontWeight: '800' }], 'headline-xl': ['36px', { lineHeight: '44px', fontWeight: '900' }], 'label-md': ['13px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '700' }], 'body-md': ['15px', { lineHeight: '22px', fontWeight: '500' }], 'headline-xl-mobile': ['28px', { lineHeight: '34px', fontWeight: '900' }], 'body-sm': ['13px', { lineHeight: '18px', fontWeight: '500' }], 'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '700' }], 'headline-lg-mobile': ['22px', { lineHeight: '28px', fontWeight: '800' }], 'headline-md': ['20px', { lineHeight: '26px', fontWeight: '800' }], 'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.5px', fontWeight: '800' }] } } } };</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior-y: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style></head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center shadow-[0_3px_0_#d9a000]"><span class="material-symbols-outlined text-on-primary-container text-[24px]">fitness_center</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-tight leading-none">QuackFit</span><span class="font-label-sm text-label-sm text-on-surface-variant font-bold leading-none mt-0.5">Percorso</span></div></div><div class="flex items-center gap-space-sm"><div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-fixed/50 shadow-[0_2px_0_rgba(146,76,0,0.15)]"><span class="material-symbols-outlined text-secondary text-[18px]">local_fire_department</span><span class="font-label-md text-label-md text-on-secondary-fixed font-black">5</span></div><div class="w-9 h-9 rounded-full ring-2 ring-primary-container ring-offset-2 ring-offset-surface overflow-hidden shadow-[0_2px_0_rgba(0,0,0,0.06)] flex items-center justify-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjDPLrBtNnfG9f35T1wFSKZJVR67bf9PcPmDF8OCpwW40GqFc_pcEO_I5jqoisBbGHk1cjBY1elyfLOZVskHVZ9P0IaKEEYQ55fq4-SCNjpyKSqjyYfEj86g6UgLDVA4oa9vuHDRL6j-y7JsaSSOabS938drU3y4_R6MPWf7aDDWkVyWjMttguiBsji8bZy2waO1gGNk0WSLvYZk0qNlglVVV-MYa02I-DYf2Ej_vhgTf61FV8L2MsIg"></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full pb-8">
+<!-- Top Greeting & Mascot Encouragement Banner -->
+<section class="px-margin mb-space-md">
+<div class="relative bg-surface-container-lowest rounded-xl p-space-md shadow-[0_4px_0_#dadad8] flex items-center justify-between overflow-hidden">
+<div class="flex flex-col z-10 max-w-[68%]">
+<div class="inline-flex items-center gap-1 bg-primary-container px-2.5 py-0.5 rounded-full w-fit mb-1.5 shadow-[0_2px_0_#d9a000]">
+<span class="material-symbols-outlined text-on-primary-container text-[14px]">military_tech</span>
+<span class="font-label-sm text-label-sm text-on-primary-container uppercase tracking-wider">Livello Quack</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface leading-tight">Allievo del Fitness!</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">"Solo 2 giorni al record! Oggi squat o divano?"</p>
+</div>
+<!-- Mascot Pixel/Chunky Duck Illustration -->
+<div class="relative z-10 w-20 h-20 flex-shrink-0 flex items-center justify-center">
+<svg class="w-full h-full drop-shadow-[0_4px_0_rgba(0,0,0,0.08)] transform hover:scale-105 transition-transform" fill="none" viewBox="0 0 96 96">
+<!-- Duck Body -->
+<circle cx="48" cy="54" fill="#ffd200" r="30"></circle>
+<path d="M72 54C72 67.2548 61.2548 78 48 78C34.7452 78 24 67.2548 24 54C24 40.7452 34.7452 30 48 30C61.2548 30 72 40.7452 72 54Z" fill="#ecc200"></path>
+<circle cx="48" cy="52" fill="#ffd200" r="28"></circle>
+<!-- Headband (Gym Style) -->
+<path d="M22 36C22 36 34 32 48 32C62 32 74 36 74 36L72 42C72 42 60 38 48 38C36 38 24 42 24 42L22 36Z" fill="#f88400"></path>
+<!-- Eye & Pupil -->
+<circle cx="40" cy="48" fill="#1a1c1b" r="4.5"></circle>
+<circle cx="42" cy="46" fill="#ffffff" r="1.5"></circle>
+<!-- Quack Beak -->
+<path d="M22 52C22 47 30 46 34 50C38 54 30 60 26 58C23 56 22 54 22 52Z" fill="#f88400"></path>
+<!-- Dumbbell in Hand -->
+<rect fill="#7f765f" height="24" rx="3" transform="rotate(-30 58 52)" width="6" x="58" y="52"></rect>
+<rect fill="#4d4632" height="12" rx="3" transform="rotate(-30 52 44)" width="8" x="52" y="44"></rect>
+<rect fill="#4d4632" height="12" rx="3" transform="rotate(-30 66 68)" width="8" x="66" y="68"></rect>
+<!-- Blush -->
+<ellipse cx="48" cy="56" fill="#ffb781" opacity="0.7" rx="4" ry="2"></ellipse>
+</svg>
+</div>
+<!-- Playful background pattern dots -->
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-fixed/40 rounded-full pointer-events-none"></div>
+</div>
+</section>
+<!-- Profile Header Card -->
+<section class="px-margin mb-space-lg">
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-[0_4px_0_#dadad8] flex flex-col items-center text-center relative">
+<!-- Avatar with Cloudinary Quick-Upload Trigger -->
+<div class="relative mb-space-sm">
+<div class="w-24 h-24 rounded-full overflow-hidden bg-primary-container shadow-[0_4px_0_#d9a000] flex items-center justify-center p-1">
+<img class="w-full h-full rounded-full object-cover" data-alt="Close up bright portrait of a confident energetic Italian athletic user smiling with warm lighting, studio background, yellow and warm tones matching Duolingo game aesthetic" id="user-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtxLW7DXdkkdTsHtW_leRtV_gGovFgGxKV_ekeOE4R0vdDPMVPwBEtvV4dgU6vkkuYciqO0UGSyBmNcjVduU90k0e6iT_lzndPYVuM-XHWRCzeyjh4kUTsYC96_mJJ19fD5xgqz3ITz98XIIpSqjWbR7hU2PdVmaoDH7G_13eHF9ymvk4SrRw5j4VD58-a0idyEm6-hneBsbKn3TLNdgI28T6GP5S_4kyo9Pyqe80CnDwBACLslHGFag">
+</div>
+<!-- Editable Camera Badge (PATCH /api/me/avatar) -->
+<button aria-label="Modifica foto profilo" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-secondary-container text-on-secondary flex items-center justify-center shadow-[0_3px_0_#924c00] active:translate-y-[2px] active:shadow-[0_1px_0_#924c00] transition-transform cursor-pointer" id="btn-edit-avatar" type="button">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span>
+</button>
+</div>
+<!-- Identity & Tags -->
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Marco Rossi</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-bold">marco.rossi@quackfit.it</p>
+<div class="mt-space-sm flex flex-wrap items-center justify-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-black">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+          Membro da Ottobre 2024
+        </span>
+
+</div>
+</div>
+</section>
+<!-- Key Stats Section (GET /api/me metrics) -->
+<section class="px-margin mb-space-lg">
+<div class="flex items-center justify-between mb-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Le Tue Statistiche</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-extrabold">Aggiornato ora</span>
+</div>
+<!-- 2x2 Tactical Gamified Grid -->
+<div class="grid grid-cols-2 gap-3">
+<!-- Streak Attuale -->
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-[0_4px_0_#dadad8] flex flex-col justify-between relative overflow-hidden group">
+<div class="flex items-center justify-between">
+<div class="w-9 h-9 rounded-xl bg-secondary-fixed flex items-center justify-center shadow-[0_2px_0_#ffb781]">
+<span class="material-symbols-outlined text-secondary text-[22px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-black bg-secondary-fixed/50 px-2 py-0.5 rounded-full">Attiva</span>
+</div>
+<div class="mt-3">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-black leading-tight">5 Giorni</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant font-bold mt-0.5">Streak Attuale</div>
+</div>
+</div>
+<!-- Record Storico -->
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-[0_4px_0_#dadad8] flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="w-9 h-9 rounded-xl bg-primary-fixed flex items-center justify-center shadow-[0_2px_0_#ecc200]">
+<span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-black bg-primary-fixed/60 px-2 py-0.5 rounded-full">Top</span>
+</div>
+<div class="mt-3">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-black leading-tight">12 Giorni</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant font-bold mt-0.5">Record Storico</div>
+</div>
+</div>
+<!-- Lezioni Superate -->
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-[0_4px_0_#dadad8] flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="w-9 h-9 rounded-xl bg-tertiary-container flex items-center justify-center shadow-[0_2px_0_#6be026]">
+<span class="material-symbols-outlined text-on-tertiary-container text-[22px]" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-tertiary-container font-black bg-tertiary-container/50 px-2 py-0.5 rounded-full">Tappa 1</span>
+</div>
+<div class="mt-3">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-black leading-tight">14 Lezioni</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant font-bold mt-0.5">Completate</div>
+</div>
+</div>
+<!-- XP Totali -->
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-[0_4px_0_#dadad8] flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center shadow-[0_2px_0_#d9a000]">
+<span class="material-symbols-outlined text-on-primary-container text-[22px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-primary-container font-black bg-primary-container/70 px-2 py-0.5 rounded-full">Punti</span>
+</div>
+<div class="mt-3">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-black leading-tight">420 XP</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant font-bold mt-0.5">Punti Quack</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Gamification Badges Section -->
+<section class="px-margin mb-space-lg">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Traguardi &amp; Badge</h3>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-black">3 Sbloccati</span>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Badge 1: Miti Sfatati -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-[0_4px_0_#dadad8] flex items-center gap-3">
+<div class="w-13 h-13 w-12 h-12 rounded-xl bg-secondary-fixed flex-shrink-0 flex items-center justify-center shadow-[0_3px_0_#ffb781]">
+<span class="material-symbols-outlined text-secondary text-[26px]">psychology_alt</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h4 class="font-label-lg text-label-lg text-on-surface truncate">Miti Sfatati</h4>
+<span class="font-label-sm text-label-sm text-secondary font-black">Liv. 2/3</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Hai smontato 6 bufale sul fitness da palestra</p>
+<!-- Progress bar -->
+<div class="w-full bg-surface-container rounded-full h-2.5 mt-2 overflow-hidden shadow-inner">
+<div class="bg-secondary-container h-full rounded-full w-2/3"></div>
+</div>
+</div>
+</div>
+<!-- Badge 2: Costanza d'Acciaio -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-[0_4px_0_#dadad8] flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed flex-shrink-0 flex items-center justify-center shadow-[0_3px_0_#ecc200]">
+<span class="material-symbols-outlined text-primary text-[26px]" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h4 class="font-label-lg text-label-lg text-on-surface truncate">Costanza d'Acciaio</h4>
+<span class="font-label-sm text-label-sm text-primary font-black">5/7 gg</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Raggiungi una streak continua di 7 giorni</p>
+<div class="w-full bg-surface-container rounded-full h-2.5 mt-2 overflow-hidden shadow-inner">
+<div class="bg-primary-container h-full rounded-full w-[71%]"></div>
+</div>
+</div>
+</div>
+<!-- Badge 3: Maestro dell'Ipertrofia -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-[0_4px_0_#dadad8] flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container flex-shrink-0 flex items-center justify-center shadow-[0_3px_0_#6be026]">
+<span class="material-symbols-outlined text-on-tertiary-container text-[26px]">fitness_center</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h4 class="font-label-lg text-label-lg text-on-surface truncate">Maestro dell'Ipertrofia</h4>
+<span class="font-label-sm text-label-sm text-on-tertiary-container font-black">100% Sbloccato</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Completa tutti i nodi di Tappa 1: Principi Base</p>
+<div class="w-full bg-surface-container rounded-full h-2.5 mt-2 overflow-hidden shadow-inner">
+<div class="bg-tertiary h-full rounded-full w-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Account Settings & Actions (specs/me.md compliant) -->
+<section class="px-margin mb-space-lg">
+<div class="flex items-center justify-between mb-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Gestione Account</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sicurezza &amp; Dati</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_0_#dadad8] overflow-hidden flex flex-col">
+<!-- Action 1: Modifica Dati (Nome/Cognome - PATCH /api/me) -->
+<button class="w-full px-space-md py-3.5 flex items-center justify-between hover:bg-surface-container-low transition-colors text-left active:bg-surface-container" onclick="openModal('modal-edit-profile')" type="button">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface">Modifica Dati Personali</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Nome, cognome e recapiti</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</button>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Action 2: Cambia Password (PATCH /api/me/password) -->
+<button class="w-full px-space-md py-3.5 flex items-center justify-between hover:bg-surface-container-low transition-colors text-left active:bg-surface-container" onclick="openModal('modal-edit-password')" type="button">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">key</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface">Cambia Password</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Proteggi il tuo account</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</button>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Action 3: Aggiorna Email (POST /api/me/email) -->
+<button class="w-full px-space-md py-3.5 flex items-center justify-between hover:bg-surface-container-low transition-colors text-left active:bg-surface-container" onclick="openModal('modal-edit-email')" type="button">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">mark_email_read</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface">Aggiorna Email</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Procedura di verifica a 2 passaggi</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Session & Danger Zone Section -->
+<section class="px-margin mb-space-md flex flex-col gap-3">
+<!-- Logout Button (Tactile 3D Secondary Button) -->
+<button class="w-full py-3.5 px-space-md rounded-xl bg-surface-container-high text-on-surface font-label-lg text-label-lg font-black shadow-[0_4px_0_#dadad8] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer" id="btn-logout" type="button">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+      Disconnetti Account
+    </button>
+<!-- Discrete Danger Option (DELETE /api/me) -->
+<div class="pt-2 text-center">
+<button class="text-error font-label-md text-label-md hover:underline font-bold inline-flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity" onclick="openModal('modal-delete-account')" type="button">
+<span class="material-symbols-outlined text-[16px]">delete_forever</span>
+        Elimina Account Definitivamente
+      </button>
+</div>
+</section>
+<!-- Interactive Modal: Modifica Profilo (PATCH /api/me) -->
+<div class="fixed inset-0 z-50 bg-on-surface/40 backdrop-blur-sm hidden items-end justify-center p-0" id="modal-edit-profile">
+<div class="w-full max-w-lg bg-surface-container-lowest rounded-t-2xl p-space-md shadow-[0_-4px_16px_rgba(0,0,0,0.15)] transform transition-transform">
+<div class="w-12 h-1.5 bg-surface-variant rounded-full mx-auto mb-4"></div>
+<div class="flex items-center justify-between mb-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Modifica Dati Personali</h3>
+<button class="text-on-surface-variant p-1" onclick="closeModal('modal-edit-profile')" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-3" id="form-edit-profile" onsubmit="event.preventDefault(); simulateSave('Dati aggiornati!');">
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Nome</label>
+<input class="w-full bg-surface-container-low px-3 py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:ring-0 focus:bg-surface-container" type="text" value="Marco">
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Cognome</label>
+<input class="w-full bg-surface-container-low px-3 py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:ring-0 focus:bg-surface-container" type="text" value="Rossi">
+</div>
+<button class="mt-space-sm w-full py-3.5 rounded-xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-black shadow-[0_4px_0_#d9a000] active:translate-y-[4px] active:shadow-none transition-all" type="submit">
+          Salva Modifiche
+        </button>
+</form>
+</div>
+</div>
+<!-- Interactive Modal: Modifica Password (PATCH /api/me/password) -->
+<div class="fixed inset-0 z-50 bg-on-surface/40 backdrop-blur-sm hidden items-end justify-center p-0" id="modal-edit-password">
+<div class="w-full max-w-lg bg-surface-container-lowest rounded-t-2xl p-space-md shadow-[0_-4px_16px_rgba(0,0,0,0.15)]">
+<div class="w-12 h-1.5 bg-surface-variant rounded-full mx-auto mb-4"></div>
+<div class="flex items-center justify-between mb-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Cambia Password</h3>
+<button class="text-on-surface-variant p-1" onclick="closeModal('modal-edit-password')" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-3" onsubmit="event.preventDefault(); simulateSave('Password aggiornata con successo!');">
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Vecchia Password</label>
+<input class="w-full bg-surface-container-low px-3 py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" placeholder="••••••••" type="password">
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Nuova Password</label>
+<input class="w-full bg-surface-container-low px-3 py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" placeholder="Minimo 8 caratteri" type="password">
+</div>
+<button class="mt-space-sm w-full py-3.5 rounded-xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-black shadow-[0_4px_0_#d9a000] active:translate-y-[4px] active:shadow-none transition-all" type="submit">
+          Aggiorna Password
+        </button>
+</form>
+</div>
+</div>
+<!-- Interactive Modal: Aggiorna Email (POST /api/me/email) -->
+<div class="fixed inset-0 z-50 bg-on-surface/40 backdrop-blur-sm hidden items-end justify-center p-0" id="modal-edit-email">
+<div class="w-full max-w-lg bg-surface-container-lowest rounded-t-2xl p-space-md shadow-[0_-4px_16px_rgba(0,0,0,0.15)]">
+<div class="w-12 h-1.5 bg-surface-variant rounded-full mx-auto mb-4"></div>
+<div class="flex items-center justify-between mb-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Nuovo Indirizzo Email</h3>
+<button class="text-on-surface-variant p-1" onclick="closeModal('modal-edit-email')" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-3" onsubmit="event.preventDefault(); simulateSave('Email di verifica inviata!');">
+<p class="font-body-sm text-body-sm text-on-surface-variant">Riceverai un link di conferma sia al vecchio che al nuovo indirizzo email per confermare l'identità.</p>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Nuova Email</label>
+<input class="w-full bg-surface-container-low px-3 py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container" placeholder="nuova.email@esempio.it" type="email">
+</div>
+<button class="mt-space-sm w-full py-3.5 rounded-xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-black shadow-[0_4px_0_#d9a000] active:translate-y-[4px] active:shadow-none transition-all" type="submit">
+          Invia Link di Conferma
+        </button>
+</form>
+</div>
+</div>
+<!-- Interactive Modal: Delete Account (DELETE /api/me) -->
+<div class="fixed inset-0 z-50 bg-on-surface/40 backdrop-blur-sm hidden items-end justify-center p-0" id="modal-delete-account">
+<div class="w-full max-w-lg bg-surface-container-lowest rounded-t-2xl p-space-md shadow-[0_-4px_16px_rgba(0,0,0,0.15)]">
+<div class="w-12 h-1.5 bg-surface-variant rounded-full mx-auto mb-4"></div>
+<div class="flex items-center justify-between mb-space-md">
+<h3 class="font-headline-sm text-headline-sm text-error">Eliminazione Definitiva</h3>
+<button class="text-on-surface-variant p-1" onclick="closeModal('modal-delete-account')" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-3">
+<p class="font-body-sm text-body-sm text-on-surface">Questa azione cancellerà tutti i tuoi progressi, i punti Quack, la serie di 5 giorni e i certificati acquisiti. Non è reversibile.</p>
+<div class="flex gap-2 mt-space-sm">
+<button class="flex-1 py-3 rounded-xl bg-surface-container text-on-surface font-label-md text-label-md font-bold" onclick="closeModal('modal-delete-account')" type="button">
+            Annulla
+          </button>
+<button class="flex-1 py-3 rounded-xl bg-error text-on-error font-label-md text-label-md font-black shadow-[0_3px_0_#93000a] active:translate-y-[2px]" onclick="simulateSave('Account eliminato.'); closeModal('modal-delete-account');" type="button">
+            Sì, Elimina
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Toast Notification Feedback -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 bg-inverse-surface text-inverse-on-surface px-4 py-2.5 rounded-full shadow-lg transition-opacity duration-200" id="toast-feedback">
+<span class="material-symbols-outlined text-[18px] text-tertiary-fixed">check_circle</span>
+<span class="font-label-md text-label-md font-bold" id="toast-message">Operazione completata!</span>
+</div>
+</div>
+<script>
+  // Dynamic Tab Switch to ensure Profile navigation is marked Active in the shell
+  (function initProfileActiveTab() {
+    const navLinks = document.querySelectorAll('nav a[data-path]');
+    navLinks.forEach(link => {
+      if (link.getAttribute('data-path') === 'profilo') {
+        link.classList.remove('text-on-surface-variant');
+        link.classList.add('text-primary', 'font-black', 'scale-105');
+        const icon = link.querySelector('.material-symbols-outlined');
+        if (icon) {
+          icon.style.fontVariationSettings = "'FILL' 1";
+        }
+      } else {
+        link.classList.remove('text-primary', 'font-black', 'scale-105');
+        link.classList.add('text-on-surface-variant');
+        const icon = link.querySelector('.material-symbols-outlined');
+        if (icon) {
+          icon.style.fontVariationSettings = "'FILL' 0";
+        }
+      }
+    });
+  })();
+
+  function openModal(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+  }
+
+  function closeModal(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('flex');
+      el.classList.add('hidden');
+    }
+  }
+
+  function simulateSave(msg) {
+    ['modal-edit-profile', 'modal-edit-password', 'modal-edit-email'].forEach(closeModal);
+    const toast = document.getElementById('toast-feedback');
+    const toastMsg = document.getElementById('toast-message');
+    if (toast && toastMsg) {
+      toastMsg.innerText = msg;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 3000);
+    }
+  }
+
+  // Camera upload trigger simulation for Cloudinary PATCH /api/me/avatar
+  const avatarBtn = document.getElementById('btn-edit-avatar');
+  if (avatarBtn) {
+    avatarBtn.addEventListener('click', () => {
+      simulateSave('Foto caricata e sincronizzata con successo!');
+    });
+  }
+
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      simulateSave('Disconnessione in corso...');
+    });
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary scale-105 font-bold"><div class="h-20 px-space-sm flex items-center justify-around"><a class="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all duration-150 text-on-surface-variant hover:text-on-surface" data-path="percorso" href="#"><span class="material-symbols-outlined text-[26px]">alt_route</span><span class="font-label-sm text-label-sm mt-0.5">Percorso</span></a><a class="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all duration-150 text-on-surface-variant hover:text-on-surface" data-path="profilo" href="#"><span class="material-symbols-outlined text-[26px]">account_circle</span><span class="font-label-sm text-label-sm mt-0.5">Profilo</span></a></div></nav>
+
+</body></html>
