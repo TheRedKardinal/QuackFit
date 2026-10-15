@@ -1,0 +1,16 @@
+/* Design token di QuackFit: nei componenti si usano sempre queste variabili, mai colori scritti a mano. */
+:root {
+  --colore-primario: #ffd200;
+  --colore-successo: #58cc02;
+  --colore-streak: #ff9600;
+  --colore-sfondo: #f9f9f7;
+  --colore-superficie: #ffffff;
+  --colore-bordo: #e5e7eb;
+
+  /* Tonalità scure per il bordo dei pulsanti "push", ricavate dal colore base */
+  --colore-primario-scuro: color-mix(in srgb, var(--colore-primario), black 15%);
+  --colore-successo-scuro: color-mix(in srgb, var(--colore-successo), black 15%);
+  --colore-bordo-scuro: color-mix(in srgb, var(--colore-bordo), black 15%);
+
+  --font-base: 'Nunito Sans', system-ui, sans-serif;
+}
