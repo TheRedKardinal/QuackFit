@@ -48,6 +48,7 @@ QuackFit/
   - `feature/<area>-<descrizione>` per le funzionalità (es. `feature/auth-registrazione`)
   - `fix/<area>-<descrizione>` per le correzioni
   - `chore/<descrizione>` per configurazione e contorno
+  - `docs/<descrizione>` per la sola documentazione (es. `docs/readme-licenza`)
 - Ogni task si chiude con una **Pull Request** verso `main`. Il **merge lo fa solo l'utente**.
 
 ### Commit

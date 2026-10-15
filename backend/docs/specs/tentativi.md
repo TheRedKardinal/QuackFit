@@ -19,8 +19,14 @@ Costante: `MAX_ERRORI = 3`.
   o inesistente → 404 `NON_TROVATO` (non si rivela che esiste).
 - Un tentativo ha tre stati: `IN_CORSO` → `SUPERATO` oppure `FALLITO`. Chiuso non si riapre.
 - Un tentativo chiuso non accetta più risposte né chiusure → 409 `TENTATIVO_CHIUSO`.
-- Se la lezione o le sue domande vengono cancellate mentre il tentativo è in corso,
-  le risposte e la chiusura rispondono 404 `NON_TROVATO`.
+- Se la lezione viene cancellata mentre il tentativo è in corso, o non resta nessuna delle domande che
+  c'erano all'avvio, le risposte e la chiusura rispondono 404 `NON_TROVATO`.
+- Modifiche ai contenuti durante un tentativo in corso. Le domande del tentativo sono quelle **attive** e create
+  **prima di `iniziato_at`** (`created_at` della domanda ≤ `iniziato_at`):
+  - domanda **aggiunta** dopo l'avvio: non fa parte del tentativo, non conta per la chiusura e una risposta ad
+    essa → 400 `VALIDAZIONE`; la vedrà chi avvia un nuovo tentativo;
+  - domanda **cancellata** dopo l'avvio: non conta per la chiusura (anche se non era ancora risolta) e una risposta
+    ad essa → 404 `NON_TROVATO`.
 - Le date usano `Clock` (fuso `Europe/Rome` per i giorni della streak).
 
 ---
@@ -89,7 +95,8 @@ Senza body. Chiude il tentativo come superato.
 
 Controlli, in ordine:
 1. tentativo già chiuso → 409 `TENTATIVO_CHIUSO`
-2. non tutte le domande della lezione hanno `risolta = true` → 400 `VALIDAZIONE`
+2. non tutte le domande del tentativo hanno `risolta = true` → 400 `VALIDAZIONE`
+   (domande del tentativo: attive e create prima dell'avvio, vedi "Regole generali")
 
 Se ok:
 - `esito = SUPERATO`, `finito_at = adesso`
@@ -131,6 +138,8 @@ Il resoconto mostra anche domande o lezioni cancellate dopo il tentativo, perch�
 - Domanda ripetuta: viene salvata solo la prima risposta, gli errori delle successive vengono contati;
   una ripetizione corretta imposta `risolta = true`; una ripetizione sbagliata la lascia `false`;
   rispondere a una domanda già risolta → 400.
+- Modifiche durante il tentativo: domanda aggiunta dopo l'avvio (risposta → 400, la chiusura la ignora);
+  domanda cancellata (risposta → 404, la chiusura non la conta); lezione cancellata o tutte le domande cancellate → 404.
 - Tentativo di un altro utente → 404; tentativo chiuso → 409 `TENTATIVO_CHIUSO` su risposte e chiusura.
 - Domanda di un'altra lezione, opzione di un'altra domanda, campo sbagliato per il tipo → 400.
 - Chiusura: con almeno una domanda non risolta (non risposta o sbagliata e non ripetuta) → 400; ok → SUPERATO; lezione sbloccata dopo il completamento.

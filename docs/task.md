@@ -11,7 +11,7 @@ e come capire quando è finita. Questo file è la copia di riserva del contenuto
 4. Segui gli step della checklist, spuntandoli man mano.
 5. Se manca una decisione o la spec non basta: **fermati e chiedi** (regola d'oro del `CLAUDE.md`).
 
-## Step finali (aggiunti in fondo alla checklist di ogni card)
+## Step finali (valgono per ogni card, anche dove non compaiono nella checklist di Trello)
 - Test della feature passano (e `npm run lint` pulito per il frontend)
 - Spec e `progettazione.md` allineati al codice
 - Commit proposti e approvati dall'utente
@@ -453,6 +453,7 @@ Backend · Frontend · Docs/Deploy
   - salvataggio della sola prima risposta, campo `risolta`, più risposte alla stessa domanda ammesse finché non risolta
   - risposta del server: `corretta`, `soluzione`, `spiegazione`, `errori`, `esito`
   - 409 `TENTATIVO_CHIUSO`, 404 per tentativo altrui
+  - contenuti modificati durante il tentativo (le domande del tentativo sono quelle attive e create prima di `iniziato_at`): risposta a una domanda aggiunta dopo l'avvio → 400 `VALIDAZIONE`; a una domanda cancellata → 404 `NON_TROVATO`; lezione cancellata → 404
   - test su tutti i casi della sezione "Test da prevedere"
 
 ### 39 · Backend · Chiusura del tentativo e streak
@@ -460,7 +461,8 @@ Backend · Frontend · Docs/Deploy
 - Leggi: `specs/tentativi.md` (Chiusura), `specs/me.md` (Streak calcolata in lettura)
 - Obiettivo: `POST /api/attempts/{id}/complete`.
 - Step:
-  - chiusura possibile solo se tutte le domande hanno `risolta = true` (altrimenti 400 `VALIDAZIONE`); già chiuso → 409
+  - chiusura possibile solo se tutte le domande del tentativo (attive e create prima dell'avvio) hanno `risolta = true` (altrimenti 400 `VALIDAZIONE`); già chiuso → 409
+  - una domanda aggiunta dopo l'avvio è ignorata dalla chiusura; una domanda cancellata non conta per la chiusura (le risposte a queste domande si gestiscono nella task 38)
   - esito SUPERATO e aggiornamento della streak (oggi invariata, ieri +1, altrimenti 1, record aggiornato)
   - risposta con `esito`, `errori`, streak aggiornata
   - test con `Clock` fisso: tutte le casistiche di streak, FALLITO non tocca la streak, lezione successiva sbloccata

@@ -152,7 +152,7 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
   - `/api/auth/**` → pubblico
   - `/api/admin/**` → solo `ADMIN` e `SUPERADMIN`
   - tutto il resto → utente autenticato **con email verificata**; se non è verificata → 403 `EMAIL_NON_VERIFICATA`,
-    tranne `POST /api/me/verification` e `POST /api/me/verification/resend`
+    tranne `GET /api/me`, `POST /api/me/verification` e `POST /api/me/verification/resend`
 
 ### Login
 - Messaggio unico per ogni login fallito, anche ad account bloccato (401 `CREDENZIALI_NON_VALIDE`):
