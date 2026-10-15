@@ -22,8 +22,8 @@ Tutto ciò che non è nella progettazione è fuori perimetro (versione "vanilla"
 | Chiamate HTTP | `fetch` con `async/await`, dentro `createAsyncThunk` |
 | UI | Bootstrap 5 (griglia, breakpoint, componenti base) + CSS puro / CSS Modules |
 | Font | Nunito Sans, con il pacchetto `@fontsource/nunito-sans` |
-| Test | Vitest + React Testing Library + `user-event` |
-| Controllo codice | ESLint (quello del template Vite) |
+| Test | Vitest + React Testing Library + `user-event` + `jest-dom` (matcher come `toBeInTheDocument`) |
+| Controllo codice | Linter del template Vite (oggi oxlint, configurato in `.oxlintrc.json`) |
 
 - **Vietati**: Tailwind CSS, Sass/SCSS, axios, librerie di animazione, librerie di traduzione.
 - Bootstrap si usa con il solo pacchetto `bootstrap` (CSS). `react-bootstrap` **non è previsto**: chiedere prima.
@@ -164,6 +164,8 @@ XP e punti, badge e traguardi, livelli, classifiche, vite o cuori, username, pix
 | Bordi | `#e5e7eb` |
 
 - Mai valori di colore scritti a mano nei componenti: si usano sempre le variabili.
+- Le tonalità scure del bordo dei pulsanti "push" non sono token a sé: si ricavano dal colore base con
+  `color-mix(in srgb, <colore>, black 15%)` in `tokens.css`.
 - Contrasto e accessibilità di base: elementi cliccabili sono veri `<button>` o `<a>`, campi con `<label>`, stati non
   affidati al solo colore (icone e testo oltre al verde/rosso).
 
