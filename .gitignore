@@ -1,0 +1,23 @@
+# Segreti e configurazioni locali
+env.properties
+.env*
+!.env.example
+.env.trello
+
+# Backend (Maven)
+target/
+
+# Frontend (Node / Vite)
+node_modules/
+dist/
+
+# IDE ed editor
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Impostazioni personali di Claude Code (quelle condivise sono in .claude/settings.json)
+.claude/settings.local.json
