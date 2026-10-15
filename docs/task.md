@@ -84,10 +84,12 @@ Backend · Frontend · Docs/Deploy
 - Dati: progetto Stitch "QuackLingo Frontend Draft", ID `14737734096977436897`. Schermate:
   `55232b38e67a487b99866f6f63653afb`, `454909794b084f3cae32f5095110e1ed`, `1cd57fbb755b4bc9b0ed0ca5545de576`,
   `4c7960be8b0d4c0ebea302b134a40579`, `0c2426c0ee404f9f82f9316e9dbcd8e9`, `db0e5ed80531446e85a4840d93227c15`,
-  `b83f5aa3227a415baa2e1f2bafa4060c`, `b3c78969af104fb984273fbd285d38bb`
+  `b83f5aa3227a415baa2e1f2bafa4060c`, `b3c78969af104fb984273fbd285d38bb`,
+  `c4c8c8f4db904ad28c5ae5660e2a4d67`, `ebdecf73d5294bd1861a4c0f1ac10b8b`, `9e30af72185a46849b25bf0a055b402b`,
+  `55da084858fa49f7b4bf1cbbf55314f9`, `20e38b4fced14df19f17afaf4e0c9127`, `b6e3e0089b474e8e846a39c23a77ef4c`
 - Obiettivo: avere le schermate di riferimento nel repository, ben nominate e collegate alle task che le usano.
 - Step:
-  - scaricare immagini e codice delle 8 schermate in `frontend/design/stitch/` (strumento Stitch e `curl -L`)
+  - scaricare immagini e codice delle 14 schermate in `frontend/design/stitch/` (strumento Stitch e `curl -L`)
   - dare a ogni schermata un nome chiaro e creare `frontend/design/stitch/README.md` con la tabella:
     schermata → file → schermata prevista → numero della task che la usa
   - elencare le schermate previste che **non** hanno un riferimento (es. verifica email, impostazioni, admin) e dirlo all'utente
@@ -254,7 +256,7 @@ Backend · Frontend · Docs/Deploy
 
 ### 20 · Frontend · Registrazione e login
 - Branch: `feature/frontend-auth` · Dipende da: 11, 12, 19
-- Leggi: `frontend/CLAUDE.md`, `specs/auth.md` (Registrazione, Login), schermate Stitch in `frontend/design/stitch/`
+- Leggi: `frontend/CLAUDE.md`, `specs/auth.md` (Registrazione, Login), schermate Stitch `registrazione` e `login` in `frontend/design/stitch/`
 - Obiettivo: schermate di registrazione e di accesso.
 - Step:
   - form di registrazione con validazione dei campi, errori per campo (`campi`), gestione di `EMAIL_GIA_USATA` con rimando al "Password dimenticata"
@@ -265,7 +267,8 @@ Backend · Frontend · Docs/Deploy
 
 ### 21 · Frontend · Verifica email e password dimenticata
 - Branch: `feature/frontend-verifica-reset` · Dipende da: 13, 14, 19
-- Leggi: `frontend/CLAUDE.md`, `specs/auth.md` (Verifica email, Nuovo codice, Password dimenticata, Reimpostazione)
+- Leggi: `frontend/CLAUDE.md`, `specs/auth.md` (Verifica email, Nuovo codice, Password dimenticata, Reimpostazione),
+  schermata Stitch `verifica-email` (password dimenticata e reimpostazione non hanno riferimento: stile di `login`)
 - Obiettivo: schermate del codice e del recupero password.
 - Step:
   - schermata del codice (6 cifre) con "Invia di nuovo" (pulsante disattivato per 60 secondi, gestione di `ATTENDI_REINVIO`), messaggi per `CODICE_NON_VALIDO`, `CODICE_SCADUTO`, `TROPPI_TENTATIVI`
@@ -275,7 +278,7 @@ Backend · Frontend · Docs/Deploy
 
 ### 22 · Frontend · Struttura dell'app e navigazione
 - Branch: `feature/frontend-layout` · Dipende da: 19
-- Leggi: `frontend/CLAUDE.md` (Struttura, Design), schermate Stitch
+- Leggi: `frontend/CLAUDE.md` (Struttura, Design), schermate Stitch `mappa-percorso` e `profilo-utente` (barre di navigazione)
 - Obiettivo: guscio dell'applicazione mobile first.
 - Step:
   - layout principale (barra di navigazione, contenitore a ~390 px, adattamento desktop), componenti comuni: pulsante "push", card, drawer, messaggio di errore
@@ -327,7 +330,7 @@ Backend · Frontend · Docs/Deploy
 
 ### 27 · Frontend · Profilo e modifica dati
 - Branch: `feature/frontend-profilo` · Dipende da: 22, 23
-- Leggi: `frontend/CLAUDE.md` (Profilo), `specs/me.md`, schermate Stitch
+- Leggi: `frontend/CLAUDE.md` (Profilo), `specs/me.md`, schermate Stitch `profilo-utente` e `modifica-profilo`
 - Obiettivo: schermata del profilo.
 - Step:
   - avatar, nome, cognome, email, etichetta del ruolo; solo streak attuale, record e lezioni completate
@@ -336,7 +339,7 @@ Backend · Frontend · Docs/Deploy
 
 ### 28 · Frontend · Avatar, cambio email e cancellazione account
 - Branch: `feature/frontend-impostazioni` · Dipende da: 24, 25, 26, 27
-- Leggi: `frontend/CLAUDE.md` (Profilo → Avatar), `specs/me.md`
+- Leggi: `frontend/CLAUDE.md` (Profilo → Avatar), `specs/me.md`, schermata Stitch `modifica-profilo`
 - Obiettivo: le tre azioni sul proprio account.
 - Step:
   - avatar: `accept="image/*"` senza `capture`, ridimensionamento a circa 512×512 su canvas (jpeg/webp, sotto i 2 MB), anteprima, gestione di `FILE_NON_VALIDO`
@@ -382,7 +385,7 @@ Backend · Frontend · Docs/Deploy
 
 ### 32 · Frontend · Admin: struttura e gestione utenti
 - Branch: `feature/frontend-admin-utenti` · Dipende da: 22, 29
-- Leggi: `frontend/CLAUDE.md` (Admin), `specs/admin.md` (Utenti), schermate Stitch
+- Leggi: `frontend/CLAUDE.md` (Admin), `specs/admin.md` (Utenti), schermate Stitch `admin-utenti-desktop` e `admin-utenti-mobile`
 - Obiettivo: pannello admin e sezione utenti.
 - Step:
   - layout admin: sidebar su desktop, barra in basso (Utenti, Contenuti) su mobile
@@ -392,7 +395,8 @@ Backend · Frontend · Docs/Deploy
 
 ### 33 · Frontend · Admin: tappe e lezioni
 - Branch: `feature/frontend-admin-contenuti` · Dipende da: 30, 32
-- Leggi: `frontend/CLAUDE.md` (Admin), `specs/admin.md` (Tappe, Lezioni)
+- Leggi: `frontend/CLAUDE.md` (Admin), `specs/admin.md` (Tappe, Lezioni),
+  schermate Stitch `admin-contenuti-desktop` e `admin-contenuti-mobile`
 - Obiettivo: gestione di tappe e lezioni.
 - Step:
   - elenco con accordion (mobile) e colonna sinistra (desktop); creazione, modifica, cancellazione con conferma
@@ -401,7 +405,8 @@ Backend · Frontend · Docs/Deploy
 
 ### 34 · Frontend · Admin: editor delle domande
 - Branch: `feature/frontend-admin-domande` · Dipende da: 31, 33
-- Leggi: `frontend/CLAUDE.md` (Admin), `specs/admin.md` (Domande)
+- Leggi: `frontend/CLAUDE.md` (Admin), `specs/admin.md` (Domande),
+  schermate Stitch `admin-contenuti-desktop` e `admin-contenuti-mobile`
 - Obiettivo: creare e modificare domande.
 - Step:
   - form di creazione per tipo (vero/falso, scelta multipla con spunta della corretta, coppie dell'abbinamento)
@@ -479,7 +484,8 @@ Backend · Frontend · Docs/Deploy
 
 ### 41 · Frontend · Mascotte Coach Quack
 - Branch: `feature/frontend-mascotte` · Dipende da: 22
-- Leggi: `frontend/CLAUDE.md` (Design → Direzione visiva), schermate Stitch
+- Leggi: `frontend/CLAUDE.md` (Design → Direzione visiva), schermate Stitch (Coach Quack compare in `login`,
+  `registrazione`, `verifica-email`, `lezione-completata-streak`, `lezione-non-superata`)
 - Obiettivo: componente della mascotte, solo frontend.
 - Step:
   - papero atletico con fascia rossa in **SVG** con animazioni **CSS** (nessuna immagine esterna né libreria)
@@ -489,7 +495,7 @@ Backend · Frontend · Docs/Deploy
 
 ### 42 · Frontend · Mappa del percorso
 - Branch: `feature/frontend-mappa` · Dipende da: 36, 22
-- Leggi: `frontend/CLAUDE.md` (Mappa), `specs/percorso.md`, schermate Stitch
+- Leggi: `frontend/CLAUDE.md` (Mappa), `specs/percorso.md`, schermata Stitch `mappa-percorso`
 - Obiettivo: schermata della mappa.
 - Step:
   - tappe e nodi in verticale con i tre stati (verde con spunta, gialla attiva, grigia con lucchetto)
@@ -499,7 +505,7 @@ Backend · Frontend · Docs/Deploy
 
 ### 43 · Frontend · Lezione: flusso, vero/falso e scelta multipla
 - Branch: `feature/frontend-lezione` · Dipende da: 37, 38, 39, 42
-- Leggi: `frontend/CLAUDE.md` (Lezione), `specs/percorso.md`, `specs/tentativi.md`, schermate Stitch
+- Leggi: `frontend/CLAUDE.md` (Lezione), `specs/percorso.md`, `specs/tentativi.md`, schermata Stitch `quiz-lezione`
 - Obiettivo: cuore dell'app, senza l'abbinamento.
 - Step:
   - slice Redux del tentativo (coda di domande, risposte, errori, esito, timer di durata)
@@ -512,7 +518,8 @@ Backend · Frontend · Docs/Deploy
 
 ### 44 · Frontend · Lezione: abbinamento
 - Branch: `feature/frontend-abbinamento` · Dipende da: 43
-- Leggi: `frontend/CLAUDE.md` (Lezione), `specs/tentativi.md` (Risposta), schermate Stitch
+- Leggi: `frontend/CLAUDE.md` (Lezione), `specs/tentativi.md` (Risposta), schermate Stitch `quiz-lezione`
+  (nessun riferimento dedicato all'abbinamento: le coppie si vedono in `resoconto-lezione`)
 - Obiettivo: domande di tipo ABBINAMENTO.
 - Step:
   - tessere sinistra ↔ destra accoppiabili con il tocco, possibilità di cambiare un collegamento
@@ -523,7 +530,8 @@ Backend · Frontend · Docs/Deploy
 
 ### 45 · Frontend · Vittoria, sconfitta e streak
 - Branch: `feature/frontend-vittoria` · Dipende da: 41, 43
-- Leggi: `frontend/CLAUDE.md` (Vittoria), `specs/tentativi.md` (Chiusura)
+- Leggi: `frontend/CLAUDE.md` (Vittoria), `specs/tentativi.md` (Chiusura),
+  schermate Stitch `lezione-completata-streak` e `lezione-non-superata`
 - Obiettivo: schermate di fine lezione.
 - Step:
   - vittoria con Coach Quack, streak e record dalla risposta, "+1 OGGI" solo se il valore è aumentato
@@ -535,7 +543,7 @@ Backend · Frontend · Docs/Deploy
 
 ### 46 · Frontend · Resoconto della lezione
 - Branch: `feature/frontend-resoconto` · Dipende da: 40, 45
-- Leggi: `frontend/CLAUDE.md`, `specs/tentativi.md` (Resoconto)
+- Leggi: `frontend/CLAUDE.md`, `specs/tentativi.md` (Resoconto), schermata Stitch `resoconto-lezione`
 - Obiettivo: schermata "Rivedi risposte".
 - Step:
   - elenco delle domande con la prima risposta, correttezza, soluzione e spiegazione

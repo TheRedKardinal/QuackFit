@@ -145,13 +145,17 @@ XP e punti, badge e traguardi, livelli, classifiche, vite o cuori, username, pix
 - Coach Quack: papero atletico con fascia sportiva rossa, **illustrazione flat in SVG con animazioni CSS**
   (nessuna immagine esterna né libreria).
 - Pulsanti e card in stile tattile, con bordo inferiore in rilievo (effetto "push").
-- Font: Nunito Sans (`@fontsource/nunito-sans`, importato in `main.tsx`, solo i pesi usati).
+- Font: Nunito Sans (`@fontsource/nunito-sans`, importato in `main.tsx`): pesi **400** (testo), **700** (grassetto,
+  pulsanti, etichette), **800** e **900** (titoli e numeri in evidenza), come nelle schermate Stitch.
 
 ### Riferimento grafico (Stitch)
 - Le schermate di Stitch sono in `frontend/design/stitch/` (con `README.md` che le associa alle schermate dell'app).
 - Sono **solo un riferimento visivo**: il codice HTML esportato non si copia. Si riscrive come componenti React in
   TypeScript, con le nostre variabili CSS, la struttura per funzionalità e senza dipendenze nuove.
 - Se una schermata prevista non ha un riferimento, si segue lo stile delle altre e si segnala all'utente.
+- Le schermate contengono elementi **fuori perimetro** (XP, livelli, badge, esame tappa, banner "Streak in pericolo", …):
+  non si realizzano. L'elenco è nel `README.md` delle schermate.
+- Le schermate usano anche colori che non sono tra i design token (es. il rosso degli errori): si chiede prima di aggiungerli.
 
 ### Design token (variabili CSS in `src/styles`)
 | Uso | Valore |
