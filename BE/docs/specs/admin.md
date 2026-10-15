@@ -1,0 +1,163 @@
+# Spec: Admin (gestione utenti e contenuti)
+
+## Obiettivo
+Gli admin gestiscono gli utenti (lista e ruoli) e i contenuti del percorso (tappe, lezioni, domande).
+
+Package: `utente` (gestione utenti) e `contenuti` (gestione contenuti). Endpoint: vedi `progettazione.md` → Admin.
+
+## Regole comuni
+- Tutti gli endpoint `/api/admin/**` sono accessibili solo a `ADMIN` e `SUPERADMIN`; gli altri ricevono 403 `ACCESSO_NEGATO`.
+- Le DTO dell'admin sono separate da quelle dell'utente: **contengono le soluzioni** (`corretta`, coppie giuste).
+- Testi con `strip()` nel record; tutti obbligatori e non vuoti, tranne dove indicato.
+- Lunghezze massime (400 `VALIDAZIONE` se superate):
+  | Campo | Max |
+  | --- | --- |
+  | titolo (tappa, lezione) | 100 |
+  | descrizione (tappa, lezione) | 300 |
+  | testo della domanda | 500 |
+  | spiegazione | 1000 |
+  | testo di un'opzione o di un elemento di abbinamento | 200 |
+- Risorsa inesistente o già cancellata → 404 `NON_TROVATO`.
+
+---
+
+# Utenti
+
+## Lista — GET /api/admin/users
+Parametri: `page` (da 0, default 0), `size` (default 20, massimo 50), `q` (opzionale).
+
+- Solo utenti **attivi** (`deleted_at = null`), dal più recente al più vecchio (`created_at`).
+- `q`: ricerca senza distinzione tra maiuscole e minuscole, che cerca il testo dentro nome, cognome o email.
+  Query parametrizzata, mai concatenata.
+- Risponde **200** con una pagina: `contenuto` (lista), `pagina`, `dimensione`, `totaleElementi`, `totalePagine`.
+- Ogni utente: `id`, `nome`, `cognome`, `email`, `ruolo`, `emailVerificata`, `creatoAt`.
+
+## Cambio ruolo — PATCH /api/admin/users/{id}/role
+Body: `ruolo` (`UTENTE` o `ADMIN`). Risponde **204**.
+
+Controlli, in ordine:
+1. utente inesistente o cancellato → 404 `NON_TROVATO`
+2. `ruolo` = `SUPERADMIN` nel body → 403 `ACCESSO_NEGATO` (nessuno assegna SUPERADMIN)
+3. l'utente da modificare è il chiamante stesso → 403 `ACCESSO_NEGATO`
+4. l'utente da modificare è un SUPERADMIN → 403 `ACCESSO_NEGATO` (nessuno gli toglie il ruolo)
+5. stesso ruolo che ha già → 204 senza modifiche e **senza** logout ovunque
+6. permessi:
+
+   | Chi chiama | UTENTE → ADMIN | ADMIN → UTENTE |
+   | --- | --- | --- |
+   | ADMIN | sì | no (403 `ACCESSO_NEGATO`) |
+   | SUPERADMIN | sì | sì |
+
+7. ok → ruolo aggiornato e **logout ovunque** per l'utente modificato (`token_validi_dal = adesso`),
+   così il nuovo ruolo vale subito.
+
+---
+
+# Contenuti
+
+## Ordine (tappe, lezioni, domande)
+Il numero d'ordine è gestito **dal service**, senza vincolo UNIQUE nel database (il soft delete lo renderebbe un problema).
+Gli ordini degli elementi attivi sono sempre **1, 2, 3… senza buchi**.
+
+- **Creazione:** il nuovo elemento va in fondo (`max + 1`). L'ordine non si sceglie in creazione.
+- **Riordino** (`PATCH` con `ordine`, solo tappe e lezioni): l'elemento va alla nuova posizione e gli altri scalano.
+  Posizione fuori da `1…n` → 400 `VALIDAZIONE`.
+- **Cancellazione:** gli elementi rimasti vengono rinumerati.
+- Le **lezioni** si riordinano solo dentro la propria tappa: spostarle in un'altra tappa non è previsto.
+- Le **domande** non si riordinano: l'utente le vede mescolate; l'ordine di creazione serve solo per il resoconto e la vista admin.
+
+## Tappe
+
+### Elenco — GET /api/admin/stages
+Risponde **200** con tutte le tappe attive in ordine. Per ogni tappa: `id`, `titolo`, `descrizione`, `ordine`
+e le sue lezioni attive in ordine (`id`, `titolo`, `descrizione`, `ordine`, `numeroDomande`).
+
+### Creazione — POST /api/admin/stages
+Body: `titolo`, `descrizione`. Risponde **201** con la tappa creata, in fondo all'ordine.
+
+### Modifica — PATCH /api/admin/stages/{stageId}
+Body (tutti opzionali, `null`/assente = invariato): `titolo`, `descrizione`, `ordine`. Risponde **200** con la tappa.
+
+### Cancellazione — DELETE /api/admin/stages/{stageId}
+Risponde **204**. Soft delete (`deleted_at = adesso`) della tappa e, **a cascata**, delle sue lezioni e domande.
+Le tappe rimaste vengono rinumerate.
+
+## Lezioni
+
+### Creazione — POST /api/admin/stages/{stageId}/lessons
+Body: `titolo`, `descrizione`. Risponde **201** con la lezione, in fondo alla tappa.
+Tappa inesistente o cancellata → 404 `NON_TROVATO`.
+
+### Dettaglio — GET /api/admin/lessons/{lessonId}
+Risponde **200** con la lezione (`id`, `titolo`, `descrizione`, `ordine`, `tappaId`) e **tutte** le sue domande
+in ordine, complete di soluzioni (vedi "Formato di una domanda").
+
+### Modifica — PATCH /api/admin/lessons/{lessonId}
+Body (opzionali): `titolo`, `descrizione`, `ordine`. Risponde **200** con la lezione.
+
+### Cancellazione — DELETE /api/admin/lessons/{lessonId}
+Risponde **204**. Soft delete della lezione e, a cascata, delle sue domande. Le lezioni rimaste nella tappa
+vengono rinumerate.
+
+Conseguenza per gli utenti: una lezione cancellata non conta più né per lo sblocco né per `lezioniCompletate`,
+e il percorso si ricalcola da solo (vedi `percorso.md`).
+
+## Domande
+
+### Creazione — POST /api/admin/lessons/{lessonId}/questions
+Body: `testo`, `spiegazione`, `tipo` e i campi del tipo. Risponde **201** con la domanda creata, in fondo alla lezione.
+Lezione inesistente o cancellata → 404 `NON_TROVATO`. Qualunque regola violata → 400 `VALIDAZIONE`.
+
+| Tipo | Campi | Regole |
+| --- | --- | --- |
+| `VERO_FALSO` | `rispostaVero` (boolean) | Il backend crea le opzioni "Vero" e "Falso" e segna come corretta quella giusta |
+| `SCELTA_MULTIPLA` | `opzioni`: lista di `{ testo, corretta }` | da 2 a 6 opzioni, **una sola** con `corretta = true` |
+| `ABBINAMENTO` | `coppie`: lista di `{ sinistra, destra }` | da 2 a 6 coppie; il backend crea gli elementi SINISTRA e DESTRA e il collegamento corretto |
+
+I campi di un tipo diverso da quello indicato devono essere assenti.
+
+### Modifica — PATCH /api/admin/questions/{questionId}
+Si modificano **solo i testi**. Risponde **200** con la domanda.
+
+Body (tutti opzionali):
+- `testo`, `spiegazione`
+- `opzioni`: lista di `{ id, testo }` (SCELTA_MULTIPLA)
+- `elementi`: lista di `{ id, testo }` (ABBINAMENTO)
+
+Regole:
+- gli `id` devono appartenere alla domanda, altrimenti 400 `VALIDAZIONE`
+- gli elementi non inclusi restano invariati
+- su `VERO_FALSO` i testi delle opzioni non si modificano ("Vero" e "Falso" sono fissi)
+- **non si cambiano** `tipo`, quale opzione è corretta, il numero di opzioni o coppie né i collegamenti dell'abbinamento:
+  la **struttura** si cambia cancellando e ricreando la domanda
+
+### Cancellazione — DELETE /api/admin/questions/{questionId}
+Risponde **204**. Soft delete della domanda; le altre vengono rinumerate.
+Si può cancellare anche l'ultima domanda: la lezione resta, ma finché non ha domande non si può avviare
+(404 `NON_TROVATO`, vedi `percorso.md`).
+
+### Formato di una domanda (risposte admin)
+- Comune: `id`, `testo`, `spiegazione`, `tipo`, `ordine`
+- `VERO_FALSO` e `SCELTA_MULTIPLA`: `opzioni` in ordine, ognuna con `id`, `testo`, `corretta`
+- `ABBINAMENTO`: `coppie` in ordine, ognuna con `sinistro` (`id`, `testo`) e `destro` (`id`, `testo`)
+
+---
+
+## Note
+- Modificare o cancellare contenuti non tocca i tentativi già svolti: restano leggibili nel resoconto (vedi `tentativi.md`).
+- Il seeder (`seed`) inserisce i contenuti iniziali rispettando le stesse regole di ordine e di struttura.
+- Le liste di tappe e lezioni sono piccole: nessuna paginazione, solo la lista utenti è paginata.
+
+## Test da prevedere
+- Lista utenti: paginazione, `size` oltre 50, ricerca con `q` (nome, cognome, email), esclusione degli utenti cancellati.
+- Cambio ruolo: ogni cella della tabella dei permessi; nessuno modifica sé stesso; nessuno assegna o toglie SUPERADMIN;
+  stesso ruolo → 204 senza logout; utente cancellato → 404; token precedenti rifiutati dopo un cambio effettivo.
+- Ordine: creazione in fondo; riordino verso l'alto e verso il basso; posizione fuori limite → 400;
+  rinumerazione dopo una cancellazione; lezioni riordinate solo dentro la propria tappa.
+- Cancellazione a cascata: tappa → lezioni e domande; lezione → domande; elementi nascosti agli utenti e alla mappa;
+  tentativi precedenti ancora leggibili.
+- Creazione domande: i tre tipi validi; troppe o poche opzioni; zero o due opzioni corrette; campi di un altro tipo;
+  testi vuoti o troppo lunghi.
+- Modifica domanda: solo i testi; id di un'altra domanda → 400; tentativo di cambiare struttura non possibile;
+  opzioni di VERO_FALSO non modificabili.
+- Permessi: un UTENTE su qualunque endpoint admin → 403; senza token → 401.
