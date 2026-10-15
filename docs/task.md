@@ -70,11 +70,11 @@ Backend · Frontend · Docs/Deploy
 - Step:
   - creare il progetto con Vite (React + TypeScript) in `frontend/`
   - installare solo le dipendenze previste: `bootstrap`, `@reduxjs/toolkit`, `react-redux`, `react-router-dom`,
-    `@fontsource/nunito-sans`, Vitest, React Testing Library, `user-event`, jsdom
+    `@fontsource/nunito-sans`, Vitest, React Testing Library, `user-event`, `jest-dom`, jsdom
   - cartelle `src/api`, `store`, `features/*`, `common`, `styles`
   - `.env.example` e `VITE_API_URL` (`.env.local` fuori da Git)
   - `styles/tokens.css` con le variabili di colore e lo stile base dei pulsanti "push"; import di Bootstrap e del font
-  - ESLint del template; script `npm test`
+  - linter del template Vite (oggi oxlint, `.oxlintrc.json`, senza configurazioni nostre); script `npm test`
   - verificare `npm run dev`, `build`, `lint`, `test`
   - verificare nel browser che la pagina di prova mostri font e colori
 
