@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="it"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><title>QuackFit</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;600;700;800;900&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'tertiary-container': '#7bf138', 'on-tertiary-fixed': '#082100', 'tertiary-fixed-dim': '#6be026', 'on-tertiary-fixed-variant': '#1f5100', 'on-tertiary-container': '#2a6a00', 'surface-bright': '#f9f9f7', 'on-tertiary': '#ffffff', 'surface-container-high': '#e8e8e6', 'error-container': '#ffdad6', 'tertiary': '#2b6c00', 'on-secondary-fixed': '#2f1400', 'surface-dim': '#dadad8', 'primary-container': '#ffd200', 'on-error-container': '#93000a', 'error': '#ba1a1a', 'on-secondary-fixed-variant': '#6f3800', 'on-error': '#ffffff', 'surface-container': '#eeeeec', 'on-surface': '#1a1c1b', 'surface': '#f9f9f7', 'on-secondary': '#ffffff', 'surface-variant': '#e2e3e1', 'on-background': '#1a1c1b', 'outline-variant': '#d1c6ab', 'inverse-surface': '#2f3130', 'on-surface-variant': '#4d4632', 'background': '#f9f9f7', 'primary-fixed-dim': '#ecc200', 'outline': '#7f765f', 'on-secondary-container': '#5b2d00', 'on-primary-fixed': '#231b00', 'on-primary': '#ffffff', 'inverse-on-surface': '#f1f1ef', 'on-primary-fixed-variant': '#564500', 'secondary-fixed': '#ffdcc4', 'surface-container-lowest': '#ffffff', 'on-primary-container': '#705b00', 'surface-tint': '#725c00', 'secondary-container': '#f88400', 'surface-container-highest': '#e2e3e1', 'secondary-fixed-dim': '#ffb781', 'inverse-primary': '#ecc200', 'primary': '#725c00', 'tertiary-fixed': '#87fe45', 'secondary': '#924c00', 'primary-fixed': '#ffe07c', 'surface-container-low': '#f4f4f2' }, borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, spacing: { 'space-sm': '0.5rem', 'space-xs': '0.25rem', 'space-xl': '2rem', 'gutter': '1rem', 'space-lg': '1.5rem', 'space-md': '1rem', 'margin': '1rem' }, fontFamily: { 'body-lg': ['Nunito Sans'], 'headline-lg': ['Nunito Sans'], 'label-lg': ['Nunito Sans'], 'headline-xl': ['Nunito Sans'], 'label-md': ['Nunito Sans'], 'body-md': ['Nunito Sans'], 'headline-xl-mobile': ['Nunito Sans'], 'body-sm': ['Nunito Sans'], 'headline-sm': ['Nunito Sans'], 'headline-lg-mobile': ['Nunito Sans'], 'headline-md': ['Nunito Sans'], 'label-sm': ['Nunito Sans'] }, fontSize: { 'body-lg': ['17px', { lineHeight: '24px', fontWeight: '600' }], 'headline-lg': ['28px', { lineHeight: '34px', fontWeight: '800' }], 'label-lg': ['15px', { lineHeight: '20px', letterSpacing: '0.5px', fontWeight: '800' }], 'headline-xl': ['36px', { lineHeight: '44px', fontWeight: '900' }], 'label-md': ['13px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '700' }], 'body-md': ['15px', { lineHeight: '22px', fontWeight: '500' }], 'headline-xl-mobile': ['28px', { lineHeight: '34px', fontWeight: '900' }], 'body-sm': ['13px', { lineHeight: '18px', fontWeight: '500' }], 'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '700' }], 'headline-lg-mobile': ['22px', { lineHeight: '28px', fontWeight: '800' }], 'headline-md': ['20px', { lineHeight: '26px', fontWeight: '800' }], 'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.5px', fontWeight: '800' }] } } } };</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior-y: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style></head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center shadow-[0_3px_0_#d9a000]"><span class="material-symbols-outlined text-on-primary-container text-[24px]">fitness_center</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-tight leading-none">QuackFit</span><span class="font-label-sm text-label-sm text-on-surface-variant font-bold leading-none mt-0.5">Percorso</span></div></div><div class="flex items-center gap-space-sm"><div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-fixed/50 shadow-[0_2px_0_rgba(146,76,0,0.15)]"><span class="material-symbols-outlined text-secondary text-[18px]">local_fire_department</span><span class="font-label-md text-label-md text-on-secondary-fixed font-black">5</span></div><div class="w-9 h-9 rounded-full ring-2 ring-primary-container ring-offset-2 ring-offset-surface overflow-hidden shadow-[0_2px_0_rgba(0,0,0,0.06)] flex items-center justify-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjDPLrBtNnfG9f35T1wFSKZJVR67bf9PcPmDF8OCpwW40GqFc_pcEO_I5jqoisBbGHk1cjBY1elyfLOZVskHVZ9P0IaKEEYQ55fq4-SCNjpyKSqjyYfEj86g6UgLDVA4oa9vuHDRL6j-y7JsaSSOabS938drU3y4_R6MPWf7aDDWkVyWjMttguiBsji8bZy2waO1gGNk0WSLvYZk0qNlglVVV-MYa02I-DYf2Ej_vhgTf61FV8L2MsIg"></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full relative select-none">
+<!-- Top Unit Header Banner -->
+<section class="px-margin pt-4 pb-2">
+<div class="bg-surface-container rounded-xl p-space-md shadow-[0_4px_0_#dadad8] relative overflow-hidden flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase tracking-wider shadow-[0_2px_0_#ecc200]">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">flag</span>
+          Tappa 1
+        </span>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-tertiary text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-black text-on-surface">1/3</span>
+<span class="text-on-surface-variant">completate</span>
+</div>
+</div>
+<div class="mt-1">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">Miti del fitness</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Smonta le credenze errate su dimagrimento e addominali</p>
+</div>
+<!-- Segmented Stage Progress Bar -->
+<div class="w-full bg-surface-container-high h-3 rounded-full mt-2 p-0.5 overflow-hidden flex gap-1">
+<div class="h-full bg-tertiary-container rounded-full flex-1 shadow-[0_1px_0_#2a6a00]"></div>
+<div class="h-full bg-primary-container rounded-full flex-1 animate-pulse"></div>
+<div class="h-full bg-surface-container-highest rounded-full flex-1"></div>
+</div>
+</div>
+</section>
+<!-- Winding Map Area with SVG connector -->
+<div class="relative w-full py-6 flex flex-col items-center min-h-[460px]">
+<!-- Background Sinuous Track Curve -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-0" fill="none" preserveAspectRatio="none" viewBox="0 0 360 460">
+<!-- Outer/shadow curve -->
+<path d="M 180,45 C 180,85 105,95 105,160 C 105,225 240,230 240,300 C 240,360 180,375 180,430" stroke="#dadad8" stroke-dasharray="2 16" stroke-linecap="round" stroke-width="12"></path>
+<!-- Completed segment curve -->
+<path d="M 180,45 C 180,85 125,95 108,145" stroke="#7bf138" stroke-linecap="round" stroke-width="8"></path>
+</svg>
+<!-- Node 1: Completata (Center) -->
+<div class="relative z-10 flex flex-col items-center w-full my-1">
+<div class="flex flex-col items-center group cursor-pointer active:translate-y-1 transition-transform" onclick="openReviewModal()">
+<!-- Crown / Star Badge Over Node -->
+<div class="w-7 h-7 -mb-3 z-20 rounded-full bg-primary-container flex items-center justify-center shadow-[0_2px_0_#d9a000] ring-2 ring-surface">
+<span class="material-symbols-outlined text-on-primary-container text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<!-- 3D Node Button -->
+<button class="w-20 h-20 rounded-full bg-tertiary-container flex items-center justify-center shadow-[0_6px_0_#2a6a00] active:shadow-[0_1px_0_#2a6a00] active:translate-y-1 transition-all">
+<span class="material-symbols-outlined text-on-tertiary-container text-[36px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</button>
+<!-- Pill Label below -->
+<div class="mt-2.5 px-3 py-1 rounded-full bg-surface-container-lowest shadow-[0_2px_0_#dadad8] flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-on-tertiary-container uppercase">Lezione 1</span>
+<span class="font-body-sm text-body-sm text-on-surface font-bold">• Addominali e pancia</span>
+</div>
+</div>
+</div>
+<!-- Node 2: Sbloccata / In Corso (Left Offset) + Mascot Quack + Speech Bubble -->
+<div class="relative z-10 w-full flex items-center justify-center my-6">
+<div class="relative w-full max-w-[340px] flex items-center justify-between px-4">
+<!-- Interactive Lesson Node with Pulse -->
+<div class="relative flex flex-col items-center group">
+<!-- Pulsing Target Aura -->
+<div class="absolute -inset-2 rounded-full bg-primary-container/30 animate-ping pointer-events-none"></div>
+<!-- Tactical Extruded Button -->
+<button class="relative w-22 h-22 w-[84px] h-[84px] rounded-full bg-primary-container flex items-center justify-center shadow-[0_7px_0_#d9a000] active:shadow-[0_1px_0_#d9a000] active:translate-y-1.5 transition-all focus:outline-none" onclick="startCurrentLesson()">
+<span class="material-symbols-outlined text-on-primary-container text-[42px]" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</button>
+<!-- Badge -->
+<div class="mt-2.5 px-3 py-1 rounded-full bg-primary text-on-primary shadow-[0_2px_0_#564500] flex items-center gap-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wide">Inizia</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</div>
+</div>
+<!-- Mascot & Animated Speech Bubble -->
+<div class="flex items-center gap-2 relative -mt-4">
+<!-- Speech Bubble -->
+<div class="relative bg-surface-container-lowest p-2.5 rounded-xl shadow-[0_3px_0_#dadad8] max-w-[130px] animate-bounce" style="animation-duration: 2.2s;">
+<p class="font-label-md text-label-md text-on-surface font-black leading-tight">Tocca a te! Inizia qui 🦆</p>
+<div class="absolute top-1/2 -right-2 -translate-y-1/2 w-0 h-0 border-y-8 border-y-transparent border-l-8 border-l-surface-container-lowest"></div>
+</div>
+<!-- Pixel Art Duck Mascot -->
+<div class="relative w-16 h-16 flex-shrink-0 cursor-pointer" onclick="duckQuackSound()">
+<img alt="QuackFit Mascot" class="w-full h-full object-contain filter drop-shadow-[0_4px_0_rgba(0,0,0,0.1)] transition-transform hover:scale-110 active:scale-95" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjDPLrBtNnfG9f35T1wFSKZJVR67bf9PcPmDF8OCpwW40GqFc_pcEO_I5jqoisBbGHk1cjBY1elyfLOZVskHVZ9P0IaKEEYQ55fq4-SCNjpyKSqjyYfEj86g6UgLDVA4oa9vuHDRL6j-y7JsaSSOabS938drU3y4_R6MPWf7aDDWkVyWjMttguiBsji8bZy2waO1gGNk0WSLvYZk0qNlglVVV-MYa02I-DYf2Ej_vhgTf61FV8L2MsIg">
+</div>
+</div>
+</div>
+</div>
+<!-- Node 2 Subtitle Label Under Center -->
+<div class="-mt-2 mb-4 px-3.5 py-1 rounded-full bg-surface-container shadow-[0_2px_0_#dadad8]">
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase">Lezione 2</span>
+<span class="font-body-sm text-body-sm text-on-surface font-black">• Deficit calorico vs Sudore</span>
+</div>
+<!-- Node 3: Bloccata (Right Offset) -->
+<div class="relative z-10 w-full flex items-center justify-center my-3">
+<div class="relative w-full max-w-[340px] flex justify-end pr-10">
+<div class="flex flex-col items-center opacity-75">
+<!-- Gray 3D Locked Node -->
+<button class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center shadow-[0_6px_0_#dadad8] cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-outline text-[32px]">lock</span>
+</button>
+<div class="mt-2.5 px-3 py-1 rounded-full bg-surface-container-high shadow-[0_2px_0_#dadad8] flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Lezione 3</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-bold">• Ipertrofia e carichi</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Final Chest / Unit Boss Node -->
+<div class="relative z-10 flex flex-col items-center mt-6">
+<div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center shadow-[0_5px_0_#dadad8] text-outline">
+<span class="material-symbols-outlined text-[32px]">military_tech</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase mt-1.5">Esame Tappa</span>
+</div>
+</div>
+<!-- Locked Next Section Teaser Card -->
+<section class="px-margin my-4">
+<div class="w-full bg-surface-container-low rounded-xl p-space-md shadow-[0_4px_0_#dadad8] relative overflow-hidden flex items-center justify-between opacity-80">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center shadow-[0_3px_0_#dadad8]">
+<span class="material-symbols-outlined text-outline text-[26px]">lock</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-extrabold">Prossimo Capitolo</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Tappa 2: Anatomia e biomeccanica</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Sblocca completando l'esame della Tappa 1</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[24px]">chevron_right</span>
+</div>
+</section>
+<!-- Sticky Bottom Alert Card: Streak a Rischio -->
+<div class="sticky bottom-2 mx-margin z-30">
+<div class="bg-secondary text-on-secondary rounded-xl p-space-sm shadow-[0_5px_0_#5b2d00] flex items-center justify-between gap-3">
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary flex items-center justify-center shadow-[0_2px_0_#5b2d00] flex-shrink-0">
+<span class="material-symbols-outlined text-[24px] text-surface-container-lowest" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md leading-tight text-secondary-fixed font-black uppercase">Streak in pericolo!</span>
+<span class="font-body-sm text-body-sm leading-tight text-on-secondary">Completa 1 lezione per salvare il fuoco 🔥</span>
+</div>
+</div>
+<button class="px-3.5 py-2 rounded-lg bg-surface-container-lowest text-secondary font-label-md text-label-md shadow-[0_3px_0_#ffdcc4] active:translate-y-1 active:shadow-none flex-shrink-0 font-black" onclick="startCurrentLesson()">
+        Salva
+      </button>
+</div>
+</div>
+<!-- Review Modal Overlay (hidden by default) -->
+<div class="fixed inset-0 bg-inverse-surface/50 z-50 flex items-end justify-center hidden p-4" id="review-modal">
+<div class="bg-surface-container-lowest w-full max-w-sm rounded-xl p-space-lg shadow-[0_8px_0_#dadad8] flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[28px]" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Ripassa Lezione 1</h4>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface" onclick="closeReviewModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Hai completato questa lezione con 3 stelle! Vuoi ripassare i concetti chiave su addominali e grasso localizzato per guadagnare +5 XP extra?</p>
+<div class="flex flex-col gap-2 mt-2">
+<button class="w-full py-3 rounded-lg bg-tertiary-container text-on-tertiary-container font-label-lg text-label-lg shadow-[0_4px_0_#2a6a00] active:translate-y-1 active:shadow-none uppercase" onclick="closeReviewModal()">
+          Ripassa (+5 XP)
+        </button>
+<button class="w-full py-2.5 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md" onclick="closeReviewModal()">
+          Chiudi
+        </button>
+</div>
+</div>
+</div>
+<script>
+    function startCurrentLesson() {
+      // Direct navigation to quiz view
+      const navItem = document.querySelector('a[data-path="esercizi-quiz"]');
+      if (navItem) {
+        navItem.click();
+      } else {
+        alert("Inizio Lezione 2: Deficit calorico vs Sudore!");
+      }
+    }
+
+    function openReviewModal() {
+      const modal = document.getElementById('review-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeReviewModal() {
+      const modal = document.getElementById('review-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function duckQuackSound() {
+      // Visual feedback for duck mascot tap
+      const duck = document.querySelector('img[alt="QuackFit Mascot"]');
+      if (duck) {
+        duck.classList.add('rotate-12', 'scale-125');
+        setTimeout(() => {
+          duck.classList.remove('rotate-12', 'scale-125');
+        }, 200);
+      }
+    }
+  </script>
+</div></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary scale-105 font-bold"><div class="h-20 px-space-sm flex items-center justify-around"><a aria-current="page" class="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all duration-150 text-primary scale-105 font-bold" data-path="percorso" href="#"><span class="material-symbols-outlined text-[26px]">alt_route</span><span class="font-label-sm text-label-sm mt-0.5">Percorso</span></a><a class="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all duration-150 text-on-surface-variant hover:text-on-surface" data-path="profilo" href="#"><span class="material-symbols-outlined text-[26px]">account_circle</span><span class="font-label-sm text-label-sm mt-0.5">Profilo</span></a></div></nav>
+
+</body></html>
