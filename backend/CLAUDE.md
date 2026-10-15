@@ -132,9 +132,17 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
   | `NON_AUTENTICATO`, `CREDENZIALI_NON_VALIDE` | 401 |
   | `ACCESSO_NEGATO`, `EMAIL_NON_VERIFICATA`, `LEZIONE_BLOCCATA` | 403 |
   | `NON_TROVATO` | 404 |
+  | `METODO_NON_CONSENTITO` | 405 |
   | `EMAIL_GIA_USATA`, `TENTATIVO_CHIUSO` | 409 |
   | `ATTENDI_REINVIO`, `TROPPE_RICHIESTE` | 429 |
   | `ERRORE_INTERNO` | 500 |
+- Errori generati da Spring prima dei service:
+  | Caso | Risposta |
+  | --- | --- |
+  | Body JSON malformato o con tipi sbagliati | 400 `VALIDAZIONE`, `campi` vuoto |
+  | Parametro dell'URL del tipo sbagliato (es. id non UUID) | 400 `VALIDAZIONE`, `campi` con il nome del parametro |
+  | Endpoint inesistente | 404 `NON_TROVATO` |
+  | Metodo HTTP non previsto | 405 `METODO_NON_CONSENTITO` |
 - Le spec indicano quale codice usare in ogni caso. **Un codice nuovo si aggiunge solo dopo averlo chiesto**
   e va riportato nella spec.
 
