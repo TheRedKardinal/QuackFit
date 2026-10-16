@@ -9,7 +9,8 @@ import jakarta.validation.ConstraintValidatorContext;
 public class PasswordValidaValidator implements ConstraintValidator<PasswordValida, String> {
 
 	static final int MINIMO_CARATTERI = 8;
-	static final int MASSIMO_BYTE = 72;
+	/** Limite di BCrypt: oltre, BCryptPasswordEncoder lancia un'eccezione. Usato anche dal login. */
+	public static final int MASSIMO_BYTE = 72;
 
 	@Override
 	public boolean isValid(String password, ConstraintValidatorContext contesto) {

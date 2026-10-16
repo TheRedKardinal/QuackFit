@@ -26,4 +26,9 @@ public class AuthController {
 		return authService.registra(richiesta);
 	}
 
+	@PostMapping("/login")
+	public TokenResponse login(@Valid @RequestBody LoginRequest richiesta) {
+		return authService.login(richiesta);
+	}
+
 }
