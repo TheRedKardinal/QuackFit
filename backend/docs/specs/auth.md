@@ -113,6 +113,13 @@ Pubblico. Body: `email`, `codice`, `nuovaPassword`.
 ## Note
 - Logout: non esiste un endpoint; il frontend cancella il token.
 - Gli endpoint `/api/auth/**` sono protetti anche dal limite per IP (20 richieste al minuto, 429 `TROPPE_RICHIESTE`).
+- Validità del token: il filtro JWT confronta la data di emissione del token (`iat`, in secondi) con `token_validi_dal`
+  **troncato al secondo** e rifiuta il token se `iat` è precedente. Nel database `token_validi_dal` resta preciso.
+  Un token emesso nello stesso secondo di `token_validi_dal` è quindi valido (necessario perché il token creato alla
+  registrazione non venga rifiutato subito); la finestra di meno di un secondo dopo un "logout ovunque" è accettata.
+- Token non valido (firma sbagliata, scaduto, utente cancellato, precedente a `token_validi_dal`) su `/api/auth/**`:
+  viene **ignorato** e la richiesta prosegue senza autenticazione, così un vecchio token rimasto nel browser non blocca
+  login e registrazione. Sulle altre rotte lo stesso token risponde 401 `NON_AUTENTICATO`.
 
 ## Test da prevedere
 - Registrazione: dati validi, campi non validi, password che non rispetta la regex, email già usata.
@@ -122,3 +129,7 @@ Pubblico. Body: `email`, `codice`, `nuovaPassword`.
 - Codici: giusto, sbagliato, scaduto, 5 tentativi, codice vecchio invalidato da uno nuovo, reinvio prima di 60 secondi.
 - Password dimenticata: email esistente e inesistente danno la stessa risposta.
 - Reset: password cambiata, email verificata, login sbloccato, token precedenti rifiutati.
+- Validità del token (con date fisse): token emesso nello stesso secondo di `token_validi_dal` accettato (anche subito
+  dopo la registrazione); token emesso un secondo prima rifiutato.
+- Token scaduto o non valido su `/api/auth/login`: il login funziona lo stesso; lo stesso token su una rotta protetta
+  → 401 `NON_AUTENTICATO`.

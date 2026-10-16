@@ -7,6 +7,9 @@ Package: `utente` (gestione utenti) e `contenuti` (gestione contenuti). Endpoint
 
 ## Regole comuni
 - Tutti gli endpoint `/api/admin/**` sono accessibili solo a `ADMIN` e `SUPERADMIN`; gli altri ricevono 403 `ACCESSO_NEGATO`.
+- Serve anche l'**email verificata**: un admin con email non verificata riceve 403 `EMAIL_NON_VERIFICATA`.
+  Si controlla prima il ruolo e poi l'email, così un non admin riceve sempre `ACCESSO_NEGATO`.
+  Il SUPERADMIN creato dal seeder ha l'email già verificata.
 - Le DTO dell'admin sono separate da quelle dell'utente: **contengono le soluzioni** (`corretta`, coppie giuste).
 - Testi con `strip()` nel record; tutti obbligatori e non vuoti, tranne dove indicato.
 - Lunghezze massime (400 `VALIDAZIONE` se superate):
@@ -160,4 +163,5 @@ Si può cancellare anche l'ultima domanda: la lezione resta, ma finché non ha d
   testi vuoti o troppo lunghi.
 - Modifica domanda: solo i testi; id di un'altra domanda → 400; tentativo di cambiare struttura non possibile;
   opzioni di VERO_FALSO non modificabili.
-- Permessi: un UTENTE su qualunque endpoint admin → 403; senza token → 401.
+- Permessi: un UTENTE su qualunque endpoint admin → 403 `ACCESSO_NEGATO` (anche se non verificato); senza token → 401;
+  un ADMIN con email non verificata → 403 `EMAIL_NON_VERIFICATA`.

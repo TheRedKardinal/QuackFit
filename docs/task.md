@@ -175,6 +175,8 @@ Backend · Frontend · Docs/Deploy
   - contatori e blocco: 3 errori entro 10 secondi dal primo oppure 5 totali → blocco di 15 minuti
   - login riuscito azzera i contatori; ammesso anche con email non verificata
   - test: tutti i casi della sezione "Contatori" di `auth.md`
+  - test: un token vecchio o non valido su `/api/auth/login` non impedisce il login
+    (nella task 07 si verifica solo che la sicurezza lasci passare la richiesta)
 
 ### 13 · Backend · Verifica email e nuovo codice
 - Branch: `feature/utente-verifica-email` · Dipende da: 10, 11
