@@ -585,6 +585,8 @@ Backend · Frontend · Docs/Deploy
   - `Dockerfile` per Render con limite di memoria della JVM (512 MB)
   - profilo `prod`: database Neon, JWT, CORS, Cloudinary, Brevo, superadmin
   - verificare avvio, seeder, registrazione con email reale e login
+  - verificare su Render che due richieste da IP diversi abbiano contatori separati e che un `X-Forwarded-For` inventato
+    non cambi l'IP contato; se il proxy non è riconosciuto, fermarsi e chiedere
   - annotare che Render gratuito si addormenta dopo 15 minuti: aprire l'app prima della presentazione
 
 ### 50 · Docs/Deploy · Deploy del frontend
