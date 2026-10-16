@@ -91,6 +91,9 @@ it.quackfit
 - I controller ricevono la richiesta, validano, chiamano il service e restituiscono il DTO con lo status code
   indicato in `docs/progettazione.md`. Nessuna logica di business nei controller.
 - L'utente loggato si ottiene con `@AuthenticationPrincipal`, mai da un id passato nell'URL o nel body.
+  Il principal è l'entità `Utente` caricata dal filtro JWT (autorità `ROLE_<ruolo>`; `Utente` non implementa `UserDetails`).
+  È "staccato" dal database: **per leggere si usa il principal; per scrivere il service ricarica l'utente per id dentro
+  il metodo `@Transactional` e modifica quello**, così non si riscrivono campi cambiati nel frattempo (es. contatori dei login).
 - Ricerca per id: `repository.findById(id).orElseThrow(...)` con l'eccezione del codice `NON_TROVATO`.
 - Operazioni che modificano più tabelle: `@Transactional` sul metodo del service.
 
@@ -158,9 +161,13 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
   cambio email, cancellazione account.
 - Regole di accesso:
   - `/api/auth/**` → pubblico
-  - `/api/admin/**` → solo `ADMIN` e `SUPERADMIN`
+  - `/api/admin/**` → solo `ADMIN` e `SUPERADMIN`, **con email verificata**. Si controlla prima il ruolo (non admin → 403
+    `ACCESSO_NEGATO`), poi l'email (admin non verificato → 403 `EMAIL_NON_VERIFICATA`)
   - tutto il resto → utente autenticato **con email verificata**; se non è verificata → 403 `EMAIL_NON_VERIFICATA`,
     tranne `GET /api/me`, `POST /api/me/verification` e `POST /api/me/verification/resend`
+- Nessun utente in memoria: `UserDetailsServiceAutoConfiguration` è esclusa in `application.properties`
+  (`spring.autoconfigure.exclude`). Gli utenti sono solo quelli del database, caricati dal filtro JWT; senza l'esclusione
+  Spring Boot creerebbe un utente `user` e scriverebbe la sua password generata nel log.
 
 ### Login
 - Messaggio unico per ogni login fallito, anche ad account bloccato (401 `CREDENZIALI_NON_VALIDE`):
@@ -196,8 +203,11 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
 ### XSS
 - Le API restituiscono solo JSON, mai HTML costruito con input dell'utente.
 - Template email Thymeleaf: solo `th:text` (fa l'escape), **mai `th:utext`**.
-- Header di sicurezza attivi tramite Spring Security: `Content-Security-Policy`, `X-Content-Type-Options`,
-  `X-Frame-Options`.
+- Header di sicurezza attivi tramite Spring Security:
+  - `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` (le API restituiscono solo JSON:
+    non serve consentire nessuna risorsa)
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
 - CORS: consentita solo l'origine del frontend (da configurazione), mai `*`.
 
 ## Soft delete
@@ -209,6 +219,12 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
 - `application.properties` importa le variabili da `env.properties` (`spring.config.import`).
 - `env.properties` è **escluso da Git**; nel repository c'è `env.properties.example` con le chiavi vuote.
 - Variabili: database, segreto e durata JWT, Cloudinary, mail (SMTP / Brevo), email e password del superadmin.
+- Chiavi della sicurezza:
+  | Chiave | Obbligatoria | Default | Uso |
+  | --- | --- | --- | --- |
+  | `JWT_SECRET` | sì, almeno 32 caratteri | — | firma HMAC-SHA256 dei token; mai in un file tracciato |
+  | `JWT_DURATA` | no | `24h` | durata del token |
+  | `FRONTEND_URL` | no | `http://localhost:5173` | unica origine ammessa dal CORS |
 - Schema del database: `spring.jpa.hibernate.ddl-auto=update`.
 - `spring.jpa.open-in-view=false`: le relazioni LAZY si leggono solo dentro i service `@Transactional`.
 - Profili:
