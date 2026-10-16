@@ -57,9 +57,27 @@ Body: `nome`, `cognome`, `email`, `password`.
   - nome, cognome, email, password obbligatori e non vuoti
   - email in formato valido
   - password: almeno 8 caratteri, una maiuscola, un numero, un carattere speciale, massimo 72 byte
+  - lunghezze massime: nome e cognome **50** caratteri, email **254** (limite standard degli indirizzi email)
+  - formato email: `@Email` di Jakarta **più** un dominio con almeno un punto (`mario@localhost` non è valido)
+  - un campo vuoto ha un solo messaggio, quello di `@NotBlank`: le altre regole (formato email, password) lo lasciano passare
+  - password: annotazione `@PasswordValida` (vedi `backend/CLAUDE.md`, Password)
+- Messaggi dei campi:
+  | Caso | Messaggio |
+  | --- | --- |
+  | nome vuoto | *"Il nome è obbligatorio"* |
+  | cognome vuoto | *"Il cognome è obbligatorio"* |
+  | email vuota | *"L'email è obbligatoria"* |
+  | email non valida | *"Formato email non valido"* |
+  | password vuota | *"La password è obbligatoria"* |
+  | password non valida | *"La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale (massimo 72 byte)"* |
+  | nome o cognome troppo lungo | *"Massimo 50 caratteri"* |
+  | email troppo lunga | *"Massimo 254 caratteri"* |
 - Email già usata da un utente attivo (`deleted_at = null`) → 409 `EMAIL_GIA_USATA`, messaggio:
   *"Email già registrata. Se è tua, accedi oppure usa 'Password dimenticata'."*
   (le email degli account anonimizzati non contano: sono già state sostituite)
+- Due registrazioni simultanee con la stessa email: il controllo "esiste già?" e il salvataggio non sono atomici.
+  L'utente si salva con `saveAndFlush` dentro un `try/catch` su `DataIntegrityViolationException` (l'unico vincolo
+  `UNIQUE` di Utente è l'email): la seconda riceve lo stesso 409 `EMAIL_GIA_USATA`, non un 500.
 - Crea l'Utente: ruolo UTENTE, `email_verificata = false`, `token_validi_dal = adesso`, contatori login a zero.
 - Crea la sua Streak: valore 0, record 0, `ultima_attivita = null`.
 - Genera e invia un codice VERIFICA_EMAIL.
