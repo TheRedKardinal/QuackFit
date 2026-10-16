@@ -21,6 +21,9 @@ Package: `utente` (gestione utenti) e `contenuti` (gestione contenuti). Endpoint
   | spiegazione | 1000 |
   | testo di un'opzione o di un elemento di abbinamento | 200 |
 - Risorsa inesistente o già cancellata → 404 `NON_TROVATO`.
+- **Cancellazioni a cascata** (tappa → lezioni → domande; lezione → domande): il service calcola l'istante una sola
+  volta e lo usa per tutta la cascata; ciò che era già cancellato mantiene il suo `deleted_at`. Opzioni ed elementi di
+  abbinamento non si cancellano mai (vedi `backend/CLAUDE.md`, Soft delete).
 
 ---
 

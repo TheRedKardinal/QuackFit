@@ -111,6 +111,7 @@ it.quackfit
 ### Tempo
 - Non usare mai `Instant.now()` o `LocalDate.now()` direttamente: inietta il bean **`Clock`** (`common/ClockConfig`)
   e usa `Instant.now(clock)` / `LocalDate.now(clock)`. Nei test si sostituisce con un orologio fisso.
+  Unica eccezione: il `CURRENT_TIMESTAMP` di `@SQLDelete`, che è solo una rete di sicurezza (vedi Soft delete).
 - Il fuso orario per "oggi" e "ieri" (streak) è **`Europe/Rome`**, definito in un'unica costante.
 
 ## Errori
@@ -251,6 +252,21 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
 
 ## Soft delete
 - `Tappa`, `Lezione`, `Domanda` hanno `deletedAt` e usano `@SQLDelete` + `@SQLRestriction("deleted_at IS NULL")`.
+- **Si cancella solo con i metodi dei service**, mai con `delete()` / `deleteAll()` dei repository:
+  - il service calcola `Instant.now(clock)` **una sola volta** e lo usa per tutta la cascata
+    (tappa → lezioni → domande; lezione → domande), con i metodi `cancella…` dei repository (UPDATE di `deleted_at`);
+  - ordine della cascata da una tappa: prima le domande, poi le lezioni, poi la tappa (la query delle domande
+    raggiunge le lezioni ancora attive);
+  - la cascata **non tocca ciò che era già cancellato**: il suo `deleted_at` resta quello originale (`deleted_at is null`
+    nelle UPDATE).
+- `@SQLDelete` è solo una **rete di sicurezza** se qualcuno chiama `delete()`: fa un soft delete del solo elemento,
+  **senza cascata**, e usa l'ora del database (`CURRENT_TIMESTAMP`). È l'unica eccezione alla regola sul `Clock`
+  (vedi Tempo), accettata perché quella strada non si usa.
+- `Opzione` ed `ElementoAbbinamento` non hanno soft delete: restano anche quando la loro domanda è cancellata, perché il
+  resoconto dei tentativi le mostra. Per questo le liste di `Domanda` hanno cascade solo `PERSIST` e `MERGE`
+  (niente `REMOVE`) e niente `orphanRemoval` (opzioni ed elementi non si tolgono mai, vedi `admin.md`).
+- Coppie di abbinamento: `Domanda.aggiungiCoppia` mette nella lista prima l'elemento DESTRA e poi il SINISTRA che punta a
+  lui, così le INSERT rispettano la chiave esterna `abbinamento_corretto_id`.
 - **Su `Utente` NON si usa `@SQLRestriction`**: i controlli su `deletedAt` si fanno esplicitamente
   (login, lista utenti admin), così lo storico dei tentativi resta leggibile.
 
@@ -323,6 +339,8 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
   partendo dalle tabelle con la chiave esterna verso l'utente (codici, streak, tentativi…) e finendo con gli utenti.
   Un nuovo endpoint che crea dati può rompere la pulizia di un test più vecchio che lo chiama: in quel caso si sistema
   la pulizia di quel test nella stessa task (la suite lo segnala con un errore di chiave esterna).
+  Attenzione: su `Tappa`, `Lezione` e `Domanda` `deleteAll()` fa un **soft delete** (le righe restano); per pulire
+  davvero si usa SQL diretto (`JdbcTemplate`). I test con `@DataJpaTest` non ne hanno bisogno: annullano tutto a fine test.
 
 ## Comandi
 Il progetto gira su Windows. Usa il Maven Wrapper:
