@@ -195,6 +195,9 @@ Backend · Frontend · Docs/Deploy
   - `forgot`: sempre 200 con messaggio generico; il codice parte solo se l'utente esiste ed è passato il limite di 60 secondi (senza 429)
   - `reset`: email inesistente → 400 `CODICE_NON_VALIDO`; codice giusto → nuova password, email verificata, logout ovunque, login sbloccato
   - test: email esistente e inesistente con la stessa risposta, reset completo, token precedenti rifiutati
+  - valutare la differenza di tempo di risposta tra email esistente e inesistente (con l'invio sincrono quella esistente
+    è più lenta e rivela che l'indirizzo è registrato); se è un problema, decidere con l'utente, per esempio con invio
+    asincrono solo per questo caso
 
 ### 15 · Backend · Seeder del superadmin
 - Branch: `feature/seed-superadmin` · Dipende da: 06, 07
@@ -581,7 +584,8 @@ Backend · Frontend · Docs/Deploy
 - Leggi: `backend/CLAUDE.md` (Configurazione, profilo `prod`)
 - Obiettivo: backend online.
 - Step:
-  - **l'utente crea gli account** (Neon, Render, Brevo) e inserisce le variabili sulle piattaforme (mai nel repository)
+  - **l'utente crea gli account** (Neon, Render, Brevo) e inserisce le variabili sulle piattaforme (mai nel repository);
+    `MAIL_MITTENTE` deve essere un mittente verificato nell'account Brevo, altrimenti l'invio viene rifiutato
   - `Dockerfile` per Render con limite di memoria della JVM (512 MB)
   - profilo `prod`: database Neon, JWT, CORS, Cloudinary, Brevo, superadmin
   - verificare avvio, seeder, registrazione con email reale e login
