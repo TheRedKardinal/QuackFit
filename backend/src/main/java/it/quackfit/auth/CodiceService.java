@@ -4,6 +4,8 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,12 +38,19 @@ public class CodiceService {
 	private final Clock clock;
 	private final SecureRandom random = new SecureRandom();
 
+	/**
+	 * Hash di un codice casuale, calcolato all'avvio con lo stesso PasswordEncoder: quando non c'è un codice da
+	 * confrontare si confronta con questo, così ogni verifica dura come un confronto vero (vedi auth.md).
+	 */
+	private final String hashFittizio;
+
 	public CodiceService(CodiceVerificaRepository codiceRepository, PasswordEncoder passwordEncoder,
 			MailService mailService, Clock clock) {
 		this.codiceRepository = codiceRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.mailService = mailService;
 		this.clock = clock;
+		this.hashFittizio = passwordEncoder.encode(UUID.randomUUID().toString());
 	}
 
 	/**
@@ -99,13 +108,21 @@ public class CodiceService {
 	@Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = ApplicazioneException.class)
 	public CodiceVerificato verifica(Utente utente, TipoCodice tipo, String codice) {
 		Instant adesso = Instant.now(clock);
-		CodiceVerifica valido = codiceRepository.findFirstByUtenteAndTipoAndUsatoAtIsNullOrderByCreatedAtDesc(utente, tipo)
-				.orElseThrow(() -> new ApplicazioneException(CodiceErrore.CODICE_NON_VALIDO, MSG_NON_VALIDO));
+		Optional<CodiceVerifica> trovato =
+				codiceRepository.findFirstByUtenteAndTipoAndUsatoAtIsNullOrderByCreatedAtDesc(utente, tipo);
+		// nei casi 1-3 il codice vero non si confronta: un confronto fittizio rende uguali i tempi di risposta
+		if (trovato.isEmpty()) {
+			confrontoFittizio(codice);
+			throw new ApplicazioneException(CodiceErrore.CODICE_NON_VALIDO, MSG_NON_VALIDO);
+		}
+		CodiceVerifica valido = trovato.get();
 
 		if (!adesso.isBefore(valido.getScadenza())) {
+			confrontoFittizio(codice);
 			throw new ApplicazioneException(CodiceErrore.CODICE_SCADUTO, MSG_SCADUTO);
 		}
 		if (valido.getTentativiFalliti() >= MASSIMO_TENTATIVI) {
+			confrontoFittizio(codice);
 			throw new ApplicazioneException(CodiceErrore.TROPPI_TENTATIVI, MSG_TROPPI_TENTATIVI);
 		}
 		if (codice == null || !passwordEncoder.matches(codice, valido.getCodiceHash())) {
@@ -118,6 +135,16 @@ public class CodiceService {
 
 		valido.setUsatoAt(adesso);
 		return new CodiceVerificato(valido.getNuovaEmail());
+	}
+
+	/**
+	 * Stesso lavoro di una verifica vera, senza nessun codice da confrontare: serve dove l'utente non esiste
+	 * (reimpostazione password con un'email non registrata), per non rivelarlo con i tempi.
+	 */
+	public void confrontoFittizio(String codice) {
+		if (codice != null) {
+			passwordEncoder.matches(codice, hashFittizio);
+		}
 	}
 
 	/** Sempre 6 cifre, anche per i numeri piccoli (es. 4213 → "004213"). */
