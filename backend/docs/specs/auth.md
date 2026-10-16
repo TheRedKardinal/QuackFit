@@ -47,6 +47,12 @@ Dato l'utente e il tipo, si prende l'ultimo codice con `usato_at = null`:
 4. codice sbagliato → `tentativi_falliti + 1`; se arriva a 5 → 400 `TROPPI_TENTATIVI`, altrimenti 400 `CODICE_NON_VALIDO`
 5. codice giusto → `usato_at = adesso` e si prosegue con l'operazione
 
+**Confronto fittizio**: nei casi 1-3 il codice ricevuto non si confronta con nessun hash; si fa comunque un confronto
+con un hash calcolato all'avvio con lo stesso `PasswordEncoder` (`CodiceService.confrontoFittizio`), così ogni verifica
+dura come un confronto vero. Vale per **tutti i tipi di codice**, quindi anche per la verifica dell'email (che però
+mantiene gli errori distinti). Lo stesso confronto si usa nella reimpostazione della password quando l'email non è
+registrata.
+
 ---
 
 ## Registrazione — POST /api/auth/register
@@ -146,13 +152,38 @@ Pubblico. Body: `email`.
   genera e invia un codice RESET_PASSWORD.
 - Il limite dei 60 secondi qui **non** restituisce 429: rivelerebbe che l'email esiste.
 - Vale anche per account con email non verificata.
+- Corpo della risposta: `{ "messaggio": "..." }` (stessa chiave del formato degli errori).
+- **Tutto il lavoro sul codice è asincrono** (`@Async`): ricerca dell'utente, controllo dei 60 secondi
+  (`reinvioConsentito`), generazione e hash BCrypt del codice, salvataggio e invio. Il controller valida l'input e
+  risponde subito con il 200, così la durata della risposta non dipende dall'esistenza dell'email (l'hash del codice
+  è lento quanto l'invio).
+  - Il metodo `@Async` sta in un bean diverso dal chiamante (`RecuperoPasswordService`, chiamato dal controller),
+    altrimenti il proxy di Spring non scatta; la transazione è dentro il metodo asincrono.
+  - Executor esplicito in `config/AsyncConfig`: 2 thread, coda di 100; a coda piena la richiesta si scarta e si logga,
+    senza far fallire la risposta. L'executor non è un bean, così quello di default di Spring Boot resta com'è.
+  - Chiusura ordinata: `AsyncConfig` è uno `SmartLifecycle` che all'arresto si ferma **dopo il web server** e prima
+    della distruzione dei bean (database, mail): non accetta nuovi lavori e finisce quelli in coda, per al massimo
+    20 secondi (Render concede 30 secondi tra SIGTERM e la chiusura forzata).
+  - Gli errori del lavoro asincrono non arrivano al client: li logga un `AsyncUncaughtExceptionHandler` con la classe
+    dell'errore e quella della causa originale, mai i messaggi né i parametri (email, codice).
+  - Nel profilo `test` l'executor è un `SyncTaskExecutor`: il lavoro finisce prima della risposta e i test ne
+    controllano subito il risultato.
+  - Solo qui: registrazione, verifica email e reinvio del codice restano sincroni.
 
 ## Reimpostazione password — POST /api/auth/password/reset
 Pubblico. Body: `email`, `codice`, `nuovaPassword`.
 
-- Validazione della nuova password come in registrazione (400 `VALIDAZIONE`).
-- Email inesistente o utente cancellato → 400 `CODICE_NON_VALIDO` (non si rivela che l'email non esiste).
-- Verifica del codice RESET_PASSWORD (vedi sopra).
+- Validazione della nuova password come in registrazione (400 `VALIDAZIONE`); email e codice solo obbligatori,
+  senza controlli di formato.
+- **Ogni fallimento risponde allo stesso modo**: 400 `CODICE_NON_VALIDO` con il messaggio
+  *"Codice non valido o scaduto: richiedine uno nuovo"*, per email inesistente o utente cancellato, nessun codice,
+  codice sbagliato, scaduto o con i tentativi esauriti. Motivo: la password dimenticata è pubblica e chiunque può far
+  generare un codice per l'email di un altro; `CODICE_SCADUTO` e `TROPPI_TENTATIVI` rivelerebbero che l'email è registrata.
+  - I controlli interni restano quelli della verifica (vedi sopra): il `+1` ai tentativi e il blocco del codice dopo
+    5 errori funzionano come sempre, cambia solo la risposta.
+  - Email inesistente o utente cancellato: confronto fittizio del codice, così non cambiano nemmeno i tempi.
+  - La verifica dell'email (`/api/me/verification`) mantiene invece gli errori distinti: è autenticata.
+- Verifica del codice RESET_PASSWORD (vedi sopra), con l'utente letto con un lock pessimistico (regola dei contatori).
 - Codice giusto:
   - password = hash BCrypt della nuova
   - `email_verificata = true` (l'utente ha dimostrato di ricevere le email a quell'indirizzo)
@@ -177,8 +208,10 @@ Pubblico. Body: `email`, `codice`, `nuovaPassword`.
 - Contatori: 3 errori in 10 secondi → blocco; 3 errori in più di 10 secondi → nessun blocco; 5 errori → blocco;
   blocco scaduto; login riuscito che azzera il contatore.
 - Codici: giusto, sbagliato, scaduto, 5 tentativi, codice vecchio invalidato da uno nuovo, reinvio prima di 60 secondi.
-- Password dimenticata: email esistente e inesistente danno la stessa risposta.
-- Reset: password cambiata, email verificata, login sbloccato, token precedenti rifiutati.
+- Password dimenticata: email esistente, inesistente e in attesa del reinvio danno la stessa risposta; il codice viene
+  creato e inviato solo quando l'email esiste.
+- Reset: password cambiata, email verificata, login sbloccato, token precedenti rifiutati; tutti i fallimenti con
+  status, codice e messaggio identici.
 - Validità del token (con date fisse): token emesso nello stesso secondo di `token_validi_dal` accettato (anche subito
   dopo la registrazione); token emesso un secondo prima rifiutato.
 - Token scaduto o non valido su `/api/auth/login`: il login funziona lo stesso; lo stesso token su una rotta protetta
