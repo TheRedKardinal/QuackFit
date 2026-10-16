@@ -190,6 +190,17 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
   La mappa va ripulita periodicamente dagli IP vecchi.
 - Dietro il proxy di Render l'IP reale va letto da `X-Forwarded-For` (configurazione di Spring per gli header inoltrati).
 - Nessuna libreria esterna.
+- **Finestra fissa**: per ogni IP un contatore e l'istante della prima richiesta; dopo 20 richieste si risponde 429
+  finché non scadono i 60 secondi, poi il conteggio riparte. A cavallo di due finestre possono passare fino a
+  40 richieste in poco tempo: accettato, perché login e codici sono protetti anche dal blocco dell'account e dai
+  5 tentativi sui codici.
+- **Pulizia**: un metodo `@Scheduled` ogni 5 minuti toglie dalla mappa gli IP con la finestra scaduta
+  (`@EnableScheduling` in `config`).
+- **IP reale**: `server.forward-headers-strategy=native` **solo nel profilo `prod`**. La `RemoteIpValve` di Tomcat legge
+  `X-Forwarded-For` da destra e salta i proxy interni (IP privati), quindi un valore inventato dal client non cambia
+  l'IP contato. Non si usa `framework` (`ForwardedHeaderFilter`): prende il primo valore, scritto dal client.
+  Se i proxy di Render non fossero riconosciuti come interni, tutti gli utenti avrebbero lo stesso IP e un solo
+  contatore: va verificato al deploy (task 49). In locale si usa l'IP diretto della connessione.
 
 ### SQL injection
 - Solo query **parametrizzate**: metodi di Spring Data JPA o `@Query` con parametri (`:email`).
