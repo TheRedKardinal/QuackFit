@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -264,6 +266,52 @@ class CodiceServiceTest {
 				.hasMessage("Codice scaduto: richiedine uno nuovo");
 		assertThatThrownBy(() -> servizio.verifica(utente, TipoCodice.RESET_PASSWORD, "123456"))
 				.hasMessage("Codice non valido");
+	}
+
+	// --- confronto fittizio: ogni verifica fa un confronto BCrypt, così i tempi non cambiano ---
+
+	/** Servizio con un encoder "spia", per contare i confronti BCrypt. */
+	private CodiceService servizioConSpia(PasswordEncoder spia) {
+		CodiceService conSpia = new CodiceService(repository, spia, mailService, Clock.fixed(ADESSO, ClockConfig.FUSO));
+		clearInvocations(spia); // l'encode dell'hash fittizio fatto nel costruttore non conta
+		return conSpia;
+	}
+
+	@Test
+	void ancheSenzaCodiceDaConfrontareSiFaUnConfronto() {
+		PasswordEncoder spia = spy(encoder);
+		CodiceService conSpia = servizioConSpia(spia);
+
+		// 1. nessun codice valido
+		erroreConCodice(() -> conSpia.verifica(utente, TipoCodice.RESET_PASSWORD, "123456"), CodiceErrore.CODICE_NON_VALIDO);
+		verify(spia).matches(eq("123456"), anyString());
+
+		// 2. codice scaduto
+		clearInvocations(spia);
+		ultimoValidoE(codice(TipoCodice.RESET_PASSWORD, "123456", ADESSO.minus(Duration.ofMinutes(20))));
+		erroreConCodice(() -> conSpia.verifica(utente, TipoCodice.RESET_PASSWORD, "123456"), CodiceErrore.CODICE_SCADUTO);
+		verify(spia).matches(eq("123456"), anyString());
+
+		// 3. tentativi esauriti
+		clearInvocations(spia);
+		CodiceVerifica bloccato = codice(TipoCodice.RESET_PASSWORD, "123456", ADESSO.minus(Duration.ofMinutes(1)));
+		bloccato.setTentativiFalliti(CodiceService.MASSIMO_TENTATIVI);
+		ultimoValidoE(bloccato);
+		erroreConCodice(() -> conSpia.verifica(utente, TipoCodice.RESET_PASSWORD, "123456"), CodiceErrore.TROPPI_TENTATIVI);
+		verify(spia).matches(eq("123456"), anyString());
+	}
+
+	@Test
+	void confrontoFittizio() {
+		PasswordEncoder spia = spy(encoder);
+		CodiceService conSpia = servizioConSpia(spia);
+
+		conSpia.confrontoFittizio("123456");
+		verify(spia).matches(eq("123456"), anyString());
+
+		clearInvocations(spia);
+		conSpia.confrontoFittizio(null);
+		verify(spia, never()).matches(any(), any());
 	}
 
 }
