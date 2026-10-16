@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Risposte 401 e 403 di Spring Security nel formato unico degli errori.
+ * Risposte 401 e 403 di Spring Security (e 429 del limite per IP) nel formato unico degli errori.
  * Servono qui perché questi errori nascono nei filtri, prima dei controller,
  * quindi l'ExceptionsHandler non li vede.
  */
@@ -54,7 +54,8 @@ public class GestoreErroriSicurezza implements AuthenticationEntryPoint, AccessD
 		scrivi(response, codice);
 	}
 
-	private void scrivi(HttpServletResponse response, CodiceErrore codice) throws IOException {
+	/** Scrive l'errore nel formato unico. Lo usa anche LimiteIpFiltro per il 429. */
+	public void scrivi(HttpServletResponse response, CodiceErrore codice) throws IOException {
 		ErroreResponse errore = ErroreResponse.da(codice, messaggio(codice), Instant.now(clock));
 		response.setStatus(errore.status());
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -66,6 +67,7 @@ public class GestoreErroriSicurezza implements AuthenticationEntryPoint, AccessD
 		return switch (codice) {
 			case NON_AUTENTICATO -> "Accesso richiesto: effettua il login";
 			case EMAIL_NON_VERIFICATA -> "Verifica la tua email per continuare";
+			case TROPPE_RICHIESTE -> "Troppe richieste: riprova tra un minuto";
 			default -> "Non hai i permessi per questa operazione";
 		};
 	}

@@ -23,7 +23,7 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService,
-			UtenteRepository utenteRepository, GestoreErroriSicurezza gestoreErrori) {
+			UtenteRepository utenteRepository, GestoreErroriSicurezza gestoreErrori, LimiteRichiesteIp limiteRichiesteIp) {
 		http
 				// il token viaggia nell'header Authorization, non in un cookie: niente CSRF
 				.csrf(AbstractHttpConfigurer::disable)
@@ -48,7 +48,9 @@ public class SecurityConfig {
 				.exceptionHandling(errori -> errori
 						.authenticationEntryPoint(gestoreErrori)
 						.accessDeniedHandler(gestoreErrori))
-				.addFilterBefore(new JwtFiltro(jwtService, utenteRepository), UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(new JwtFiltro(jwtService, utenteRepository), UsernamePasswordAuthenticationFilter.class)
+				// il limite per IP viene prima del JwtFiltro: una richiesta respinta non tocca nemmeno il database
+				.addFilterBefore(new LimiteIpFiltro(limiteRichiesteIp, gestoreErrori), JwtFiltro.class);
 		return http.build();
 	}
 
