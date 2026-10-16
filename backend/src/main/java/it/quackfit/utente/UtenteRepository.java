@@ -27,4 +27,7 @@ public interface UtenteRepository extends JpaRepository<Utente, UUID> {
 	 */
 	boolean existsByEmail(String email);
 
+	/** Serve al seeder: c'è già un utente con questo ruolo? (il SUPERADMIN non può cancellarsi, vedi me.md) */
+	boolean existsByRuolo(Ruolo ruolo);
+
 }
