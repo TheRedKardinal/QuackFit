@@ -264,6 +264,11 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
   | `JWT_SECRET` | sì, almeno 32 caratteri | — | firma HMAC-SHA256 dei token; mai in un file tracciato |
   | `JWT_DURATA` | no | `24h` | durata del token |
   | `FRONTEND_URL` | no | `http://localhost:5173` | unica origine ammessa dal CORS |
+- Chiavi del superadmin (vedi Seeder):
+  | Chiave | Obbligatoria | Default | Uso |
+  | --- | --- | --- | --- |
+  | `SUPERADMIN_EMAIL` | sì, finché nel database non c'è un SUPERADMIN | — | email del superadmin creato all'avvio |
+  | `SUPERADMIN_PASSWORD` | sì, finché nel database non c'è un SUPERADMIN | — | password, con le regole di `@PasswordValida`; mai in un file tracciato |
 - Chiavi delle email:
   | Chiave | Obbligatoria | Default | Uso |
   | --- | --- | --- | --- |
@@ -292,6 +297,16 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
 ## Seeder
 - Un `CommandLineRunner` nel package `seed`:
   - crea il **superadmin** se non esiste, con credenziali lette da `env.properties`
+    (`SuperadminSeeder`):
+    - se esiste già un SUPERADMIN non fa nulla, anche se `SUPERADMIN_EMAIL` è cambiata (il superadmin non può
+      cancellarsi, vedi `me.md`)
+    - altrimenti lo crea con nome *Super*, cognome *Admin*, email pulita come in registrazione (`strip()`, minuscolo)
+      e già verificata, password con hash BCrypt e la sua `Streak` a zero
+    - **l'app non parte** (eccezione all'avvio con un messaggio chiaro) se, senza un SUPERADMIN, le chiavi mancano o
+      sono vuote, l'email non ha un punto nel dominio, la password non rispetta `@PasswordValida`, oppure l'email è già
+      usata da un altro utente (che **non** viene promosso)
+    - non gira nel profilo `test` (`@Profile("!test")`): il superadmin con la sua streak resterebbe nel database
+      condiviso dai test; il suo test lo costruisce e lo esegue a mano
   - inserisce i **contenuti iniziali** (tappe, lezioni, domande) **solo se non esiste nessuna tappa**
 - I contenuti iniziali sono scritti in Java, generati con Claude e **revisionati dall'utente** prima del commit.
 
