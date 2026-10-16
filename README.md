@@ -12,3 +12,11 @@ QuackFit/
 │   └── design/ schermate di riferimento (Stitch)
 └── docs/       elenco delle task del progetto
 ```
+
+## Avvio in locale (Windows)
+Due script nella radice, da lanciare anche con doppio clic:
+- `avvia-app.cmd` → avvia backend (`mvnw.cmd spring-boot:run`) e frontend (`npm run dev`) in due finestre separate.
+  Richiede `backend/env.properties` (copia di `env.properties.example` con le chiavi compilate);
+  se mancano le dipendenze del frontend esegue prima `npm install`.
+- `apri-ide.cmd` → apre `backend/` in IntelliJ IDEA e `frontend/` in Visual Studio Code.
+  Il percorso di IntelliJ è nella variabile `IDEA` dello script: va adattato se è installato altrove.
