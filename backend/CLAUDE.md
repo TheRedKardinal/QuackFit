@@ -100,6 +100,12 @@ it.quackfit
 ### Password
 - Validazione: almeno 8 caratteri, almeno una maiuscola, un numero e un carattere speciale,
   e **massimo 72 byte** (limite di BCrypt).
+- Si usa l'annotazione **`@PasswordValida`** (`common`), la stessa per registrazione, reset e cambio password:
+  - maiuscola = qualunque lettera maiuscola (anche accentata, es. `À`); numero = `0-9`;
+    carattere speciale = qualunque carattere che non è lettera, cifra o spazio
+  - i 72 byte si contano in **UTF-8** (`@Size` conta i caratteri: una lettera accentata vale 2 byte)
+  - un solo messaggio: *"La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale
+    (massimo 72 byte)"*; la password vuota la segnala `@NotBlank` (*"La password è obbligatoria"*)
 - Password e codici di verifica si salvano solo come **hash BCrypt**.
 
 ### Tempo
