@@ -87,7 +87,7 @@
 * lato Lato (ENUM)
 * abbinamento_corretto_id UUID (FK → ElementoAbbinamento, self-reference, UNIQUE,
   valorizzato solo sugli elementi SINISTRA; null sui DESTRA)
-* ordine int
+* ordine int (posizione della coppia nella domanda: uguale per l'elemento SINISTRA e il suo DESTRA)
 * domanda_id UUID (FK → Domanda, N:1)
 
 ### Funzionalità `tentativi`
