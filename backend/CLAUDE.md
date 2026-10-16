@@ -236,6 +236,23 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
   | `JWT_SECRET` | sì, almeno 32 caratteri | — | firma HMAC-SHA256 dei token; mai in un file tracciato |
   | `JWT_DURATA` | no | `24h` | durata del token |
   | `FRONTEND_URL` | no | `http://localhost:5173` | unica origine ammessa dal CORS |
+- Chiavi delle email:
+  | Chiave | Obbligatoria | Default | Uso |
+  | --- | --- | --- | --- |
+  | `MAIL_MODALITA` | no | `log` | `log` (codici nel log, mai in `prod`), `smtp` (Gmail, solo locale), `brevo`; in `prod` è fissata a `brevo` |
+  | `MAIL_MITTENTE` | con `smtp` e `brevo` | — | indirizzo del mittente; con Brevo deve essere un mittente verificato nell'account |
+  | `MAIL_NOME_MITTENTE` | no | `QuackFit` | nome del mittente |
+  | `MAIL_USERNAME`, `MAIL_PASSWORD` | con `smtp` | — | account Gmail e password per app |
+  | `BREVO_API_KEY` | con `brevo` | — | chiave API di Brevo; mai in un file tracciato |
+- Regole delle email (package `mail`):
+  - `MailService` ha un metodo per ogni email (verifica, reset password, cambio email); le implementazioni si scelgono
+    con `MAIL_MODALITA`. Quella di log ha anche `@Profile("!prod")`: in produzione non esiste.
+  - Invio **sincrono**. Il servizio **non lancia eccezioni**: se la consegna fallisce registra l'errore e prosegue
+    (registrazione, reinvio e password dimenticata non devono fallire per colpa dell'email, vedi `auth.md`).
+  - Nei log di errore **mai il codice e mai l'indirizzo completo** (solo mascherato, es. `m***@example.com`); di Brevo
+    si registra solo lo stato HTTP, mai il corpo della richiesta né la chiave API. Il codice in chiaro compare solo
+    nell'implementazione di log.
+  - Timeout di 10 secondi sia per Brevo (connessione e risposta) sia per l'SMTP (connessione, lettura, scrittura).
 - Schema del database: `spring.jpa.hibernate.ddl-auto=update`.
 - `spring.jpa.open-in-view=false`: le relazioni LAZY si leggono solo dentro i service `@Transactional`.
 - Profili:
