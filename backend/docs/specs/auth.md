@@ -98,6 +98,20 @@ Body: `email`, `password`.
   risponde **200** con il solo token JWT.
 - Il login è consentito anche con email non verificata: il token serve per verificarla
   (gli altri endpoint rispondono 403 `EMAIL_NON_VERIFICATA`).
+- Campi vuoti: "ogni fallimento → 401" **non** vale per email o password mancanti o vuote, che rispondono
+  **400 `VALIDAZIONE`** (`@NotBlank`: *"L'email è obbligatoria"*, *"La password è obbligatoria"*) senza toccare i contatori.
+  Sull'email non c'è controllo di formato: un'email strana dà semplicemente 401.
+- Scelte di implementazione (vedi anche `backend/CLAUDE.md`, Regole ricorrenti):
+  - **Contatori salvati anche con il 401**: `login` ha `noRollbackFor = ApplicazioneException`, altrimenti il rollback
+    cancellerebbe il `+1` e il blocco non scatterebbe mai. `login` è chiamato solo dal controller (nessuna transazione
+    esterna), quindi non serve `REQUIRES_NEW`.
+  - **Tentativi in parallelo**: l'utente si legge con un lock pessimistico (`PESSIMISTIC_WRITE`, `SELECT ... FOR UPDATE`):
+    due login sullo stesso account si mettono in fila e nessun tentativo si perde.
+  - **Stessi tempi di risposta**: per email inesistente, utente cancellato e account bloccato la password si confronta
+    con un **hash fittizio**, calcolato all'avvio con lo stesso `PasswordEncoder` (stesso costo BCrypt), così i tempi non
+    rivelano se l'email è registrata. Per l'account bloccato la password vera resta non controllata.
+  - **Password oltre i 72 byte** (soglia di `@PasswordValida`): conta come password sbagliata (contatori e 401), mai un 500.
+    In quel caso non si chiama BCrypt né per un utente esistente né per uno inesistente, così la durata è la stessa.
 
 ### Contatori dei login falliti
 A ogni password sbagliata:

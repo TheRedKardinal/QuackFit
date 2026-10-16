@@ -227,6 +227,24 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
   - `X-Frame-Options: DENY`
 - CORS: consentita solo l'origine del frontend (da configurazione), mai `*`.
 
+## Regole ricorrenti
+Regole di default per le task che salvano tentativi, contatori o codici (login, codici, reset, cambio password ed email).
+Si applicano senza chiedere e si indicano nel piano della task; si chiede solo per un caso che non rientra in nessuna.
+
+1. **Salvare e poi rispondere con un errore**: se un metodo deve salvare dati (contatori, tentativi, codici) e poi
+   lanciare l'eccezione applicativa, usa `noRollbackFor = ApplicazioneException.class` (più `REQUIRES_NEW` se il metodo
+   può essere chiamato dentro la transazione di un altro service, vedi `auth.md`, Codici email). Nel test di integrazione
+   **rileggi il dato dal database** dopo l'errore.
+2. **Contatori**: la lettura dell'utente di cui si aggiornano i contatori usa un lock pessimistico
+   (`@Lock(LockModeType.PESSIMISTIC_WRITE)`), così richieste in parallelo non perdono aggiornamenti.
+3. **Non rivelare se un'email è registrata**, né nel messaggio né nei tempi: dove l'utente non esiste (o è cancellato o
+   bloccato) si confronta comunque la password con un **hash fittizio** calcolato all'avvio con lo stesso `PasswordEncoder`.
+4. **Campi obbligatori mancanti o vuoti** → 400 `VALIDAZIONE` con `@NotBlank` e messaggio *"Il/L' «campo» è
+   obbligatorio/a"* (es. *"L'email è obbligatoria"*, *"La password è obbligatoria"*).
+5. **Password oltre i 72 byte**: mai un 500 (BCrypt lancia un'eccezione oltre i 72 byte). In input si valida con
+   `@PasswordValida`; dove si confronta una password esistente conta come sbagliata, senza chiamare BCrypt.
+   La soglia è la costante di `PasswordValidaValidator`, non va riscritta.
+
 ## Soft delete
 - `Tappa`, `Lezione`, `Domanda` hanno `deletedAt` e usano `@SQLDelete` + `@SQLRestriction("deleted_at IS NULL")`.
 - **Su `Utente` NON si usa `@SQLRestriction`**: i controlli su `deletedAt` si fanno esplicitamente
