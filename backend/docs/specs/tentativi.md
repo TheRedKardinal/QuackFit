@@ -124,8 +124,13 @@ Risponde **200** con:
 
 Il resoconto mostra anche domande o lezioni cancellate dopo il tentativo, perché le risposte salvate restano.
 
-> Nota implementativa: i soft delete (`@SQLRestriction`) nascondono le entità cancellate nelle query normali.
-> Per mostrare questo resoconto serve una query che le raggiunga comunque. Se è complicato, fermarsi e chiedere.
+> Nota implementativa: i soft delete (`@SQLRestriction`) nascondono le entità cancellate nelle query normali **e anche
+> nelle relazioni JPA** (da una risposta, `getDomanda()` su una domanda cancellata lancia `EntityNotFoundException`).
+> Il resoconto usa quindi query SQL native in `ResocontoQuery` (`NamedParameterJdbcTemplate`, `RowMapper` e record),
+> che raggiungono lezioni, domande, opzioni ed elementi cancellati. Il proprietario si controlla dentro la query
+> (`t.utente_id`): un tentativo altrui non restituisce nulla → 404 `NON_TROVATO`.
+> Anche avvio, risposta e chiusura non navigano da tentativi e risposte verso i contenuti: usano query con gli id
+> (vedi `backend/CLAUDE.md`, Soft delete).
 
 ---
 

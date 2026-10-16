@@ -267,6 +267,15 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
   (niente `REMOVE`) e niente `orphanRemoval` (opzioni ed elementi non si tolgono mai, vedi `admin.md`).
 - Coppie di abbinamento: `Domanda.aggiungiCoppia` mette nella lista prima l'elemento DESTRA e poi il SINISTRA che punta a
   lui, così le INSERT rispettano la chiave esterna `abbinamento_corretto_id`.
+- **`@SQLRestriction` vale anche per le relazioni**: da un'entità che punta a una domanda o lezione cancellata,
+  `getDomanda()` lancia `EntityNotFoundException`, un `join` JPQL fa sparire la riga e `find` restituisce `null`.
+  Per questo, **in tutto il codice dei tentativi** (avvio, risposta, chiusura, resoconto) da tentativi e risposte
+  **non si naviga** verso lezione, domanda, opzioni ed elementi: si usano query con gli id o proiezioni.
+- **Query che devono raggiungere i contenuti cancellati** (il resoconto, `tentativi/ResocontoQuery`): SQL nativo con
+  `NamedParameterJdbcTemplate`, `RowMapper` e **record**, non `@Query` nativa di Spring Data (lì i tipi li sceglie
+  Hibernate, e su H2 gli UUID escono come `byte[]`). Nel `RowMapper`: UUID con `getObject(colonna, UUID.class)`, date con
+  `getObject(colonna, OffsetDateTime.class).toInstant()` (mai `getTimestamp`), colonne lette **per alias** e non per
+  posizione. Parametri sempre con nome. Il controllo del proprietario (`utente_id`) sta dentro la query.
 - **Su `Utente` NON si usa `@SQLRestriction`**: i controlli su `deletedAt` si fanno esplicitamente
   (login, lista utenti admin), così lo storico dei tentativi resta leggibile.
 
@@ -341,6 +350,10 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
   la pulizia di quel test nella stessa task (la suite lo segnala con un errore di chiave esterna).
   Attenzione: su `Tappa`, `Lezione` e `Domanda` `deleteAll()` fa un **soft delete** (le righe restano); per pulire
   davvero si usa SQL diretto (`JdbcTemplate`). I test con `@DataJpaTest` non ne hanno bisogno: annullano tutto a fine test.
+- **Query native: provarle anche su PostgreSQL**, perché H2 non basta. Si eseguono i test `@DataJpaTest` su un database
+  PostgreSQL **di prova** creato apposta (mai quello di sviluppo: `@DataJpaTest` ricrea e cancella lo schema), con le
+  variabili d'ambiente `SPRING_DATASOURCE_URL`/`_USERNAME`/`_PASSWORD` e `SPRING_TEST_DATABASE_REPLACE=none`; poi il
+  database di prova si elimina.
 
 ## Comandi
 Il progetto gira su Windows. Usa il Maven Wrapper:
