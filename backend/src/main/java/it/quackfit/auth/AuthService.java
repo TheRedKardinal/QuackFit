@@ -21,7 +21,7 @@ import it.quackfit.utente.StreakRepository;
 import it.quackfit.utente.Utente;
 import it.quackfit.utente.UtenteRepository;
 
-/** Registrazione e login (e, nelle prossime task, recupero della password). Vedi auth.md. */
+/** Registrazione e login. Il recupero della password è in RecuperoPasswordService. Vedi auth.md. */
 @Service
 public class AuthService {
 

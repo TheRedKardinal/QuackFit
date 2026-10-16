@@ -16,6 +16,7 @@ public interface UtenteRepository extends JpaRepository<Utente, UUID> {
 	/**
 	 * Come {@link #findByEmailAndDeletedAtIsNull}, ma con un lock pessimistico (SELECT ... FOR UPDATE) fino alla fine
 	 * della transazione: due login sullo stesso account si mettono in fila e i contatori non perdono aggiornamenti.
+	 * Lo usa anche la reimpostazione della password, che azzera gli stessi contatori.
 	 */
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	Optional<Utente> findPerLoginByEmailAndDeletedAtIsNull(String email);

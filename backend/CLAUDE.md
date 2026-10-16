@@ -244,6 +244,10 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
 5. **Password oltre i 72 byte**: mai un 500 (BCrypt lancia un'eccezione oltre i 72 byte). In input si valida con
    `@PasswordValida`; dove si confronta una password esistente conta come sbagliata, senza chiamare BCrypt.
    La soglia è la costante di `PasswordValidaValidator`, non va riscritta.
+6. **Lavoro asincrono solo per la password dimenticata**: lì tutto il lavoro sul codice (ricerca dell'utente, controllo
+   dei 60 secondi, hash, salvataggio, invio) è `@Async`, così la durata della risposta non rivela se l'email esiste
+   (vedi `auth.md`, Password dimenticata, e `config/AsyncConfig`). Registrazione, verifica email e reinvio restano
+   sincroni. Nel profilo `test` l'executor è sincrono.
 
 ## Soft delete
 - `Tappa`, `Lezione`, `Domanda` hanno `deletedAt` e usano `@SQLDelete` + `@SQLRestriction("deleted_at IS NULL")`.
@@ -271,7 +275,8 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
 - Regole delle email (package `mail`):
   - `MailService` ha un metodo per ogni email (verifica, reset password, cambio email); le implementazioni si scelgono
     con `MAIL_MODALITA`. Quella di log ha anche `@Profile("!prod")`: in produzione non esiste.
-  - Invio **sincrono**. Il servizio **non lancia eccezioni**: se la consegna fallisce registra l'errore e prosegue
+  - Invio **sincrono** (per la password dimenticata è asincrono tutto il lavoro del chiamante, vedi Regole ricorrenti).
+    Il servizio **non lancia eccezioni**: se la consegna fallisce registra l'errore e prosegue
     (registrazione, reinvio e password dimenticata non devono fallire per colpa dell'email, vedi `auth.md`).
   - Nei log di errore **mai il codice e mai l'indirizzo completo** (solo mascherato, es. `m***@example.com`); di Brevo
     si registra solo lo stato HTTP, mai il corpo della richiesta né la chiave API. Il codice in chiaro compare solo
