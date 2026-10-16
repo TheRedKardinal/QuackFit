@@ -298,6 +298,11 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
 - Per le regole legate alle date si usa un `Clock` fisso.
 - I test devono passare prima di proporre un commit.
 - Solo strumenti visti al corso o simili; niente librerie di test aggiuntive senza chiedere.
+- **Database condiviso tra i test**: tutti i test di integrazione usano lo stesso H2 in memoria (anche con contesti
+  Spring diversi). Ogni classe di test che crea dati li cancella **prima e dopo ogni test** (`@BeforeEach` + `@AfterEach`),
+  partendo dalle tabelle con la chiave esterna verso l'utente (codici, streak, tentativi…) e finendo con gli utenti.
+  Un nuovo endpoint che crea dati può rompere la pulizia di un test più vecchio che lo chiama: in quel caso si sistema
+  la pulizia di quel test nella stessa task (la suite lo segnala con un errore di chiave esterna).
 
 ## Comandi
 Il progetto gira su Windows. Usa il Maven Wrapper:
