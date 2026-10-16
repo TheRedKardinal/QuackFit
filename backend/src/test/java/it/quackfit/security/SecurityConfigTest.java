@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import it.quackfit.auth.CodiceVerificaRepository;
 import it.quackfit.utente.Ruolo;
 import it.quackfit.utente.Utente;
 import it.quackfit.utente.UtenteRepository;
@@ -41,8 +43,8 @@ import it.quackfit.utente.UtenteRepository;
  * Test di integrazione della sicurezza: applicazione completa con H2 e un controller di prova
  * che esiste solo qui (classe annidata: Spring Boot la esclude dalla scansione degli altri test).
  *
- * Le rotte /api/me e /api/auth/login non hanno ancora un controller: per quelle si verifica solo
- * che la sicurezza lasci passare la richiesta (nessun 401/403), qualunque cosa risponda poi l'endpoint.
+ * Per le rotte /api/me e /api/auth/login si verifica solo che la sicurezza lasci passare la richiesta
+ * (nessun 401/403): cosa risponde poi l'endpoint lo controllano i test della sua task.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -79,6 +81,9 @@ class SecurityConfigTest {
 	private UtenteRepository utenteRepository;
 
 	@Autowired
+	private CodiceVerificaRepository codiceRepository;
+
+	@Autowired
 	private JwtService jwtService;
 
 	@Autowired
@@ -88,7 +93,10 @@ class SecurityConfigTest {
 	private String segreto;
 
 	@BeforeEach
+	@AfterEach
 	void pulisci() {
+		// prima i codici: POST /api/me/verification/resend ne genera uno, con la chiave esterna verso l'utente
+		codiceRepository.deleteAll();
 		utenteRepository.deleteAll();
 	}
 
