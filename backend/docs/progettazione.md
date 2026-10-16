@@ -117,6 +117,8 @@
 * elemento_destro_id UUID (FK → ElementoAbbinamento, N:1)
   (una riga per ogni coppia collegata alla prima risposta)
 * risolta boolean (come in RispostaOpzione; lo stesso valore su tutte le righe della stessa domanda)
+  (UNIQUE su tentativo_id + elemento_sinistro_id e su tentativo_id + elemento_destro_id: si salva solo la prima risposta
+  e in una risposta valida ogni elemento compare una volta sola; ultima difesa contro due prime risposte in parallelo)
 
 ## Enum
 
