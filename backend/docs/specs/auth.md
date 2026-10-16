@@ -20,6 +20,24 @@ Valgono per tutti i tipi di codice: VERIFICA_EMAIL, RESET_PASSWORD, CAMBIO_EMAIL
 - Tra due invii dello stesso tipo per lo stesso utente devono passare **60 secondi**.
 - Email inviate con template Thymeleaf (solo `th:text`).
 - In locale il codice può essere scritto nel log; **mai** nel profilo `prod`.
+- Chi genera e invia: **`CodiceService`** (`generaEInvia(utente, tipo, nuovaEmail)`) genera il codice, salva l'hash e
+  invia l'email giusta per il tipo (per CAMBIO_EMAIL alla **nuova** email). Il codice in chiaro non esce da quel metodo.
+- Limite dei 60 secondi: `generaEInvia` risponde 429 `ATTENDI_REINVIO`. Dove la spec vuole il silenzio
+  (password dimenticata) il chiamante usa prima `reinvioConsentito(utente, tipo)` e, se è troppo presto, non fa nulla.
+  I 60 secondi si contano dalla creazione dell'ultimo codice dello stesso tipo, usato o no.
+- Messaggi degli errori:
+  | Codice | Messaggio |
+  | --- | --- |
+  | `CODICE_NON_VALIDO` | *"Codice non valido"* |
+  | `CODICE_SCADUTO` | *"Codice scaduto: richiedine uno nuovo"* |
+  | `TROPPI_TENTATIVI` | *"Troppi tentativi: richiedi un nuovo codice"* |
+  | `ATTENDI_REINVIO` | *"Attendi un minuto prima di richiedere un nuovo codice"* |
+- La verifica gira in una **transazione propria** (`REQUIRES_NEW`) che **non fa rollback sugli errori dei codici**
+  (`noRollbackFor = ApplicazioneException`), così il `+1` ai tentativi resta salvato anche quando si risponde con un
+  errore e anche se il chiamante annulla la sua transazione. Serve solo sul metodo `verifica`, che va chiamato da un altro
+  bean (proxy di Spring); i chiamanti non devono fare nulla. Dentro quella transazione si carica, controlla, conta e marca "usato" il codice;
+  al chiamante torna solo l'esito (per CAMBIO_EMAIL la nuova email), mai l'entità. Conseguenza: un codice giusto risulta **usato** anche se l'operazione del chiamante fallisce
+  dopo (per esempio con il 409 `EMAIL_GIA_USATA` della conferma del cambio email): l'utente deve chiederne uno nuovo.
 
 ### Verifica di un codice
 Dato l'utente e il tipo, si prende l'ultimo codice con `usato_at = null`:
