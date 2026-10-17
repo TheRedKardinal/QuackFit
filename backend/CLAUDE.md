@@ -76,7 +76,7 @@ it.quackfit
 - Nomi: `<Cosa>Request` per l'input, `<Cosa>Response` per l'output.
 - **Conversione entità → DTO**: metodo statico nel record chiamato **`da`**, invocato dal service:
   ```java
-  public record MeResponse(UUID id, String nome, ...) {
+  public record MeResponse(String nome, String cognome, ...) {
       public static MeResponse da(Utente utente, int streakAttuale, ...) { return new MeResponse(...); }
   }
   ```

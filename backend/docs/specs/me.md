@@ -23,10 +23,15 @@ La verifica dell'email (`/verification`, `/verification/resend`) è descritta in
 Risponde **200** con:
 - `nome`, `cognome`, `email`, `ruolo`, `fotoProfilo` (URL o null)
 - `emailVerificata`: serve al frontend per decidere se mostrare la schermata del codice; **non** va mostrato nel profilo
-- `streak`: `valore` e `record`
+- `streak`: oggetto con `valore` e `record`
 - `lezioniCompletate`: numero di lezioni attive con almeno un tentativo SUPERATO dell'utente
 
+Nessun `id` nella risposta: il frontend non ne ha bisogno, ogni endpoint usa l'utente del token.
+
 Funziona anche con email non verificata.
+
+Ogni utente attivo ha la sua `Streak` (creata alla registrazione e dal seeder). Se manca è un dato incoerente:
+500 `ERRORE_INTERNO` con il messaggio generico; nel log finisce l'id dell'utente (mai l'email).
 
 ### Streak calcolata in lettura
 Lo streak salvato non viene modificato dalla lettura. Si calcola solo il valore da mostrare:
@@ -115,7 +120,7 @@ Body: `password`. Risponde **204**.
 ## Test da prevedere
 - GET: dati corretti; `lezioniCompletate` conta solo lezioni attive con tentativo SUPERATO (e una sola volta
   anche con più tentativi superati); streak mostrata 0 se `ultima_attivita` è più vecchia di ieri;
-  risposta anche con email non verificata.
+  risposta anche con email non verificata; utente senza Streak → 500 nel formato standard, senza dettagli interni.
 - PATCH dati: valori validi, vuoti, oltre 50 caratteri.
 - Password: attuale sbagliata, nuova non valida, nuova uguale alla vecchia, token precedenti rifiutati dopo il cambio.
 - Avatar: formato valido, formato non ammesso, file oltre 2 MB, file con estensione falsa, sostituzione della foto.
