@@ -1,0 +1,149 @@
+/* Guscio dell'app: barra in alto e in basso fisse, contenuto in una colonna centrata (mobile first, ~390 px). */
+
+.app {
+  --altezza-barra-superiore: 4rem;
+  --altezza-barra-navigazione: 4.25rem;
+
+  min-height: 100vh;
+  padding-top: var(--altezza-barra-superiore);
+  padding-bottom: calc(var(--altezza-barra-navigazione) + env(safe-area-inset-bottom));
+}
+
+.colonna {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.contenuto {
+  padding-top: 1rem;
+  padding-bottom: 1.5rem;
+}
+
+/* --- barra in alto --- */
+
+.barraSuperiore {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1030;
+  height: var(--altezza-barra-superiore);
+  border-bottom: 2px solid var(--colore-bordo);
+  background-color: var(--colore-superficie);
+}
+
+.barraSuperioreInterno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  height: 100%;
+}
+
+.marchio {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.nomeMarchio {
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.sezione {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.destra {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border: 2px solid var(--colore-streak);
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.iconaStreak {
+  display: inline-flex;
+  color: var(--colore-streak);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid var(--colore-primario);
+  border-radius: 50%;
+  background-color: var(--colore-primario);
+  color: inherit;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.fotoAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- barra in basso --- */
+
+.barraNavigazione {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1030;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 2px solid var(--colore-bordo);
+  background-color: var(--colore-superficie);
+}
+
+.voci {
+  display: flex;
+  justify-content: space-around;
+  height: var(--altezza-barra-navigazione);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.voce {
+  flex: 1;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  height: 100%;
+  color: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+  opacity: 0.7;
+}
+
+/* voce attiva: colore, grassetto pieno e una barretta sopra (non solo il colore) */
+.linkAttivo {
+  font-weight: 900;
+  opacity: 1;
+  box-shadow: inset 0 3px 0 var(--colore-primario);
+}
