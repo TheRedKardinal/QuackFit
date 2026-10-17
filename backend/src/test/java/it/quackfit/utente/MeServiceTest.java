@@ -18,12 +18,16 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import it.quackfit.common.ApplicazioneException;
+import it.quackfit.common.CodiceErrore;
 import it.quackfit.tentativi.TentativoLezioneRepository;
 
 /**
- * Unit test di MeService con Mockito e un orologio fisso.
+ * Unit test di MeService con Mockito, un orologio fisso e un BCrypt vero ma veloce (costo 4).
  * Adesso = 17 ottobre 2026 alle 00:30 di Roma (16 ottobre 22:30 UTC): l'orologio è in UTC apposta,
  * così si verifica che "oggi" e "ieri" si calcolano sul fuso di Roma e non su quello dell'orologio.
  */
@@ -32,6 +36,10 @@ class MeServiceTest {
 	private static final Instant ADESSO = Instant.parse("2026-10-16T22:30:00Z");
 	private static final LocalDate OGGI = LocalDate.of(2026, 10, 17);
 
+	private static final String PASSWORD = "Password1!";
+	private static final PasswordEncoder ENCODER = new BCryptPasswordEncoder(4);
+
+	private UtenteRepository utenteRepository;
 	private StreakRepository streakRepository;
 	private TentativoLezioneRepository tentativoRepository;
 	private MeService servizio;
@@ -40,11 +48,15 @@ class MeServiceTest {
 
 	@BeforeEach
 	void setUp() {
+		utenteRepository = mock(UtenteRepository.class);
 		streakRepository = mock(StreakRepository.class);
 		tentativoRepository = mock(TentativoLezioneRepository.class);
-		servizio = new MeService(streakRepository, tentativoRepository, Clock.fixed(ADESSO, ZoneOffset.UTC));
-		utente = new Utente("Mario", "Rossi", "mario@example.com", "hash", Instant.parse("2026-01-01T10:00:00Z"));
+		servizio = new MeService(utenteRepository, streakRepository, tentativoRepository, ENCODER,
+				Clock.fixed(ADESSO, ZoneOffset.UTC));
+		utente = new Utente("Mario", "Rossi", "mario@example.com", ENCODER.encode(PASSWORD),
+				Instant.parse("2026-01-01T10:00:00Z"));
 		ReflectionTestUtils.setField(utente, "id", UUID.randomUUID());
+		when(utenteRepository.findById(utente.getId())).thenReturn(Optional.of(utente));
 		streak = new Streak(utente, Instant.parse("2026-01-01T10:00:00Z"));
 		streak.setValore(5);
 		streak.setRecord(8);
@@ -118,6 +130,67 @@ class MeServiceTest {
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessageContaining(utente.getId().toString())
 				.hasMessageNotContaining(utente.getEmail());
+	}
+
+	// --- modifica dati ---
+
+	@Test
+	void modificaDatiSalvaNomeECognome() {
+		servizio.modificaDati(utente.getId(), new ModificaDatiRequest("Luigi", "Verdi"));
+
+		assertThat(utente.getNome()).isEqualTo("Luigi");
+		assertThat(utente.getCognome()).isEqualTo("Verdi");
+		assertThat(utente.getEmail()).isEqualTo("mario@example.com");
+	}
+
+	// --- cambio password ---
+
+	@Test
+	void cambioPasswordRiuscitoNuovoHashELogoutOvunque() {
+		Instant tokenValidiDalPrima = utente.getTokenValidiDal();
+
+		servizio.cambiaPassword(utente.getId(), new CambioPasswordRequest(PASSWORD, "Nuova123!"));
+
+		assertThat(ENCODER.matches("Nuova123!", utente.getPassword())).isTrue();
+		assertThat(utente.getTokenValidiDal()).isEqualTo(ADESSO).isAfter(tokenValidiDalPrima);
+	}
+
+	@Test
+	void passwordAttualeSbagliataNonCambiaNulla() {
+		String hashPrima = utente.getPassword();
+
+		assertThatThrownBy(() -> servizio.cambiaPassword(utente.getId(), new CambioPasswordRequest("Sbagliata1!", "Nuova123!")))
+				.isInstanceOfSatisfying(ApplicazioneException.class,
+						e -> assertThat(e.getCodice()).isEqualTo(CodiceErrore.PASSWORD_ATTUALE_ERRATA));
+		assertThat(utente.getPassword()).isEqualTo(hashPrima);
+		assertThat(utente.getTokenValidiDal()).isNotEqualTo(ADESSO);
+	}
+
+	@Test
+	void passwordAttualeOltre72ByteContaComeSbagliataSenzaEccezioniDiBcrypt() {
+		String troppoLunga = "Aa1!" + "a".repeat(69); // 73 byte
+
+		assertThatThrownBy(() -> servizio.cambiaPassword(utente.getId(), new CambioPasswordRequest(troppoLunga, "Nuova123!")))
+				.isInstanceOfSatisfying(ApplicazioneException.class,
+						e -> assertThat(e.getCodice()).isEqualTo(CodiceErrore.PASSWORD_ATTUALE_ERRATA));
+	}
+
+	@Test
+	void nuovaUgualeAllAttualeErroreSulCampoDopoIlControlloDellAttuale() {
+		assertThatThrownBy(() -> servizio.cambiaPassword(utente.getId(), new CambioPasswordRequest(PASSWORD, PASSWORD)))
+				.isInstanceOfSatisfying(ApplicazioneException.class, e -> {
+					assertThat(e.getCodice()).isEqualTo(CodiceErrore.VALIDAZIONE);
+					assertThat(e.getCampi()).containsEntry("nuovaPassword", MeService.MSG_PASSWORD_UGUALE);
+				});
+		assertThat(utente.getTokenValidiDal()).isNotEqualTo(ADESSO);
+	}
+
+	@Test
+	void conLAttualeSbagliataNonSiDiceSeLaNuovaEUgualeAllAttuale() {
+		// la "nuova" è la password vera, ma l'attuale è sbagliata: l'errore resta quello della password attuale
+		assertThatThrownBy(() -> servizio.cambiaPassword(utente.getId(), new CambioPasswordRequest("Sbagliata1!", PASSWORD)))
+				.isInstanceOfSatisfying(ApplicazioneException.class,
+						e -> assertThat(e.getCodice()).isEqualTo(CodiceErrore.PASSWORD_ATTUALE_ERRATA));
 	}
 
 }
