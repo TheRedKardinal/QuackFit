@@ -11,6 +11,8 @@ import {
   type DatiRegistrazione,
   type ErroriCampi,
 } from '../../common/validazione'
+import MessaggioErrore from '../../common/MessaggioErrore'
+import Pulsante from '../../common/Pulsante'
 import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { registra } from './authThunk'
@@ -183,16 +185,12 @@ function PaginaRegistrazione() {
           <p className={stili.nota}>Registrandoti riceverai un codice a 6 cifre via email per verificare il tuo indirizzo.</p>
         </div>
 
-        {erroreGenerale && (
-          <p role="alert" className={stili.erroreGenerale}>
-            {erroreGenerale}
-          </p>
-        )}
+        <MessaggioErrore testo={erroreGenerale} />
 
         <div className={stili.pulsantiera}>
-          <button type="submit" className="btn-push" disabled={bloccato}>
+          <Pulsante type="submit" disabled={bloccato}>
             <TestoPulsante testo="Crea account" inviando={inviando} secondiAttesa={secondiAttesa} />
-          </button>
+          </Pulsante>
         </div>
       </form>
 

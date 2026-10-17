@@ -1,0 +1,57 @@
+.drawer {
+  --drawer-colore: var(--colore-successo);
+  --drawer-colore-scuro: var(--colore-successo-scuro);
+
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1050;
+  padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom));
+  border-top: 4px solid var(--drawer-colore);
+  border-radius: 1.5rem 1.5rem 0 0;
+  background-color: var(--colore-superficie);
+  box-shadow: 0 -4px 16px color-mix(in srgb, black 12%, transparent);
+  animation: sali 0.25s ease-out;
+}
+
+.drawer:focus {
+  outline: none;
+}
+
+.successo {
+  --drawer-colore: var(--colore-successo);
+  --drawer-colore-scuro: var(--colore-successo-scuro);
+}
+
+.errore {
+  --drawer-colore: var(--colore-errore);
+  --drawer-colore-scuro: var(--colore-errore-scuro);
+}
+
+.contenuto {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.titolo {
+  margin-bottom: 0.75rem;
+  color: var(--drawer-colore-scuro);
+  font-size: 1.375rem;
+  font-weight: 900;
+}
+
+@keyframes sali {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer {
+    animation: none;
+  }
+}

@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import LayoutApp from './common/layout/LayoutApp'
 import Segnaposto from './common/Segnaposto'
 import PaginaLogin from './features/auth/PaginaLogin'
 import PaginaPasswordDimenticata from './features/auth/PaginaPasswordDimenticata'
@@ -13,7 +14,8 @@ import SoloOspite from './features/auth/SoloOspite'
 
 /**
  * Rotte dell'app con le guardie annidate: autenticato → email verificata → admin.
- * Le pagine sono segnaposto finché non arrivano le schermate vere.
+ * Le pagine dell'app stanno nel guscio LayoutApp (barra in alto e in basso); mappa, profilo e admin sono ancora
+ * segnaposto finché non arrivano le schermate vere.
  * Il router (BrowserRouter) sta in main.tsx, così i test possono usare MemoryRouter.
  */
 function App() {
@@ -29,10 +31,12 @@ function App() {
       <Route element={<RichiedeAutenticazione />}>
         <Route path="/verify-email" element={<PaginaVerificaEmail />} />
         <Route element={<RichiedeEmailVerificata />}>
-          <Route path="/" element={<Segnaposto titolo="Percorso"><PulsanteEsci /></Segnaposto>} />
-          <Route path="/profile" element={<Segnaposto titolo="Profilo"><PulsanteEsci /></Segnaposto>} />
-          <Route element={<RichiedeAdmin />}>
-            <Route path="/admin" element={<Segnaposto titolo="Admin"><PulsanteEsci /></Segnaposto>} />
+          <Route element={<LayoutApp />}>
+            <Route path="/" element={<Segnaposto titolo="Percorso" />} />
+            <Route path="/profile" element={<Segnaposto titolo="Profilo"><PulsanteEsci /></Segnaposto>} />
+            <Route element={<RichiedeAdmin />}>
+              <Route path="/admin" element={<Segnaposto titolo="Admin" />} />
+            </Route>
           </Route>
         </Route>
       </Route>

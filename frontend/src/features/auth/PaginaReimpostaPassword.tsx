@@ -13,6 +13,8 @@ import {
   type DatiReimpostazione,
   type ErroriCampi,
 } from '../../common/validazione'
+import Pulsante from '../../common/Pulsante'
+import Scheda from '../../common/Scheda'
 import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { passwordDimenticata, reimpostaPassword } from './authThunk'
@@ -131,76 +133,78 @@ function PaginaReimpostaPassword() {
         <p className={stili.sottotitolo}>Inserisci il codice a 6 cifre che hai ricevuto via email e la nuova password.</p>
       </div>
 
-      <form noValidate onSubmit={invio} className={stili.scheda}>
-        <CampoTesto
-          id="email"
-          etichetta="Email"
-          tipo="email"
-          valore={dati.email}
-          onChange={(valore) => cambia('email', valore)}
-          autoComplete="email"
-          placeholder="esempio@email.com"
-          errore={errori.email}
-          ref={campoEmail}
-        />
+      <Scheda>
+        <form noValidate onSubmit={invio}>
+          <CampoTesto
+            id="email"
+            etichetta="Email"
+            tipo="email"
+            valore={dati.email}
+            onChange={(valore) => cambia('email', valore)}
+            autoComplete="email"
+            placeholder="esempio@email.com"
+            errore={errori.email}
+            ref={campoEmail}
+          />
 
-        <CodiceSeiCifre
-          id="codice"
-          etichetta="Codice"
-          valore={dati.codice}
-          onChange={(valore) => cambia('codice', valore)}
-          errore={errori.codice}
-          ref={campoCodice}
-        />
+          <CodiceSeiCifre
+            id="codice"
+            etichetta="Codice"
+            valore={dati.codice}
+            onChange={(valore) => cambia('codice', valore)}
+            errore={errori.codice}
+            ref={campoCodice}
+          />
 
-        <CampoTesto
-          id="nuovaPassword"
-          etichetta="Nuova password"
-          tipo={mostraPassword ? 'text' : 'password'}
-          valore={dati.nuovaPassword}
-          onChange={(valore) => cambia('nuovaPassword', valore)}
-          autoComplete="new-password"
-          errore={errori.nuovaPassword}
-          accessorio={
-            <button type="button" className={stili.mostra} onClick={() => setMostraPassword((m) => !m)}>
-              {mostraPassword ? 'Nascondi' : 'Mostra'}
-            </button>
-          }
-          ref={campoPassword}
-        />
+          <CampoTesto
+            id="nuovaPassword"
+            etichetta="Nuova password"
+            tipo={mostraPassword ? 'text' : 'password'}
+            valore={dati.nuovaPassword}
+            onChange={(valore) => cambia('nuovaPassword', valore)}
+            autoComplete="new-password"
+            errore={errori.nuovaPassword}
+            accessorio={
+              <button type="button" className={stili.mostra} onClick={() => setMostraPassword((m) => !m)}>
+                {mostraPassword ? 'Nascondi' : 'Mostra'}
+              </button>
+            }
+            ref={campoPassword}
+          />
 
-        <section className={stili.riquadro} aria-label="Requisiti di sicurezza">
-          <p className={stili.titoloRiquadro}>Requisiti di sicurezza</p>
-          <ul className={stili.requisiti}>
-            <RequisitoPassword ok={requisiti.caratteri} testo="8+ caratteri" />
-            <RequisitoPassword ok={requisiti.maiuscola} testo="1 maiuscola" />
-            <RequisitoPassword ok={requisiti.numero} testo="1 numero" />
-            <RequisitoPassword ok={requisiti.speciale} testo="1 speciale (!@#$)" />
-          </ul>
-        </section>
+          <section className={stili.riquadro} aria-label="Requisiti di sicurezza">
+            <p className={stili.titoloRiquadro}>Requisiti di sicurezza</p>
+            <ul className={stili.requisiti}>
+              <RequisitoPassword ok={requisiti.caratteri} testo="8+ caratteri" />
+              <RequisitoPassword ok={requisiti.maiuscola} testo="1 maiuscola" />
+              <RequisitoPassword ok={requisiti.numero} testo="1 numero" />
+              <RequisitoPassword ok={requisiti.speciale} testo="1 speciale (!@#$)" />
+            </ul>
+          </section>
 
-        {avviso && (
-          <p
-            role={avviso.tipo === 'errore' ? 'alert' : 'status'}
-            className={avviso.tipo === 'ok' ? stili.messaggioOk : stili.erroreGenerale}
-          >
-            {avviso.testo}
-          </p>
-        )}
+          {avviso && (
+            <p
+              role={avviso.tipo === 'errore' ? 'alert' : 'status'}
+              className={avviso.tipo === 'ok' ? stili.messaggioOk : stili.erroreGenerale}
+            >
+              {avviso.testo}
+            </p>
+          )}
 
-        <div className={stili.pulsantiera}>
-          <button type="submit" className="btn-push" disabled={reimposta.bloccato}>
-            <TestoPulsante
-              testo="Salva la nuova password"
-              inviando={reimposta.inviando}
-              secondiAttesa={reimposta.secondiAttesa}
-            />
-          </button>
-          <button type="button" className="btn-push btn-push-neutro" onClick={nuovoCodice} disabled={reinvio.bloccato}>
-            <TestoPulsante testo="Invia di nuovo il codice" inviando={reinvio.inviando} secondiAttesa={reinvio.secondiAttesa} />
-          </button>
-        </div>
-      </form>
+          <div className={stili.pulsantiera}>
+            <Pulsante type="submit" disabled={reimposta.bloccato}>
+              <TestoPulsante
+                testo="Salva la nuova password"
+                inviando={reimposta.inviando}
+                secondiAttesa={reimposta.secondiAttesa}
+              />
+            </Pulsante>
+            <Pulsante variante="neutro" onClick={nuovoCodice} disabled={reinvio.bloccato}>
+              <TestoPulsante testo="Invia di nuovo il codice" inviando={reinvio.inviando} secondiAttesa={reinvio.secondiAttesa} />
+            </Pulsante>
+          </div>
+        </form>
+      </Scheda>
 
       <p className={stili.centrato}>
         <Link to="/login" className={stili.link}>

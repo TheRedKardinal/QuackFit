@@ -4,6 +4,7 @@ import CodiceSeiCifre, { type CodiceSeiCifreHandle } from '../../common/CodiceSe
 import { messaggioErrore } from '../../common/messaggiErrore'
 import { SECONDI_ATTESA_429 } from '../../common/useConteggioAllaRovescia'
 import { validaCodice } from '../../common/validazione'
+import Pulsante from '../../common/Pulsante'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { reinviaCodice, verificaEmail } from './authThunk'
@@ -92,9 +93,9 @@ function PaginaVerificaEmail() {
           ref={campoCodice}
         />
         <div className={stili.pulsantiera}>
-          <button type="submit" className="btn-push btn-push-successo" disabled={conferma.bloccato}>
+          <Pulsante type="submit" variante="successo" disabled={conferma.bloccato}>
             <TestoPulsante testo="Conferma codice" inviando={conferma.inviando} secondiAttesa={0} />
-          </button>
+          </Pulsante>
         </div>
       </form>
 
@@ -107,9 +108,9 @@ function PaginaVerificaEmail() {
             {avviso.testo}
           </p>
         )}
-        <button type="button" className="btn-push btn-push-neutro" onClick={nuovoCodice} disabled={reinvio.bloccato}>
+        <Pulsante variante="neutro" onClick={nuovoCodice} disabled={reinvio.bloccato}>
           <TestoPulsante testo="Invia nuovo codice" inviando={reinvio.inviando} secondiAttesa={reinvio.secondiAttesa} />
-        </button>
+        </Pulsante>
         <p className={stili.notaPiccola}>Tra due invii serve un intervallo di 60 secondi.</p>
       </div>
 
