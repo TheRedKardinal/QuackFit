@@ -80,6 +80,11 @@ src
   | 409 `TENTATIVO_CHIUSO` | torna alla mappa con un messaggio |
   | 429 `ATTENDI_REINVIO` / `TROPPE_RICHIESTE` | messaggio e pulsante disattivato per un po' |
   | 500 e errori di rete | messaggio generico, mai dettagli tecnici |
+- **`ERRORE_RETE`** esiste solo nel frontend: richiesta che non arriva al server (o risposta che non arriva a noi),
+  `ApiError` con `status` 0. Ha il suo messaggio, diverso da quello di `ERRORE_INTERNO`.
+- La reazione a 401 `NON_AUTENTICATO` e 403 `EMAIL_NON_VERIFICATA` è **globale**: i thunk rifiutano sempre con
+  `rejectWithValue(DatiErrore)` e un listener di Redux (`features/auth/sessioneListener.ts`) fa logout o segna l'email
+  come non verificata; le guardie delle rotte spostano l'utente. Le schermate non gestiscono questi due casi.
 - Il login fallito mostra **sempre il messaggio unico del backend** (non distingue email o password errate).
 
 ## Sicurezza
@@ -92,6 +97,22 @@ src
   il frontend fa logout e porta al login.
 - Le schermate admin si nascondono ai non-admin, ma è solo comodità: i permessi veri li decide il backend.
 - Percorsi protetti (guardie del router): utente autenticato → email verificata → ruolo admin per `/admin`.
+
+### Rotte
+Percorsi in inglese, come i path delle API:
+| Percorso | Pagina | Guardia |
+| --- | --- | --- |
+| `/login`, `/register`, `/forgot-password`, `/reset-password` | accesso | solo senza token (con il token → `/`) |
+| `/verify-email` | codice di verifica | autenticato |
+| `/`, `/profile` | mappa, profilo | autenticato + email verificata |
+| `/admin` | gestione | autenticato + email verificata + `ADMIN`/`SUPERADMIN` (altrimenti → `/`) |
+| qualunque altro | — | → `/` |
+
+### Avvio della sessione
+- Con un token salvato si carica `GET /api/me`; **finché non è riuscito non si mostra nessun contenuto protetto**
+  (solo caricamento o errore), nemmeno in base al solo token.
+- 401 → logout e login. Errore di rete o 500 → il token resta e si mostra l'errore con **"Riprova"** (sempre manuale,
+  nessun tentativo automatico) ed **"Esci"** (logout volontario). Il logout automatico avviene solo sul 401.
 
 ## Schermate e comportamento
 
