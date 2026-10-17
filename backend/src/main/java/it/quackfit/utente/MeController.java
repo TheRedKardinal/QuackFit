@@ -25,11 +25,14 @@ public class MeController {
 
 	private final MeService meService;
 	private final AvatarService avatarService;
+	private final CambioEmailService cambioEmailService;
 	private final VerificaEmailService verificaEmailService;
 
-	public MeController(MeService meService, AvatarService avatarService, VerificaEmailService verificaEmailService) {
+	public MeController(MeService meService, AvatarService avatarService, CambioEmailService cambioEmailService,
+			VerificaEmailService verificaEmailService) {
 		this.meService = meService;
 		this.avatarService = avatarService;
+		this.cambioEmailService = cambioEmailService;
 		this.verificaEmailService = verificaEmailService;
 	}
 
@@ -59,6 +62,21 @@ public class MeController {
 	public AvatarResponse aggiornaAvatar(@AuthenticationPrincipal Utente utente,
 			@RequestParam(name = "file", required = false) MultipartFile file) {
 		return avatarService.aggiorna(utente.getId(), file);
+	}
+
+	/** Invia il codice alla nuova email; l'email dell'utente cambia solo con la conferma. */
+	@PostMapping("/email")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void richiediCambioEmail(@AuthenticationPrincipal Utente utente, @Valid @RequestBody CambioEmailRequest richiesta) {
+		cambioEmailService.richiedi(utente.getId(), richiesta);
+	}
+
+	/** Logout ovunque: dopo il 204 anche il token usato per la chiamata non vale più. */
+	@PostMapping("/email/confirm")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void confermaCambioEmail(@AuthenticationPrincipal Utente utente,
+			@Valid @RequestBody ConfermaCambioEmailRequest richiesta) {
+		cambioEmailService.conferma(utente.getId(), richiesta.codice());
 	}
 
 	@PostMapping("/verification")
