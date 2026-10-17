@@ -193,6 +193,11 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
 ### Limite per indirizzo IP
 - Filtro che limita le richieste su `/api/auth/**` a **20 al minuto per IP**; oltre → 429 `TROPPE_RICHIESTE`,
   senza eseguire la richiesta.
+- Lo stesso limite, **con lo stesso contatore per IP**, vale per gli endpoint che chiedono la password attuale, con
+  metodo e percorso esatti: `PATCH /api/me/password`, `POST /api/me/email`, `DELETE /api/me` (le task 25 e 26 lo
+  applicano già). Gli altri endpoint di `/api/me` non consumano il limite (`GET /api/me` parte a ogni avvio dell'app).
+- **Limite residuo**: chi prova la password attuale da molti IP diversi con lo stesso token non è fermato.
+  Mitigazione possibile in futuro: un blocco per utente come quello del login.
 - I contatori stanno **solo in memoria** (`ConcurrentHashMap`), mai nel database (l'IP è un dato personale).
   La mappa va ripulita periodicamente dagli IP vecchi.
 - Dietro il proxy di Render l'IP reale va letto da `X-Forwarded-For` (configurazione di Spring per gli header inoltrati).
