@@ -307,6 +307,29 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
   | `MAIL_NOME_MITTENTE` | no | `QuackFit` | nome del mittente |
   | `MAIL_USERNAME`, `MAIL_PASSWORD` | con `smtp` | — | account Gmail e password per app |
   | `BREVO_API_KEY` | con `brevo` | — | chiave API di Brevo; mai in un file tracciato |
+- Chiavi di Cloudinary (foto profilo):
+  | Chiave | Obbligatoria | Default | Uso |
+  | --- | --- | --- | --- |
+  | `CLOUDINARY_CLOUD_NAME` | solo in `prod` | — | nome del cloud |
+  | `CLOUDINARY_API_KEY` | solo in `prod` | — | chiave API |
+  | `CLOUDINARY_API_SECRET` | solo in `prod` | — | firma delle richieste; mai in un file tracciato, mai nel log |
+- **Chiavi dei servizi esterni in produzione**: nel profilo `prod` l'app **non parte** se mancano
+  - le tre chiavi Cloudinary (`quackfit.cloudinary.chiavi-obbligatorie=true`): il messaggio nomina le variabili
+    mancanti, mai i valori
+  - `BREVO_API_KEY` o `MAIL_MITTENTE` (in `prod` `MAIL_MODALITA` è fissata a `brevo`, e il costruttore di
+    `BrevoMailService` le controlla)
+
+  Nei profili default e `test` le chiavi Cloudinary sono facoltative: senza, l'app parte e il caricamento della foto
+  risponde 500 con un errore chiaro nel log.
+- Regole di Cloudinary (`config/ArchivioImmagini`, implementazione `CloudinaryArchivioImmagini`):
+  - API REST di upload chiamata con l'HttpClient del JDK, come Brevo: **nessuna dipendenza** (niente SDK).
+    Timeout di 10 secondi (connessione e risposta). Il file viaggia come data URI base64 in un form urlencoded.
+  - **Firma**: i parametri da firmare (`invalidate`, `overwrite`, `public_id`, `timestamp`) in ordine alfabetico,
+    uniti come `chiave=valore` con `&`, seguiti dall'`api_secret`, passati in SHA-1 (esadecimale). Cloudinary rifà
+    lo stesso calcolo con il suo secret: firme uguali = richiesta autentica e parametri non modificati. Il secret
+    non viaggia mai. La firma è provata con l'esempio della documentazione di Cloudinary.
+  - Nei test Cloudinary non si chiama mai: il client si prova contro un server HTTP finto del JDK, il resto con
+    `ArchivioImmagini` simulato (`@MockitoBean`).
 - Regole delle email (package `mail`):
   - `MailService` ha un metodo per ogni email (verifica, reset password, cambio email); le implementazioni si scelgono
     con `MAIL_MODALITA`. Quella di log ha anche `@Profile("!prod")`: in produzione non esiste.

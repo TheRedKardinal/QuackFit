@@ -70,13 +70,19 @@ Controlli, in ordine:
 ## Foto profilo — PATCH /api/me/avatar
 Multipart, campo `file`. Risponde **200** con il nuovo URL (`fotoProfilo`).
 
-- Formati: **jpg, png, webp**; massimo **2 MB**.
-- Il tipo si controlla sul contenuto reale del file, non solo su estensione o content-type dichiarato.
-- File mancante, vuoto, troppo grande o di tipo non ammesso → 400 `FILE_NON_VALIDO`.
-- Su Cloudinary la foto ha un nome fisso legato all'utente (`avatar/<id utente>`):
-  una nuova foto **sostituisce** la vecchia, non c'è nulla da conservare né da cancellare.
+- Formati: **jpg, png, webp**; massimo **2 MB** (2 × 1024 × 1024 byte).
+- Il tipo si controlla sul contenuto reale del file, dai primi byte ("magic number"): JPEG `FF D8 FF`,
+  PNG `89 50 4E 47 0D 0A 1A 0A`, WEBP `RIFF` + 4 byte + `WEBP`. Estensione e content-type dichiarato non contano.
+- File mancante, vuoto, troppo grande o di tipo non ammesso, richiesta non multipart → 400 `FILE_NON_VALIDO`
+  (*"Immagine non valida: usa un file jpg, png o webp fino a 2 MB"*). Oltre i limiti di Spring
+  (`spring.servlet.multipart`: 2 MB per il file, 3 MB per la richiesta) risponde lo stesso errore, mai un 500.
+- Su Cloudinary la foto ha un nome fisso legato all'utente (`avatar/<id utente>`, `overwrite` e `invalidate`):
+  una nuova foto **sostituisce** la vecchia, non c'è nulla da conservare né da cancellare. L'URL contiene la versione
+  (`/v123.../`), quindi cambia a ogni foto e il browser non mostra quella vecchia dalla cache.
 - Si salva in `foto_profilo` l'URL sicuro (https) restituito da Cloudinary.
-- Se Cloudinary non risponde → 500 `ERRORE_INTERNO`; la foto precedente resta com'è.
+- Ordine: prima l'upload, **fuori da ogni transazione**; poi una UPDATE della sola colonna `foto_profilo`.
+- Se Cloudinary non risponde, rifiuta la richiesta o le chiavi mancano → 500 `ERRORE_INTERNO` con il messaggio
+  generico; nel log solo il motivo (stato HTTP, tipo d'errore o nomi delle chiavi). La foto precedente resta com'è.
 
 ---
 
