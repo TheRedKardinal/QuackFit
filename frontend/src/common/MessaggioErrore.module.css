@@ -1,0 +1,5 @@
+.errore {
+  margin-bottom: 1rem;
+  color: var(--colore-errore);
+  font-weight: 700;
+}
