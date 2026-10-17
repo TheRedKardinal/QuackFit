@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 
@@ -22,10 +24,12 @@ import jakarta.validation.Valid;
 public class MeController {
 
 	private final MeService meService;
+	private final AvatarService avatarService;
 	private final VerificaEmailService verificaEmailService;
 
-	public MeController(MeService meService, VerificaEmailService verificaEmailService) {
+	public MeController(MeService meService, AvatarService avatarService, VerificaEmailService verificaEmailService) {
 		this.meService = meService;
+		this.avatarService = avatarService;
 		this.verificaEmailService = verificaEmailService;
 	}
 
@@ -45,6 +49,16 @@ public class MeController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cambiaPassword(@AuthenticationPrincipal Utente utente, @Valid @RequestBody CambioPasswordRequest richiesta) {
 		meService.cambiaPassword(utente.getId(), richiesta);
+	}
+
+	/**
+	 * Multipart con il campo "file". Il file è facoltativo per Spring (required = false): se manca, o la richiesta
+	 * non è multipart, risponde il service con 400 FILE_NON_VALIDO invece di un errore generico.
+	 */
+	@PatchMapping("/avatar")
+	public AvatarResponse aggiornaAvatar(@AuthenticationPrincipal Utente utente,
+			@RequestParam(name = "file", required = false) MultipartFile file) {
+		return avatarService.aggiorna(utente.getId(), file);
 	}
 
 	@PostMapping("/verification")

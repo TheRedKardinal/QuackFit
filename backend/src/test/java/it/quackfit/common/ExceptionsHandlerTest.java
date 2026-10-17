@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -72,6 +73,14 @@ class ExceptionsHandlerTest {
 				.andExpect(jsonPath("$.messaggio").value("Email già registrata"))
 				.andExpect(jsonPath("$.campi").value(anEmptyMap()))
 				.andExpect(jsonPath("$.timestamp").value("2026-10-14T12:00:00Z"));
+	}
+
+	@Test
+	void fileOltreIlLimiteDiSpringDiventaFileNonValido() throws Exception {
+		mockMvc.perform(get("/finto/file-troppo-grande"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.codice").value("FILE_NON_VALIDO"))
+				.andExpect(jsonPath("$.messaggio").value("Immagine non valida: usa un file jpg, png o webp fino a 2 MB"));
 	}
 
 	@Test
@@ -133,6 +142,11 @@ class ExceptionsHandlerTest {
 		@GetMapping("/finto/applicazione")
 		void applicazione() {
 			throw new ApplicazioneException(CodiceErrore.EMAIL_GIA_USATA, "Email già registrata");
+		}
+
+		@GetMapping("/finto/file-troppo-grande")
+		void fileTroppoGrande() {
+			throw new MaxUploadSizeExceededException(2L * 1024 * 1024);
 		}
 
 		@GetMapping("/finto/imprevisto")
