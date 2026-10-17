@@ -142,6 +142,21 @@ Percorsi in inglese, come i path delle API:
 - 401 → logout e login. Errore di rete o 500 → il token resta e si mostra l'errore con **"Riprova"** (sempre manuale,
   nessun tentativo automatico) ed **"Esci"** (logout volontario). Il logout automatico avviene solo sul 401.
 
+### Guscio dell'app
+- Le pagine dell'app (utente con email verificata) stanno in `common/layout/LayoutApp`:
+  - **barra in alto**: marchio "QuackFit" con il nome della sezione, streak (`utente.streak.valore` di `/api/me`,
+    mai calcolata) e avatar (foto o iniziali) che porta al profilo
+  - **barra in basso**: Percorso e Profilo; **Admin solo per `ADMIN`/`SUPERADMIN`** (comodità, il backend decide).
+    La voce attiva ha `aria-current="page"`, grassetto e una barretta sopra (non solo il colore)
+  - contenuto in una **colonna centrata di ~480 px**, anche su desktop (le barre restano a tutta larghezza).
+    Il layout desktop vero (sidebar) lo ha solo l'admin, nella sua task.
+- Le pagine di accesso (login, registrazione, codice, recupero) **non** usano il guscio.
+- Componenti comuni in `common`: `Pulsante` (varianti primario, successo, neutro sulla classe `btn-push`; di default
+  `type="button"`), `Scheda`, `MessaggioErrore` (`role="alert"`, traduce il codice), `Drawer` (pannello dal basso,
+  tono successo o errore, `role="dialog"`, focus al pannello, Esc opzionale), `CampoTesto`, `CodiceSeiCifre`.
+  Le schermate usano questi invece di riscrivere pulsanti, card ed errori a mano.
+- Icone: `common/Icona`, **SVG disegnati a mano** (nessuna libreria), decorativi (`aria-hidden`) e sempre con un testo.
+
 ## Schermate e comportamento
 
 ### Mappa — `GET /api/path/stages`
