@@ -3,8 +3,11 @@ import {
   MESSAGGI,
   requisitiPassword,
   strip,
+  validaCodice,
   validaLogin,
+  validaPasswordDimenticata,
   validaRegistrazione,
+  validaReimpostazione,
   type DatiRegistrazione,
 } from './validazione'
 
@@ -107,5 +110,29 @@ describe('validaLogin', () => {
 
   it('nessuna regola di formato né della password', () => {
     expect(validaLogin({ email: 'non-una-email', password: 'x' })).toEqual({})
+  })
+})
+
+describe('verifica email e recupero password', () => {
+  it('codice: solo obbligatorio', () => {
+    expect(validaCodice('')).toEqual({ codice: MESSAGGI.codiceObbligatorio })
+    expect(validaCodice('12')).toEqual({})
+  })
+
+  it('password dimenticata: solo email obbligatoria, nessun formato', () => {
+    expect(validaPasswordDimenticata('   ')).toEqual({ email: MESSAGGI.emailObbligatoria })
+    expect(validaPasswordDimenticata('non-una-email')).toEqual({})
+  })
+
+  it('reimpostazione: email e codice obbligatori, nuova password con le regole della registrazione', () => {
+    expect(validaReimpostazione({ email: '', codice: '', nuovaPassword: '' })).toEqual({
+      email: MESSAGGI.emailObbligatoria,
+      codice: MESSAGGI.codiceObbligatorio,
+      nuovaPassword: MESSAGGI.nuovaPasswordObbligatoria,
+    })
+    expect(validaReimpostazione({ email: 'strana', codice: '1', nuovaPassword: 'Password 12' })).toEqual({
+      nuovaPassword: MESSAGGI.passwordNonValida,
+    })
+    expect(validaReimpostazione({ email: 'strana', codice: '1', nuovaPassword: 'Àbcdefg1!' })).toEqual({})
   })
 })

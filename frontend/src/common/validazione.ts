@@ -3,7 +3,8 @@
  * e i suoi errori `campi` hanno sempre la precedenza. Il frontend non deve MAI essere più severo del backend.
  *
  * Fonti da tenere allineate (vedi frontend/CLAUDE.md, Validazione dei form):
- * - backend/docs/specs/auth.md (Registrazione, Login) e i record RegistrazioneRequest / LoginRequest
+ * - backend/docs/specs/auth.md (Registrazione, Login, Verifica email, Password dimenticata, Reimpostazione) e i record
+ *   RegistrazioneRequest, LoginRequest, VerificaEmailRequest, PasswordDimenticataRequest, ReimpostaPasswordRequest
  * - @PasswordValida e PasswordValidaValidator (backend/CLAUDE.md, Password)
  * Messaggi identici a quelli del backend.
  */
@@ -14,6 +15,8 @@ export const MESSAGGI = {
   emailObbligatoria: "L'email è obbligatoria",
   emailNonValida: 'Formato email non valido',
   passwordObbligatoria: 'La password è obbligatoria',
+  nuovaPasswordObbligatoria: 'La nuova password è obbligatoria',
+  codiceObbligatorio: 'Il codice è obbligatorio',
   passwordNonValida:
     'La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale (massimo 72 byte)',
   massimo50: 'Massimo 50 caratteri',
@@ -157,6 +160,39 @@ export function validaLogin(dati: DatiLogin): ErroriCampi {
   }
   if (vuoto(dati.password)) {
     errori.password = MESSAGGI.passwordObbligatoria
+  }
+  return errori
+}
+
+/** Verifica dell'email: solo obbligatorio (un codice sbagliato lo segnala il backend, come tentativo). */
+export function validaCodice(codice: string): ErroriCampi {
+  return vuoto(codice) ? { codice: MESSAGGI.codiceObbligatorio } : {}
+}
+
+/** Password dimenticata: solo email obbligatoria, nessun formato (un'email strana riceve la risposta generica). */
+export function validaPasswordDimenticata(email: string): ErroriCampi {
+  return vuoto(pulisciEmail(email)) ? { email: MESSAGGI.emailObbligatoria } : {}
+}
+
+export interface DatiReimpostazione {
+  email: string
+  codice: string
+  nuovaPassword: string
+}
+
+/** Reimpostazione: email e codice solo obbligatori, la nuova password con le regole della registrazione. */
+export function validaReimpostazione(dati: DatiReimpostazione): ErroriCampi {
+  const errori: ErroriCampi = {}
+  if (vuoto(pulisciEmail(dati.email))) {
+    errori.email = MESSAGGI.emailObbligatoria
+  }
+  if (vuoto(dati.codice)) {
+    errori.codice = MESSAGGI.codiceObbligatorio
+  }
+  if (vuoto(dati.nuovaPassword)) {
+    errori.nuovaPassword = MESSAGGI.nuovaPasswordObbligatoria
+  } else if (!passwordValida(dati.nuovaPassword)) {
+    errori.nuovaPassword = MESSAGGI.passwordNonValida
   }
   return errori
 }

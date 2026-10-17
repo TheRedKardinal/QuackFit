@@ -102,7 +102,7 @@ describe('registrazione', () => {
 
     await utente.click(screen.getByRole('button', { name: 'Crea account' }))
 
-    expect(await screen.findByRole('heading', { name: 'Verifica email' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Verifica la tua email' })).toBeInTheDocument()
     expect(leggiToken()).toBe('nuovo-token')
     const [, init] = chiamateA('/api/auth/register')[0]
     expect(JSON.parse(String(init?.body))).toEqual({
@@ -193,7 +193,7 @@ describe('login', () => {
 
     await utente.click(screen.getByRole('button', { name: 'Accedi' }))
 
-    expect(await screen.findByRole('heading', { name: 'Verifica email' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Verifica la tua email' })).toBeInTheDocument()
   })
 
   it('email verificata → mappa', async () => {

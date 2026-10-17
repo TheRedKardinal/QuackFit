@@ -1,0 +1,47 @@
+.campo {
+  margin-bottom: 1rem;
+}
+
+.etichetta {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-weight: 700;
+}
+
+.caselle {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+}
+
+.casella {
+  width: 100%;
+  min-width: 0;
+  height: 3.5rem;
+  border: 2px solid var(--colore-bordo);
+  border-bottom-width: 4px;
+  border-radius: 0.875rem;
+  background-color: var(--colore-superficie);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.casella:focus {
+  outline: none;
+  border-color: var(--colore-primario);
+  border-bottom-color: var(--colore-primario-scuro);
+}
+
+.casellaErrata,
+.casellaErrata:focus {
+  border-color: var(--colore-errore);
+}
+
+.errore {
+  margin-top: 0.375rem;
+  margin-bottom: 0;
+  color: var(--colore-errore);
+  font-size: 0.875rem;
+  font-weight: 700;
+}

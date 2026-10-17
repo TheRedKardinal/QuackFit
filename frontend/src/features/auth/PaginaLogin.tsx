@@ -1,5 +1,5 @@
-import { useRef, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { DatiErrore } from '../../api/ApiError'
 import CampoTesto from '../../common/CampoTesto'
 import { messaggioErrore } from '../../common/messaggiErrore'
@@ -9,6 +9,7 @@ import stili from './accesso.module.css'
 import { accedi } from './authThunk'
 import BarraAccesso from './BarraAccesso'
 import TestoPulsante from './TestoPulsante'
+import type { StatoVersoLogin } from './tipi'
 import { useInvioForm } from './useInvioForm'
 
 type Campo = keyof DatiLogin
@@ -22,11 +23,23 @@ const ORDINE_CAMPI: Campo[] = ['email', 'password']
 function PaginaLogin() {
   const dispatch = useAppDispatch()
   const { invia, inviando, secondiAttesa, bloccato } = useInvioForm()
-  const [dati, setDati] = useState<DatiLogin>({ email: '', password: '' })
+  const naviga = useNavigate()
+  const posizione = useLocation()
+  // dopo un reset riuscito arrivano un messaggio e l'email (mai codice o password)
+  const statoIniziale = posizione.state as StatoVersoLogin | null
+  const [conferma] = useState(statoIniziale?.messaggio ?? null)
+  const [dati, setDati] = useState<DatiLogin>({ email: statoIniziale?.email ?? '', password: '' })
   const [errori, setErrori] = useState<ErroriCampi>({})
   const [erroreGenerale, setErroreGenerale] = useState<string | null>(null)
   const [mostraPassword, setMostraPassword] = useState(false)
   const campi = useRef<Partial<Record<Campo, HTMLInputElement | null>>>({})
+
+  // letto lo state, lo si toglie dalla cronologia: con F5 il messaggio non riappare
+  useEffect(() => {
+    if (posizione.state) {
+      naviga(posizione.pathname, { replace: true, state: null })
+    }
+  }, [naviga, posizione.pathname, posizione.state])
 
   function cambia(campo: Campo, valore: string) {
     setDati((precedenti) => ({ ...precedenti, [campo]: valore }))
@@ -78,6 +91,12 @@ function PaginaLogin() {
         <h2 className={stili.titolo}>Bentornato su QuackFit!</h2>
         <p className={stili.sottotitolo}>Accedi per continuare la tua streak di apprendimento.</p>
       </div>
+
+      {conferma && (
+        <p role="status" className={stili.messaggioOk}>
+          ✓ {conferma}
+        </p>
+      )}
 
       <form noValidate onSubmit={invio} className={stili.scheda}>
         <CampoTesto

@@ -47,6 +47,12 @@ const sessioneSlice = createSlice({
     logout() {
       return statoSessioneVuoto
     },
+    /** Codice di verifica accettato (204): l'email è verificata e le guardie lasciano passare, senza ricaricare /api/me. */
+    emailConfermata(stato) {
+      if (stato.utente) {
+        stato.utente.emailVerificata = true
+      }
+    },
     /** Il backend ha risposto 403 EMAIL_NON_VERIFICATA: le guardie portano alla schermata del codice. */
     emailNonVerificata(stato) {
       if (stato.utente) {
@@ -71,5 +77,5 @@ const sessioneSlice = createSlice({
   },
 })
 
-export const { impostaToken, logout, emailNonVerificata } = sessioneSlice.actions
+export const { impostaToken, logout, emailConfermata, emailNonVerificata } = sessioneSlice.actions
 export default sessioneSlice.reducer
