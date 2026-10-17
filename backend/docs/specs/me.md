@@ -92,12 +92,18 @@ Due passaggi: l'email cambia solo quando il nuovo indirizzo è confermato con il
 ### Richiesta — POST /api/me/email
 Body: `nuovaEmail`, `password`. Risponde **204**.
 
-Controlli, in ordine:
-1. password attuale sbagliata → 400 `PASSWORD_ATTUALE_ERRATA`
-2. `nuovaEmail` non valida (`strip()`, minuscolo, formato) → 400 `VALIDAZIONE`
-3. `nuovaEmail` uguale a quella attuale → 400 `VALIDAZIONE`
-4. `nuovaEmail` già usata da un utente attivo → 409 `EMAIL_GIA_USATA`
+Pulizia nel record: `nuovaEmail` con `strip()` e in minuscolo; la password non si tocca.
+
+Controlli, in ordine (come nel cambio password, prima `@Valid`):
+1. campi mancanti o `nuovaEmail` non valida → 400 `VALIDAZIONE` con i `campi`, stesse regole e messaggi della
+   registrazione (obbligatoria, formato con il punto nel dominio, massimo 254 caratteri); *"La password è obbligatoria"*
+2. password attuale sbagliata → 400 `PASSWORD_ATTUALE_ERRATA`
+3. `nuovaEmail` uguale a quella attuale (confronto dopo la pulizia) → 400 `VALIDAZIONE` con
+   `campi: { nuovaEmail: "La nuova email deve essere diversa da quella attuale" }`
+4. `nuovaEmail` già usata da un utente attivo → 409 `EMAIL_GIA_USATA` (*"Questa email è già usata da un altro account"*)
 5. meno di 60 secondi dall'ultimo invio di un codice CAMBIO_EMAIL → 429 `ATTENDI_REINVIO`
+
+I punti 3-5 vengono dopo la password: senza conoscerla, un token rubato non rivela quali email sono registrate.
 
 Se ok: genera un codice CAMBIO_EMAIL con `nuova_email` valorizzata (invalidando i precedenti dello stesso tipo)
 e lo invia alla **nuova** email. L'email dell'utente resta quella vecchia.
@@ -105,9 +111,12 @@ e lo invia alla **nuova** email. L'email dell'utente resta quella vecchia.
 ### Conferma — POST /api/me/email/confirm
 Body: `codice`. Risponde **204**.
 
-1. verifica del codice CAMBIO_EMAIL (ordine dei controlli in `auth.md`)
-2. se nel frattempo la nuova email è stata presa da un altro utente → 409 `EMAIL_GIA_USATA`
-3. ok → `email` = `nuova_email`, `email_verificata = true`, **logout ovunque**
+1. `codice` mancante → 400 `VALIDAZIONE` (*"Il codice è obbligatorio"*); `strip()` nel record, nessun controllo di formato
+2. verifica del codice CAMBIO_EMAIL (ordine dei controlli in `auth.md`)
+3. se nel frattempo la nuova email è stata presa da un altro utente → 409 `EMAIL_GIA_USATA`. Vale anche per due
+   conferme in parallelo: la UPDATE parte subito (`saveAndFlush`) e la violazione dell'UNIQUE sull'email diventa un 409,
+   come nella registrazione. Il codice resta comunque usato (vedi `auth.md`): ne serve uno nuovo
+4. ok → `email` = `nuova_email`, `email_verificata = true`, **logout ovunque**
 
 ---
 
