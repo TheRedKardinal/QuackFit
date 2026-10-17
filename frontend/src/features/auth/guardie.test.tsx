@@ -52,7 +52,7 @@ describe('guardie delle rotte', () => {
     fetchFinto.mockResolvedValue(rispostaJson(200, profilo({ emailVerificata: false })))
     apri('/', 'token-valido')
 
-    expect(await screen.findByRole('heading', { name: 'Verifica email' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Verifica la tua email' })).toBeInTheDocument()
   })
 
   it('un utente non admin su /admin torna alla home', async () => {
@@ -101,7 +101,7 @@ describe('guardie delle rotte', () => {
 
     await act(() => store.dispatch(thunkCheFallisce('EMAIL_NON_VERIFICATA')))
 
-    expect(await screen.findByRole('heading', { name: 'Verifica email' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Verifica la tua email' })).toBeInTheDocument()
   })
 
   it('il pulsante Esci fa logout e porta al login', async () => {
