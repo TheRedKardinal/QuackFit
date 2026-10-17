@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -63,6 +64,16 @@ public class ExceptionsHandler {
 		return risposta(ErroreResponse.da(
 				CodiceErrore.VALIDAZIONE, "Uno o più campi non sono validi",
 				Map.of(e.getName(), "Valore non valido"), adesso()));
+	}
+
+	/**
+	 * File oltre i limiti di spring.servlet.multipart (MaxUploadSizeExceededException) o corpo multipart rovinato:
+	 * lo stesso 400 FILE_NON_VALIDO dei controlli del service (vedi me.md, Foto profilo), mai un 500.
+	 */
+	@ExceptionHandler(MultipartException.class)
+	public ResponseEntity<ErroreResponse> multipartNonValido(MultipartException e) {
+		return risposta(ErroreResponse.da(
+				CodiceErrore.FILE_NON_VALIDO, "Immagine non valida: usa un file jpg, png o webp fino a 2 MB", adesso()));
 	}
 
 	/** Endpoint inesistente. */
