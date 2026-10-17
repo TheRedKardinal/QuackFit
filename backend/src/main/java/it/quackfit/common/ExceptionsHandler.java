@@ -35,7 +35,7 @@ public class ExceptionsHandler {
 	/** Errori previsti dalle spec, lanciati dai service. */
 	@ExceptionHandler(ApplicazioneException.class)
 	public ResponseEntity<ErroreResponse> applicazione(ApplicazioneException e) {
-		return risposta(ErroreResponse.da(e.getCodice(), e.getMessage(), adesso()));
+		return risposta(ErroreResponse.da(e.getCodice(), e.getMessage(), e.getCampi(), adesso()));
 	}
 
 	/** Validazione dei record di richiesta (@Valid): un messaggio per ogni campo sbagliato. */
