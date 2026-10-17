@@ -51,8 +51,8 @@ class MeServiceTest {
 		utenteRepository = mock(UtenteRepository.class);
 		streakRepository = mock(StreakRepository.class);
 		tentativoRepository = mock(TentativoLezioneRepository.class);
-		servizio = new MeService(utenteRepository, streakRepository, tentativoRepository, ENCODER,
-				Clock.fixed(ADESSO, ZoneOffset.UTC));
+		servizio = new MeService(utenteRepository, streakRepository, tentativoRepository, new PasswordAttuale(ENCODER),
+				ENCODER, Clock.fixed(ADESSO, ZoneOffset.UTC));
 		utente = new Utente("Mario", "Rossi", "mario@example.com", ENCODER.encode(PASSWORD),
 				Instant.parse("2026-01-01T10:00:00Z"));
 		ReflectionTestUtils.setField(utente, "id", UUID.randomUUID());
