@@ -100,6 +100,20 @@ src
   sbagliato. L'errore di un campo sparisce appena lo si modifica.
 - Il login controlla solo i campi obbligatori, mai le regole della password.
 - Durante l'invio il pulsante è disattivato e un secondo click non parte (`features/auth/useInvioForm`).
+- Codici a 6 cifre (verifica email, reimpostazione): campo `common/CodiceSeiCifre`, sei caselle che si riempiono in
+  ordine senza buchi, solo cifre, incolla e autocompletamento (`one-time-code`). Nel frontend il codice è solo
+  obbligatorio: un codice sbagliato lo segnala il backend.
+
+## Verifica email e recupero password
+- "Invia nuovo codice" è attivo all'apertura della pagina; resta disattivato **60 secondi dopo un invio riuscito o un
+  429** (`ATTENDI_REINVIO`, `TROPPE_RICHIESTE`), con il conto alla rovescia.
+- Codice giusto → reducer `emailConfermata` (niente nuova chiamata a `/api/me`) e le guardie portano alla mappa.
+  Codice rifiutato → messaggio sotto le caselle, caselle svuotate e cursore sulla prima.
+- Password dimenticata: messaggio sempre generico (stesso testo del backend), poi la reimpostazione con l'email già
+  compilata. La reimpostazione ha anche "Invia di nuovo il codice" (richiama la password dimenticata).
+- Dopo un reset riuscito: si cancella l'eventuale token salvato (invalidato dal logout ovunque) e si va al login con
+  un messaggio di conferma e l'email già compilata. **Nello state del router passano solo messaggio ed email**, mai
+  codice o password; il login li legge e poi pulisce lo state con una navigazione `replace` (con F5 non riappaiono).
 
 ## Sicurezza
 - Il token JWT si salva in **`localStorage`** e viaggia nell'header `Authorization`. Al logout si cancellano il token
