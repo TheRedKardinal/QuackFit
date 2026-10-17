@@ -1,33 +1,39 @@
-// Pagina di prova per controllare font, colori e pulsanti: verrà sostituita dal router nelle prossime task.
-const colori = ['primario', 'successo', 'streak', 'sfondo', 'superficie', 'bordo']
+import { Navigate, Route, Routes } from 'react-router-dom'
+import Segnaposto from './common/Segnaposto'
+import PulsanteEsci from './features/auth/PulsanteEsci'
+import RichiedeAdmin from './features/auth/RichiedeAdmin'
+import RichiedeAutenticazione from './features/auth/RichiedeAutenticazione'
+import RichiedeEmailVerificata from './features/auth/RichiedeEmailVerificata'
+import SoloOspite from './features/auth/SoloOspite'
 
+/**
+ * Rotte dell'app con le guardie annidate: autenticato → email verificata → admin.
+ * Le pagine sono segnaposto finché non arrivano le schermate vere.
+ * Il router (BrowserRouter) sta in main.tsx, così i test possono usare MemoryRouter.
+ */
 function App() {
   return (
-    <main className="container py-4" style={{ maxWidth: 480 }}>
-      <h1>QuackFit</h1>
-      <p>Impara la teoria del fitness, una lezione alla volta.</p>
+    <Routes>
+      <Route element={<SoloOspite />}>
+        <Route path="/login" element={<Segnaposto titolo="Login" />} />
+        <Route path="/register" element={<Segnaposto titolo="Registrazione" />} />
+        <Route path="/forgot-password" element={<Segnaposto titolo="Password dimenticata" />} />
+        <Route path="/reset-password" element={<Segnaposto titolo="Reimposta la password" />} />
+      </Route>
 
-      <h2 className="h5 mt-4">Colori</h2>
-      <div className="row g-2">
-        {colori.map((colore) => (
-          <div key={colore} className="col-4">
-            <div
-              className="rounded-3 border"
-              style={{ height: 56, backgroundColor: `var(--colore-${colore})` }}
-            />
-            <small>{colore}</small>
-          </div>
-        ))}
-      </div>
+      <Route element={<RichiedeAutenticazione />}>
+        <Route path="/verify-email" element={<Segnaposto titolo="Verifica email"><PulsanteEsci /></Segnaposto>} />
+        <Route element={<RichiedeEmailVerificata />}>
+          <Route path="/" element={<Segnaposto titolo="Percorso"><PulsanteEsci /></Segnaposto>} />
+          <Route path="/profile" element={<Segnaposto titolo="Profilo"><PulsanteEsci /></Segnaposto>} />
+          <Route element={<RichiedeAdmin />}>
+            <Route path="/admin" element={<Segnaposto titolo="Admin"><PulsanteEsci /></Segnaposto>} />
+          </Route>
+        </Route>
+      </Route>
 
-      <h2 className="h5 mt-4">Pulsanti</h2>
-      <div className="d-grid gap-3">
-        <button type="button" className="btn-push">Inizia</button>
-        <button type="button" className="btn-push btn-push-successo">Continua</button>
-        <button type="button" className="btn-push btn-push-neutro">Annulla</button>
-        <button type="button" className="btn-push" disabled>Disattivato</button>
-      </div>
-    </main>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
