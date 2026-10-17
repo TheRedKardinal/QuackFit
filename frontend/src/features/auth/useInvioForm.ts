@@ -36,5 +36,6 @@ export function useInvioForm() {
     }
   }
 
-  return { invia, inviando, secondiAttesa, bloccato: inviando || secondiAttesa > 0 }
+  /** `avviaAttesa` serve dove l'attesa parte anche dopo un invio riuscito (nuovo codice). */
+  return { invia, inviando, secondiAttesa, avviaAttesa, bloccato: inviando || secondiAttesa > 0 }
 }

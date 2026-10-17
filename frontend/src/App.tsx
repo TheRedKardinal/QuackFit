@@ -1,7 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Segnaposto from './common/Segnaposto'
 import PaginaLogin from './features/auth/PaginaLogin'
+import PaginaPasswordDimenticata from './features/auth/PaginaPasswordDimenticata'
 import PaginaRegistrazione from './features/auth/PaginaRegistrazione'
+import PaginaReimpostaPassword from './features/auth/PaginaReimpostaPassword'
+import PaginaVerificaEmail from './features/auth/PaginaVerificaEmail'
 import PulsanteEsci from './features/auth/PulsanteEsci'
 import RichiedeAdmin from './features/auth/RichiedeAdmin'
 import RichiedeAutenticazione from './features/auth/RichiedeAutenticazione'
@@ -19,12 +22,12 @@ function App() {
       <Route element={<SoloOspite />}>
         <Route path="/login" element={<PaginaLogin />} />
         <Route path="/register" element={<PaginaRegistrazione />} />
-        <Route path="/forgot-password" element={<Segnaposto titolo="Password dimenticata" />} />
-        <Route path="/reset-password" element={<Segnaposto titolo="Reimposta la password" />} />
+        <Route path="/forgot-password" element={<PaginaPasswordDimenticata />} />
+        <Route path="/reset-password" element={<PaginaReimpostaPassword />} />
       </Route>
 
       <Route element={<RichiedeAutenticazione />}>
-        <Route path="/verify-email" element={<Segnaposto titolo="Verifica email"><PulsanteEsci /></Segnaposto>} />
+        <Route path="/verify-email" element={<PaginaVerificaEmail />} />
         <Route element={<RichiedeEmailVerificata />}>
           <Route path="/" element={<Segnaposto titolo="Percorso"><PulsanteEsci /></Segnaposto>} />
           <Route path="/profile" element={<Segnaposto titolo="Profilo"><PulsanteEsci /></Segnaposto>} />

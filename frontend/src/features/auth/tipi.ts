@@ -16,3 +16,28 @@ export interface LoginRequest {
 export interface TokenResponse {
   token: string
 }
+
+export interface VerificaEmailRequest {
+  codice: string
+}
+
+export interface PasswordDimenticataRequest {
+  email: string
+}
+
+export interface ReimpostaPasswordRequest {
+  email: string
+  codice: string
+  nuovaPassword: string
+}
+
+/** Risposta della password dimenticata: sempre lo stesso messaggio generico. */
+export interface MessaggioResponse {
+  messaggio: string
+}
+
+/** State del router dalla reimpostazione al login: solo messaggio ed email, mai codice o password. */
+export interface StatoVersoLogin {
+  messaggio: string
+  email: string
+}
