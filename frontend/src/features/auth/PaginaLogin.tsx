@@ -4,6 +4,9 @@ import type { DatiErrore } from '../../api/ApiError'
 import CampoTesto from '../../common/CampoTesto'
 import { messaggioErrore } from '../../common/messaggiErrore'
 import { validaLogin, type DatiLogin, type ErroriCampi } from '../../common/validazione'
+import MessaggioErrore from '../../common/MessaggioErrore'
+import Pulsante from '../../common/Pulsante'
+import Scheda from '../../common/Scheda'
 import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { accedi } from './authThunk'
@@ -98,56 +101,54 @@ function PaginaLogin() {
         </p>
       )}
 
-      <form noValidate onSubmit={invio} className={stili.scheda}>
-        <CampoTesto
-          id="email"
-          etichetta="Email"
-          tipo="email"
-          valore={dati.email}
-          onChange={(valore) => cambia('email', valore)}
-          autoComplete="email"
-          placeholder="esempio@email.com"
-          errore={errori.email}
-          ref={(elemento) => {
-            campi.current.email = elemento
-          }}
-        />
+      <Scheda>
+        <form noValidate onSubmit={invio}>
+          <CampoTesto
+            id="email"
+            etichetta="Email"
+            tipo="email"
+            valore={dati.email}
+            onChange={(valore) => cambia('email', valore)}
+            autoComplete="email"
+            placeholder="esempio@email.com"
+            errore={errori.email}
+            ref={(elemento) => {
+              campi.current.email = elemento
+            }}
+          />
 
-        <CampoTesto
-          id="password"
-          etichetta="Password"
-          tipo={mostraPassword ? 'text' : 'password'}
-          valore={dati.password}
-          onChange={(valore) => cambia('password', valore)}
-          autoComplete="current-password"
-          placeholder="Inserisci la tua password"
-          errore={errori.password}
-          accessorio={
-            <Link to="/forgot-password" className={stili.link}>
-              Password dimenticata?
-            </Link>
-          }
-          ref={(elemento) => {
-            campi.current.password = elemento
-          }}
-        >
-          <button type="button" className={`${stili.mostra} mt-2`} onClick={() => setMostraPassword((m) => !m)}>
-            {mostraPassword ? 'Nascondi password' : 'Mostra password'}
-          </button>
-        </CampoTesto>
+          <CampoTesto
+            id="password"
+            etichetta="Password"
+            tipo={mostraPassword ? 'text' : 'password'}
+            valore={dati.password}
+            onChange={(valore) => cambia('password', valore)}
+            autoComplete="current-password"
+            placeholder="Inserisci la tua password"
+            errore={errori.password}
+            accessorio={
+              <Link to="/forgot-password" className={stili.link}>
+                Password dimenticata?
+              </Link>
+            }
+            ref={(elemento) => {
+              campi.current.password = elemento
+            }}
+          >
+            <button type="button" className={`${stili.mostra} mt-2`} onClick={() => setMostraPassword((m) => !m)}>
+              {mostraPassword ? 'Nascondi password' : 'Mostra password'}
+            </button>
+          </CampoTesto>
 
-        {erroreGenerale && (
-          <p role="alert" className={stili.erroreGenerale}>
-            {erroreGenerale}
-          </p>
-        )}
+          <MessaggioErrore testo={erroreGenerale} />
 
-        <div className={stili.pulsantiera}>
-          <button type="submit" className="btn-push" disabled={bloccato}>
-            <TestoPulsante testo="Accedi" inviando={inviando} secondiAttesa={secondiAttesa} />
-          </button>
-        </div>
-      </form>
+          <div className={stili.pulsantiera}>
+            <Pulsante type="submit" disabled={bloccato}>
+              <TestoPulsante testo="Accedi" inviando={inviando} secondiAttesa={secondiAttesa} />
+            </Pulsante>
+          </div>
+        </form>
+      </Scheda>
 
       <p className={stili.centrato}>Non hai ancora un account?</p>
       <div className={stili.pulsantiera}>

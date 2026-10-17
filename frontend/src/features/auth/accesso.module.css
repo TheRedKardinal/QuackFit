@@ -42,15 +42,6 @@
   text-align: center;
 }
 
-.scheda {
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border: 2px solid var(--colore-bordo);
-  border-bottom-width: 4px;
-  border-radius: 1.25rem;
-  background-color: var(--colore-superficie);
-}
-
 .riga {
   display: grid;
   grid-template-columns: 1fr 1fr;

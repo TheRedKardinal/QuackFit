@@ -1,4 +1,5 @@
 import { messaggioErrore } from '../../common/messaggiErrore'
+import Pulsante from '../../common/Pulsante'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import PulsanteEsci from './PulsanteEsci'
 import { caricaProfilo } from './sessioneSlice'
@@ -15,9 +16,9 @@ function ErroreAvvio() {
     <main className="container py-5 text-center" style={{ maxWidth: 480 }}>
       <p role="alert">{messaggioErrore(errore?.codice ?? 'ERRORE_INTERNO')}</p>
       <div className="d-grid gap-3">
-        <button type="button" className="btn-push" onClick={() => void dispatch(caricaProfilo())}>
+        <Pulsante onClick={() => void dispatch(caricaProfilo())}>
           Riprova
-        </button>
+        </Pulsante>
         <PulsanteEsci />
       </div>
     </main>

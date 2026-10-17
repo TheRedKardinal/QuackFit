@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import CampoTesto from '../../common/CampoTesto'
 import { messaggioErrore } from '../../common/messaggiErrore'
 import { pulisciEmail, validaPasswordDimenticata } from '../../common/validazione'
+import MessaggioErrore from '../../common/MessaggioErrore'
+import Pulsante from '../../common/Pulsante'
+import Scheda from '../../common/Scheda'
 import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { passwordDimenticata } from './authThunk'
@@ -63,46 +66,44 @@ function PaginaPasswordDimenticata() {
         <p className={stili.sottotitolo}>Scrivi l'email del tuo account: ti invieremo un codice per scegliere una nuova password.</p>
       </div>
 
-      <form noValidate onSubmit={invio} className={stili.scheda}>
-        <CampoTesto
-          id="email"
-          etichetta="Email"
-          tipo="email"
-          valore={email}
-          onChange={(valore) => {
-            setEmail(valore)
-            setErroreEmail(undefined)
-            setInviata(false)
-          }}
-          autoComplete="email"
-          placeholder="esempio@email.com"
-          errore={erroreEmail}
-          ref={campoEmail}
-        />
+      <Scheda>
+        <form noValidate onSubmit={invio}>
+          <CampoTesto
+            id="email"
+            etichetta="Email"
+            tipo="email"
+            valore={email}
+            onChange={(valore) => {
+              setEmail(valore)
+              setErroreEmail(undefined)
+              setInviata(false)
+            }}
+            autoComplete="email"
+            placeholder="esempio@email.com"
+            errore={erroreEmail}
+            ref={campoEmail}
+          />
 
-        {inviata && (
-          <p role="status" className={stili.messaggioOk}>
-            {MESSAGGIO_PASSWORD_DIMENTICATA}
-          </p>
-        )}
-        {erroreGenerale && (
-          <p role="alert" className={stili.erroreGenerale}>
-            {erroreGenerale}
-          </p>
-        )}
-
-        <div className={stili.pulsantiera}>
-          {inviata ? (
-            <button type="button" className="btn-push btn-push-successo" onClick={vaiAlCodice}>
-              Inserisci il codice
-            </button>
-          ) : (
-            <button type="submit" className="btn-push" disabled={bloccato}>
-              <TestoPulsante testo="Invia il codice" inviando={inviando} secondiAttesa={secondiAttesa} />
-            </button>
+          {inviata && (
+            <p role="status" className={stili.messaggioOk}>
+              {MESSAGGIO_PASSWORD_DIMENTICATA}
+            </p>
           )}
-        </div>
-      </form>
+          <MessaggioErrore testo={erroreGenerale} />
+
+          <div className={stili.pulsantiera}>
+            {inviata ? (
+              <Pulsante variante="successo" onClick={vaiAlCodice}>
+                Inserisci il codice
+              </Pulsante>
+            ) : (
+              <Pulsante type="submit" disabled={bloccato}>
+                <TestoPulsante testo="Invia il codice" inviando={inviando} secondiAttesa={secondiAttesa} />
+              </Pulsante>
+            )}
+          </div>
+        </form>
+      </Scheda>
 
       <p className={stili.centrato}>
         <Link to="/reset-password" className={stili.link}>

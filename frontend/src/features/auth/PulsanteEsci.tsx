@@ -1,3 +1,4 @@
+import Pulsante from '../../common/Pulsante'
 import { useAppDispatch } from '../../store/hooks'
 import { logout } from './sessioneSlice'
 
@@ -6,9 +7,9 @@ function PulsanteEsci() {
   const dispatch = useAppDispatch()
 
   return (
-    <button type="button" className="btn-push btn-push-neutro" onClick={() => dispatch(logout())}>
+    <Pulsante variante="neutro" onClick={() => dispatch(logout())}>
       Esci
-    </button>
+    </Pulsante>
   )
 }
 
