@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Segnaposto from './common/Segnaposto'
+import PaginaLogin from './features/auth/PaginaLogin'
+import PaginaRegistrazione from './features/auth/PaginaRegistrazione'
 import PulsanteEsci from './features/auth/PulsanteEsci'
 import RichiedeAdmin from './features/auth/RichiedeAdmin'
 import RichiedeAutenticazione from './features/auth/RichiedeAutenticazione'
@@ -15,8 +17,8 @@ function App() {
   return (
     <Routes>
       <Route element={<SoloOspite />}>
-        <Route path="/login" element={<Segnaposto titolo="Login" />} />
-        <Route path="/register" element={<Segnaposto titolo="Registrazione" />} />
+        <Route path="/login" element={<PaginaLogin />} />
+        <Route path="/register" element={<PaginaRegistrazione />} />
         <Route path="/forgot-password" element={<Segnaposto titolo="Password dimenticata" />} />
         <Route path="/reset-password" element={<Segnaposto titolo="Reimposta la password" />} />
       </Route>

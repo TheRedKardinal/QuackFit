@@ -6,11 +6,13 @@
   --colore-sfondo: #f9f9f7;
   --colore-superficie: #ffffff;
   --colore-bordo: #e5e7eb;
+  --colore-errore: #ba1a1a;
 
   /* Tonalità scure per il bordo dei pulsanti "push", ricavate dal colore base */
   --colore-primario-scuro: color-mix(in srgb, var(--colore-primario), black 15%);
   --colore-successo-scuro: color-mix(in srgb, var(--colore-successo), black 15%);
   --colore-bordo-scuro: color-mix(in srgb, var(--colore-bordo), black 15%);
+  --colore-errore-scuro: color-mix(in srgb, var(--colore-errore), black 15%);
 
   --font-base: 'Nunito Sans', system-ui, sans-serif;
 }

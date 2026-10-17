@@ -50,5 +50,6 @@ e le spec del backend):
 ## Colori
 
 Le schermate usano anche tonalità non presenti tra i design token (rosso per errori e cancellazione,
-verde scuro, marrone). Nei componenti si usano solo le variabili di `tokens.css`: se un colore manca
-(es. il rosso del drawer "risposta sbagliata"), va chiesto prima di aggiungerlo.
+verde scuro, marrone). Nei componenti si usano solo le variabili di `tokens.css`: se un colore manca,
+va chiesto prima di aggiungerlo. Il rosso `#ba1a1a` (errori dei campi, drawer "risposta sbagliata") è già
+stato aggiunto come `--colore-errore`.
