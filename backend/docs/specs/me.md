@@ -12,7 +12,11 @@ La verifica dell'email (`/verification`, `/verification/resend`) è descritta in
 - Tutti gli endpoint richiedono l'utente autenticato.
 - Con email **non verificata** sono consentiti solo `GET /api/me`, `POST /api/me/verification` e
   `POST /api/me/verification/resend`; gli altri rispondono 403 `EMAIL_NON_VERIFICATA`.
-- Le operazioni che richiedono la **password attuale** rispondono 400 `PASSWORD_ATTUALE_ERRATA` se è sbagliata.
+- Le operazioni che richiedono la **password attuale** rispondono 400 `PASSWORD_ATTUALE_ERRATA` se è sbagliata
+  (400, non 401: chi la sbaglia non viene disconnesso). Oltre i 72 byte conta come sbagliata, senza chiamare BCrypt.
+- Le stesse operazioni (`PATCH /api/me/password`, `POST /api/me/email`, `DELETE /api/me`) rientrano nel **limite
+  per IP** di 20 richieste al minuto (429 `TROPPE_RICHIESTE`, vedi `backend/CLAUDE.md`, Limite per IP), così un token
+  rubato non permette di provare la password attuale a raffica.
 - "Logout ovunque" = `token_validi_dal = adesso`: anche il token usato per la chiamata smette di funzionare,
   quindi il frontend deve cancellare il token e riportare l'utente al login.
 - Codici email: regole comuni in `auth.md` (6 cifre, hash BCrypt, 15 minuti, 5 tentativi, 60 secondi tra due invii).
@@ -43,17 +47,22 @@ Lo streak salvato non viene modificato dalla lettura. Si calcola solo il valore 
 ## Modifica dati — PATCH /api/me
 Body: `nome`, `cognome`. Risponde **204**.
 
-- `strip()` nel record; entrambi obbligatori, non vuoti, massimo **50 caratteri** (400 `VALIDAZIONE`).
-- Email, ruolo e password non si cambiano da qui.
+- `strip()` nel record; entrambi obbligatori, non vuoti, massimo **50 caratteri** (400 `VALIDAZIONE`), con gli stessi
+  messaggi della registrazione (*"Il nome è obbligatorio"*, *"Il cognome è obbligatorio"*, *"Massimo 50 caratteri"*).
+- Email, ruolo e password non si cambiano da qui. Non fa logout.
 
 ---
 
 ## Cambio password — PATCH /api/me/password
 Body: `passwordAttuale`, `nuovaPassword`. Risponde **204**.
 
-1. password attuale sbagliata → 400 `PASSWORD_ATTUALE_ERRATA`
-2. nuova password non valida (stesse regole della registrazione) → 400 `VALIDAZIONE`
-3. nuova password uguale all'attuale → 400 `VALIDAZIONE`
+Controlli, in ordine:
+1. campi mancanti o nuova password non valida (stesse regole della registrazione) → 400 `VALIDAZIONE` con i `campi`
+   (*"La password attuale è obbligatoria"*, *"La nuova password è obbligatoria"*, messaggio di `@PasswordValida`).
+   Vengono da `@Valid`, quindi prima di tutto il resto
+2. password attuale sbagliata → 400 `PASSWORD_ATTUALE_ERRATA`
+3. nuova password uguale all'attuale → 400 `VALIDAZIONE` con `campi: { nuovaPassword: "La nuova password deve essere
+   diversa da quella attuale" }`. Viene **dopo** il punto 2, così non rivela se una password è quella attuale
 4. ok → nuovo hash BCrypt e **logout ovunque**
 
 ---
@@ -122,7 +131,8 @@ Body: `password`. Risponde **204**.
   anche con più tentativi superati); streak mostrata 0 se `ultima_attivita` è più vecchia di ieri;
   risposta anche con email non verificata; utente senza Streak → 500 nel formato standard, senza dettagli interni.
 - PATCH dati: valori validi, vuoti, oltre 50 caratteri.
-- Password: attuale sbagliata, nuova non valida, nuova uguale alla vecchia, token precedenti rifiutati dopo il cambio.
+- Password: attuale sbagliata, nuova non valida, nuova uguale alla vecchia, token precedenti rifiutati dopo il cambio;
+  il 21° tentativo dallo stesso IP nello stesso minuto → 429.
 - Avatar: formato valido, formato non ammesso, file oltre 2 MB, file con estensione falsa, sostituzione della foto.
 - Cambio email: password sbagliata, stessa email, email già usata (alla richiesta e alla conferma),
   reinvio prima di 60 secondi, codice giusto/sbagliato/scaduto, email cambiata solo dopo la conferma, token precedenti rifiutati.

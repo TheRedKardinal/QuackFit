@@ -1,7 +1,9 @@
 package it.quackfit.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -102,6 +104,56 @@ class LimiteIpFiltroTest {
 			mockMvc.perform(get("/api/qualunque").with(daIp("198.51.100.4")))
 					.andExpect(status().isUnauthorized());
 		}
+	}
+
+	// --- endpoint con la password attuale (vedi backend/CLAUDE.md, Limite per IP) ---
+
+	@Test
+	void laVentunesimaRichiestaDiCambioPasswordRiceve429() throws Exception {
+		for (int i = 0; i < LimiteRichiesteIp.MASSIMO_RICHIESTE; i++) {
+			// senza token: 401, ma la richiesta conta lo stesso (il limite viene prima del filtro JWT)
+			mockMvc.perform(patch("/api/me/password").with(daIp("198.51.100.5")))
+					.andExpect(status().isUnauthorized());
+		}
+
+		mockMvc.perform(patch("/api/me/password").with(daIp("198.51.100.5")))
+				.andExpect(status().isTooManyRequests())
+				.andExpect(jsonPath("$.codice").value("TROPPE_RICHIESTE"));
+	}
+
+	@Test
+	void cambioEmailECancellazioneAccountSonoLimitati() throws Exception {
+		for (int i = 0; i < LimiteRichiesteIp.MASSIMO_RICHIESTE / 2; i++) {
+			mockMvc.perform(post("/api/me/email").with(daIp("198.51.100.6")));
+			mockMvc.perform(delete("/api/me").with(daIp("198.51.100.6")));
+		}
+
+		mockMvc.perform(delete("/api/me").with(daIp("198.51.100.6")))
+				.andExpect(status().isTooManyRequests());
+	}
+
+	@Test
+	void ilContatoreECondivisoConAuth() throws Exception {
+		for (int i = 0; i < LimiteRichiesteIp.MASSIMO_RICHIESTE; i++) {
+			mockMvc.perform(post("/api/auth/prova-limite").with(daIp("198.51.100.7")));
+		}
+
+		mockMvc.perform(patch("/api/me/password").with(daIp("198.51.100.7")))
+				.andExpect(status().isTooManyRequests());
+	}
+
+	@Test
+	void gliAltriEndpointDiMeNonConsumanoIlLimite() throws Exception {
+		for (int i = 0; i < LimiteRichiesteIp.MASSIMO_RICHIESTE + 5; i++) {
+			// GET /api/me parte a ogni avvio dell'app; PATCH /api/me (nome e cognome) non chiede la password
+			mockMvc.perform(get("/api/me").with(daIp("198.51.100.8"))).andExpect(status().isUnauthorized());
+			mockMvc.perform(patch("/api/me").with(daIp("198.51.100.8"))).andExpect(status().isUnauthorized());
+			// stesso percorso, metodo diverso: non conta
+			mockMvc.perform(get("/api/me/password").with(daIp("198.51.100.8"))).andExpect(status().isUnauthorized());
+		}
+
+		mockMvc.perform(patch("/api/me/password").with(daIp("198.51.100.8")))
+				.andExpect(status().isUnauthorized());
 	}
 
 	@Test

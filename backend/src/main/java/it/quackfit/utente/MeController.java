@@ -3,6 +3,7 @@ package it.quackfit.utente;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,19 @@ public class MeController {
 	@GetMapping
 	public MeResponse profilo(@AuthenticationPrincipal Utente utente) {
 		return meService.profilo(utente);
+	}
+
+	@PatchMapping
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void modificaDati(@AuthenticationPrincipal Utente utente, @Valid @RequestBody ModificaDatiRequest richiesta) {
+		meService.modificaDati(utente.getId(), richiesta);
+	}
+
+	/** Logout ovunque: dopo il 204 anche il token usato per la chiamata non vale più. */
+	@PatchMapping("/password")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void cambiaPassword(@AuthenticationPrincipal Utente utente, @Valid @RequestBody CambioPasswordRequest richiesta) {
+		meService.cambiaPassword(utente.getId(), richiesta);
 	}
 
 	@PostMapping("/verification")
