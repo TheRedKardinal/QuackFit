@@ -78,7 +78,7 @@ src
   | 403 `LEZIONE_BLOCCATA` | torna alla mappa con un messaggio |
   | 403 `ACCESSO_NEGATO` | messaggio "non hai i permessi" |
   | 409 `TENTATIVO_CHIUSO` | torna alla mappa con un messaggio |
-  | 429 `ATTENDI_REINVIO` / `TROPPE_RICHIESTE` | messaggio e pulsante disattivato per un po' |
+  | 429 `ATTENDI_REINVIO` / `TROPPE_RICHIESTE` | messaggio e pulsante disattivato per **60 secondi** (la finestra del backend), con il conto alla rovescia sul pulsante ("Riprova tra 42 s"); `common/useConteggioAllaRovescia` |
   | 500 e errori di rete | messaggio generico, mai dettagli tecnici |
 - **`ERRORE_RETE`** esiste solo nel frontend: richiesta che non arriva al server (o risposta che non arriva a noi),
   `ApiError` con `status` 0. Ha il suo messaggio, diverso da quello di `ERRORE_INTERNO`.
@@ -86,6 +86,20 @@ src
   `rejectWithValue(DatiErrore)` e un listener di Redux (`features/auth/sessioneListener.ts`) fa logout o segna l'email
   come non verificata; le guardie delle rotte spostano l'utente. Le schermate non gestiscono questi due casi.
 - Il login fallito mostra **sempre il messaggio unico del backend** (non distingue email o password errate).
+
+## Validazione dei form
+- Validazione da "classico form" nel frontend, ma il **backend resta autorevole**: tutte le regole stanno in un solo file,
+  `common/validazione.ts`, usato dai form e dai test. **Va aggiornato insieme al backend** (spec `auth.md`, i record di
+  richiesta e `@PasswordValida`).
+- Il frontend **non è mai più severo del backend**: stessa pulizia (`strip()` di Java, che non toglie gli spazi non
+  separabili; email in minuscolo), lunghezze contate dopo la pulizia, maiuscola secondo Unicode (anche `À`), speciale =
+  né lettera né cifra né spazio, massimo 72 byte UTF-8. Del formato email si controlla solo `qualcosa@dominio.punto`.
+- Messaggi in italiano **identici a quelli del backend**, uno per campo. Gli errori `campi` del backend hanno sempre la
+  precedenza e si mostrano comunque.
+- Form con `noValidate`: con errori non si invia, si mostrano gli errori sotto i campi e il cursore va sul primo campo
+  sbagliato. L'errore di un campo sparisce appena lo si modifica.
+- Il login controlla solo i campi obbligatori, mai le regole della password.
+- Durante l'invio il pulsante è disattivato e un secondo click non parte (`features/auth/useInvioForm`).
 
 ## Sicurezza
 - Il token JWT si salva in **`localStorage`** e viaggia nell'header `Authorization`. Al logout si cancellano il token
@@ -176,7 +190,8 @@ XP e punti, badge e traguardi, livelli, classifiche, vite o cuori, username, pix
 - Se una schermata prevista non ha un riferimento, si segue lo stile delle altre e si segnala all'utente.
 - Le schermate contengono elementi **fuori perimetro** (XP, livelli, badge, esame tappa, banner "Streak in pericolo", …):
   non si realizzano. L'elenco è nel `README.md` delle schermate.
-- Le schermate usano anche colori che non sono tra i design token (es. il rosso degli errori): si chiede prima di aggiungerli.
+- Le schermate usano anche colori che non sono tra i design token: si chiede prima di aggiungerli
+  (il rosso degli errori è stato aggiunto come `--colore-errore`, preso da Stitch).
 
 ### Design token (variabili CSS in `src/styles`)
 | Uso | Valore |
@@ -187,6 +202,7 @@ XP e punti, badge e traguardi, livelli, classifiche, vite o cuori, username, pix
 | Sfondo | `#f9f9f7` |
 | Superficie | `#ffffff` |
 | Bordi | `#e5e7eb` |
+| Errore (messaggi dei campi, risposta sbagliata) | `#ba1a1a` |
 
 - Mai valori di colore scritti a mano nei componenti: si usano sempre le variabili.
 - Le tonalità scure del bordo dei pulsanti "push" non sono token a sé: si ricavano dal colore base con
