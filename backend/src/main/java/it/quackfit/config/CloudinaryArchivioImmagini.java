@@ -25,12 +25,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Caricamento su Cloudinary con l'API REST di upload, chiamata con l'HttpClient del JDK (come Brevo):
- * nessuna dipendenza in più.
+ * Caricamento ed eliminazione su Cloudinary con le API REST upload e destroy, chiamate con l'HttpClient del JDK
+ * (come Brevo): nessuna dipendenza in più.
  *
  * - Richiesta firmata: i parametri (tranne file e api_key) si firmano con l'api_secret, che non viaggia mai (vedi firma).
  * - Il file viaggia come data URI base64 in un form urlencoded, così non serve costruire a mano un corpo multipart.
@@ -40,6 +41,7 @@ import tools.jackson.databind.ObjectMapper;
  * Chiavi (vedi backend/CLAUDE.md, Configurazione): facoltative in locale e nei test (senza chiavi il caricamento
  * fallisce con un errore chiaro), obbligatorie all'avvio nel profilo prod (quackfit.cloudinary.chiavi-obbligatorie).
  */
+@Slf4j
 @Service
 public class CloudinaryArchivioImmagini implements ArchivioImmagini {
 
@@ -88,21 +90,51 @@ public class CloudinaryArchivioImmagini implements ArchivioImmagini {
 
 	@Override
 	public String carica(byte[] contenuto, String tipoMime, String idPubblico) {
+		Map<String, String> file = Map.of(
+				"file", "data:" + tipoMime + ";base64," + Base64.getEncoder().encodeToString(contenuto));
+		return urlSicuro(chiama("upload", parametriFirmati(idPubblico, true), file));
+	}
+
+	/**
+	 * API destroy: elimina l'immagine e svuota la cache della CDN (invalidate). Cloudinary risponde
+	 * {"result": "ok"} oppure {"result": "not found"} se non c'era: in entrambi i casi l'immagine non esiste più.
+	 */
+	@Override
+	public void elimina(String idPubblico) {
+		String risultato = leggi(chiama("destroy", parametriFirmati(idPubblico, false), Map.of()), "result");
+		if (!risultato.equals("ok") && !risultato.equals("not found")) {
+			throw new CaricamentoImmagineFallitoException("eliminazione su Cloudinary non riuscita");
+		}
+		log.info("Eliminazione su Cloudinary: {}", risultato);
+	}
+
+	/** Parametri da firmare: invalidate, public_id, timestamp e, solo per l'upload, overwrite. */
+	private SortedMap<String, String> parametriFirmati(String idPubblico, boolean sovrascrivi) {
+		SortedMap<String, String> parametri = new TreeMap<>(Map.of(
+				"invalidate", "true",
+				"public_id", idPubblico,
+				"timestamp", String.valueOf(Instant.now(clock).getEpochSecond())));
+		if (sovrascrivi) {
+			parametri.put("overwrite", "true");
+		}
+		return parametri;
+	}
+
+	/**
+	 * POST firmato a {url}/{cloud}/image/{azione}, come form urlencoded. I campi `extra` (il file) non si firmano,
+	 * come api_key. Restituisce il corpo della risposta; ogni errore diventa CaricamentoImmagineFallitoException
+	 * con solo lo stato HTTP o il tipo dell'errore nel messaggio.
+	 */
+	private String chiama(String azione, SortedMap<String, String> daFirmare, Map<String, String> extra) {
 		if (!chiaviMancanti().isEmpty()) {
 			throw new CaricamentoImmagineFallitoException("chiavi Cloudinary mancanti: " + chiaviMancanti());
 		}
-		SortedMap<String, String> daFirmare = new TreeMap<>(Map.of(
-				"invalidate", "true",
-				"overwrite", "true",
-				"public_id", idPubblico,
-				"timestamp", String.valueOf(Instant.now(clock).getEpochSecond())));
-
 		Map<String, String> corpo = new LinkedHashMap<>(daFirmare);
 		corpo.put("signature", firma(daFirmare, apiSecret));
 		corpo.put("api_key", apiKey);
-		corpo.put("file", "data:" + tipoMime + ";base64," + Base64.getEncoder().encodeToString(contenuto));
+		corpo.putAll(extra);
 
-		HttpRequest richiesta = HttpRequest.newBuilder(URI.create(urlBase + "/" + cloudName + "/image/upload"))
+		HttpRequest richiesta = HttpRequest.newBuilder(URI.create(urlBase + "/" + cloudName + "/image/" + azione))
 				.timeout(TIMEOUT)
 				.header("Content-Type", "application/x-www-form-urlencoded")
 				.POST(HttpRequest.BodyPublishers.ofString(formUrlEncoded(corpo)))
@@ -116,23 +148,27 @@ public class CloudinaryArchivioImmagini implements ArchivioImmagini {
 			throw new CaricamentoImmagineFallitoException("Cloudinary non raggiungibile (" + e.getClass().getSimpleName() + ")");
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new CaricamentoImmagineFallitoException("caricamento su Cloudinary interrotto");
+			throw new CaricamentoImmagineFallitoException("richiesta a Cloudinary interrotta");
 		}
 		if (risposta.statusCode() < 200 || risposta.statusCode() >= 300) {
 			throw new CaricamentoImmagineFallitoException("Cloudinary ha risposto con lo stato HTTP " + risposta.statusCode());
 		}
-		return urlSicuro(risposta.body());
+		return risposta.body();
+	}
+
+	/** Un campo di testo della risposta JSON ("" se manca); risposta non leggibile → fallita. */
+	private String leggi(String corpoRisposta, String campo) {
+		try {
+			JsonNode json = objectMapper.readTree(corpoRisposta);
+			return json.path(campo).asString("");
+		} catch (RuntimeException e) {
+			throw new CaricamentoImmagineFallitoException("risposta di Cloudinary non leggibile");
+		}
 	}
 
 	/** L'URL https della risposta (secure_url): se manca o non è https, il caricamento conta come fallito. */
 	private String urlSicuro(String corpoRisposta) {
-		String url;
-		try {
-			JsonNode json = objectMapper.readTree(corpoRisposta);
-			url = json.path("secure_url").asString("");
-		} catch (RuntimeException e) {
-			throw new CaricamentoImmagineFallitoException("risposta di Cloudinary non leggibile");
-		}
+		String url = leggi(corpoRisposta, "secure_url");
 		if (!url.startsWith("https://")) {
 			throw new CaricamentoImmagineFallitoException("risposta di Cloudinary senza secure_url https");
 		}
