@@ -5,7 +5,7 @@ body {
 
 /*
  * Pulsante "push": bordo inferiore in rilievo che si abbassa quando si preme.
- * Varianti: .btn-push-primario (default), .btn-push-successo, .btn-push-neutro.
+ * Varianti: .btn-push-primario (default), .btn-push-successo, .btn-push-neutro, .btn-push-pericolo.
  */
 .btn-push {
   --push-colore: var(--colore-primario);
@@ -46,4 +46,11 @@ body {
   --push-ombra: var(--colore-bordo-scuro);
   border: 2px solid var(--colore-bordo);
   border-bottom: 4px solid var(--push-ombra);
+}
+
+/* azioni irreversibili (cancellazione dell'account): rosso degli errori */
+.btn-push-pericolo {
+  --push-colore: var(--colore-errore);
+  --push-ombra: var(--colore-errore-scuro);
+  color: var(--colore-superficie);
 }

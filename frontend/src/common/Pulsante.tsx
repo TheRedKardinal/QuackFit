@@ -1,11 +1,12 @@
 import type { ComponentProps } from 'react'
 
-type Variante = 'primario' | 'successo' | 'neutro'
+type Variante = 'primario' | 'successo' | 'neutro' | 'pericolo'
 
 const CLASSI_VARIANTE: Record<Variante, string> = {
   primario: '',
   successo: 'btn-push-successo',
   neutro: 'btn-push-neutro',
+  pericolo: 'btn-push-pericolo',
 }
 
 interface Props extends ComponentProps<'button'> {
