@@ -32,9 +32,17 @@ Package: `utente` (gestione utenti) e `contenuti` (gestione contenuti). Endpoint
 ## Lista — GET /api/admin/users
 Parametri: `page` (da 0, default 0), `size` (default 20, massimo 50), `q` (opzionale).
 
-- Solo utenti **attivi** (`deleted_at = null`), dal più recente al più vecchio (`created_at`).
+- Parametri mancanti → valori predefiniti (`page=0`, `size=20`).
+- Parametri non validi → 400 `VALIDAZIONE`, con il parametro sbagliato in `campi`:
+  - `page` negativa → *"La pagina non può essere negativa"*
+  - `size` fuori da 1…50 → *"La dimensione deve essere tra 1 e 50"*
+  - valore non numerico (es. `page=abc`, `size=abc`) → stesso 400 `VALIDAZIONE` (*"Valore non valido"*), non un errore diverso
+- Solo utenti **attivi** (`deleted_at = null`), dal più recente al più vecchio (`created_at`; a parità di data
+  decide l'`id`, così un utente non cambia pagina tra una richiesta e l'altra).
 - `q`: ricerca senza distinzione tra maiuscole e minuscole, che cerca il testo dentro nome, cognome o email.
   Query parametrizzata, mai concatenata.
+  - `q` vuoto o di soli spazi = nessuna ricerca; altrimenti il testo si cerca dopo `strip()`.
+  - `%` e `_` si cercano come caratteri normali, non come jolly del `LIKE` (escape con `!`).
 - Risponde **200** con una pagina: `contenuto` (lista), `pagina`, `dimensione`, `totaleElementi`, `totalePagine`.
 - Ogni utente: `id`, `nome`, `cognome`, `email`, `ruolo`, `emailVerificata`, `creatoAt`.
 
@@ -155,7 +163,8 @@ Si può cancellare anche l'ultima domanda: la lezione resta, ma finché non ha d
 - Le liste di tappe e lezioni sono piccole: nessuna paginazione, solo la lista utenti è paginata.
 
 ## Test da prevedere
-- Lista utenti: paginazione, `size` oltre 50, ricerca con `q` (nome, cognome, email), esclusione degli utenti cancellati.
+- Lista utenti: paginazione e valori predefiniti; `size=0`, `size=51`, `page=-1`, `page=abc` → 400 `VALIDAZIONE` con il
+  campo; ricerca con `q` (nome, cognome, email, maiuscole, `%` e `_` come testo); esclusione degli utenti cancellati.
 - Cambio ruolo: ogni cella della tabella dei permessi; nessuno modifica sé stesso; nessuno assegna o toglie SUPERADMIN;
   stesso ruolo → 204 senza logout; utente cancellato → 404; token precedenti rifiutati dopo un cambio effettivo.
 - Ordine: creazione in fondo; riordino verso l'alto e verso il basso; posizione fuori limite → 400;

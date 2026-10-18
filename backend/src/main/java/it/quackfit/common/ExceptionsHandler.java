@@ -12,7 +12,9 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -74,6 +76,21 @@ public class ExceptionsHandler {
 	public ResponseEntity<ErroreResponse> multipartNonValido(MultipartException e) {
 		return risposta(ErroreResponse.da(
 				CodiceErrore.FILE_NON_VALIDO, "Immagine non valida: usa un file jpg, png o webp fino a 2 MB", adesso()));
+	}
+
+	/**
+	 * Parametri dell'URL che violano un vincolo (es. @Min/@Max su page e size della lista utenti): 400 VALIDAZIONE
+	 * con il nome del parametro e il primo messaggio in `campi`, come per i campi del body.
+	 */
+	@ExceptionHandler(HandlerMethodValidationException.class)
+	public ResponseEntity<ErroreResponse> parametriNonValidi(HandlerMethodValidationException e) {
+		Map<String, String> campi = new LinkedHashMap<>();
+		for (ParameterValidationResult risultato : e.getParameterValidationResults()) {
+			String nome = risultato.getMethodParameter().getParameterName();
+			risultato.getResolvableErrors().stream().findFirst()
+					.ifPresent(errore -> campi.putIfAbsent(nome, errore.getDefaultMessage()));
+		}
+		return risposta(ErroreResponse.da(CodiceErrore.VALIDAZIONE, "Uno o più campi non sono validi", campi, adesso()));
 	}
 
 	/** Endpoint inesistente. */
