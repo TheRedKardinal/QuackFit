@@ -119,6 +119,10 @@ src
 - Dopo un reset riuscito: si cancella l'eventuale token salvato (invalidato dal logout ovunque) e si va al login con
   un messaggio di conferma e l'email già compilata. **Nello state del router passano solo messaggio ed email**, mai
   codice o password; il login li legge e poi pulisce lo state con una navigazione `replace` (con F5 non riappaiono).
+- Stesso esito dopo il **cambio password** e la **conferma del cambio email** (204 senza nuovo token, logout ovunque):
+  messaggio ed email nello state (`common/statoVersoLogin`). Da una pagina protetta si va a **`/logout`**, che fa il
+  logout e poi porta al login con lo state: se il logout partisse dalla pagina, la sua guardia porterebbe al login da
+  sola, senza state, e il messaggio andrebbe perso.
 
 ## Sicurezza
 - Il token JWT si salva in **`localStorage`** e viaggia nell'header `Authorization`. Al logout si cancellano il token
@@ -137,8 +141,9 @@ Percorsi in inglese, come i path delle API:
 | --- | --- | --- |
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | accesso | solo senza token (con il token → `/`) |
 | `/verify-email` | codice di verifica | autenticato |
-| `/`, `/profile` | mappa, profilo | autenticato + email verificata |
+| `/`, `/profile`, `/profile/edit` | mappa, profilo, modifica profilo | autenticato + email verificata |
 | `/admin` | gestione | autenticato + email verificata + `ADMIN`/`SUPERADMIN` (altrimenti → `/`) |
+| `/logout` | tecnica: logout e poi `/login` con lo stesso state (`common/Uscita`) | nessuna |
 | qualunque altro | — | → `/` |
 
 ### Avvio della sessione
@@ -192,7 +197,12 @@ Percorsi in inglese, come i path delle API:
 ### Profilo — `GET /api/me`
 - Avatar, nome, cognome, email, etichetta del ruolo; solo tre metriche: streak attuale, record, lezioni completate.
 - `emailVerificata` serve solo a decidere dove portare l'utente (schermata del codice); non si mostra nel profilo.
-- Modifica nome e cognome, cambio password, cambio email (con codice), cambio avatar, cancellazione account.
+- `/profile` mostra il profilo (con "Modifica profilo" ed "Esci"); `/profile/edit` è la schermata "Modifica profilo":
+  dati personali e password (task 27), foto, cambio email con codice e cancellazione account (task 28).
+- Modifica di nome e cognome: stesse regole della registrazione; dopo il 204 il profilo in memoria si aggiorna con i
+  valori puliti (reducer `datiAnagraficiAggiornati`), senza ricaricare `/api/me` (il caricamento smonterebbe la pagina).
+- Cambio password: `PASSWORD_ATTUALE_ERRATA` sotto il campo; nuova password con le regole della registrazione e diversa
+  dall'attuale; dopo il 204 logout e login con il messaggio (vedi Verifica email e recupero password).
 - **Avatar**: campo file con `accept="image/*"` **senza** `capture` (galleria o fotocamera). Prima dell'invio si
   ridimensiona su un canvas a circa 512×512 e si comprime in jpeg/webp per restare sotto i 2 MB.
 
