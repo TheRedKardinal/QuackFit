@@ -19,6 +19,10 @@ public interface DomandaRepository extends JpaRepository<Domanda, UUID> {
 
 	long countByLezione(Lezione lezione);
 
+	/** Numero di domande attive per ogni lezione che ne ha (le lezioni senza domande non compaiono). */
+	@Query("select new it.quackfit.contenuti.ConteggioDomande(d.lezione.id, count(d)) from Domanda d group by d.lezione.id")
+	List<ConteggioDomande> contaPerLezione();
+
 	/** Ordine più alto tra le domande attive della lezione (0 se non ce ne sono). */
 	@Query("select coalesce(max(d.ordine), 0) from Domanda d where d.lezione = :lezione")
 	int ordineMassimo(@Param("lezione") Lezione lezione);
