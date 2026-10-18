@@ -19,4 +19,7 @@ public interface CodiceVerificaRepository extends JpaRepository<CodiceVerifica, 
 	/** I codici ancora validi, da invalidare quando se ne genera uno nuovo. */
 	List<CodiceVerifica> findByUtenteAndTipoAndUsatoAtIsNull(Utente utente, TipoCodice tipo);
 
+	/** Cancellazione dell'account: i codici dell'utente si eliminano definitivamente (vedi me.md). */
+	void deleteByUtente(Utente utente);
+
 }
