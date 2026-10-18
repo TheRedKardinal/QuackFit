@@ -6,7 +6,7 @@ import PaginaPasswordDimenticata from './features/auth/PaginaPasswordDimenticata
 import PaginaRegistrazione from './features/auth/PaginaRegistrazione'
 import PaginaReimpostaPassword from './features/auth/PaginaReimpostaPassword'
 import PaginaVerificaEmail from './features/auth/PaginaVerificaEmail'
-import PulsanteEsci from './features/auth/PulsanteEsci'
+import PulsanteEsci from './common/PulsanteEsci'
 import RichiedeAdmin from './features/auth/RichiedeAdmin'
 import RichiedeAutenticazione from './features/auth/RichiedeAutenticazione'
 import RichiedeEmailVerificata from './features/auth/RichiedeEmailVerificata'

@@ -5,8 +5,8 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../App'
 import { creaStore } from '../../store/store'
-import { fetchFinto, profilo, rispostaErrore, rispostaJson, thunkCheFallisce } from './testUtili'
-import { leggiToken, salvaToken } from './tokenSalvato'
+import { fetchFinto, profilo, rispostaErrore, rispostaJson, thunkCheFallisce } from '../../testUtili'
+import { leggiToken, salvaToken } from '../../store/sessione/tokenSalvato'
 
 beforeEach(() => {
   localStorage.clear()

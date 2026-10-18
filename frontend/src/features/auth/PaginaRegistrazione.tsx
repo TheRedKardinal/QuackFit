@@ -17,9 +17,9 @@ import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { registra } from './authThunk'
 import BarraAccesso from './BarraAccesso'
-import RequisitoPassword from './RequisitoPassword'
-import TestoPulsante from './TestoPulsante'
-import { useInvioForm } from './useInvioForm'
+import RequisitoPassword from '../../common/RequisitoPassword'
+import TestoPulsante from '../../common/TestoPulsante'
+import { useInvioForm } from '../../common/useInvioForm'
 
 type Campo = keyof DatiRegistrazione
 const ORDINE_CAMPI: Campo[] = ['nome', 'cognome', 'email', 'password']

@@ -1,8 +1,8 @@
 import { messaggioErrore } from '../../common/messaggiErrore'
 import Pulsante from '../../common/Pulsante'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import PulsanteEsci from './PulsanteEsci'
-import { caricaProfilo } from './sessioneSlice'
+import PulsanteEsci from '../../common/PulsanteEsci'
+import { caricaProfilo } from '../../store/sessione/sessioneSlice'
 
 /**
  * Il caricamento del profilo è fallito per un motivo diverso dal 401 (rete, 500): il token resta salvato.

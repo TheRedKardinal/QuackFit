@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { isDatiErrore, type DatiErrore } from '../../api/ApiError'
-import { SECONDI_ATTESA_429, useConteggioAllaRovescia } from '../../common/useConteggioAllaRovescia'
+import { isDatiErrore, type DatiErrore } from '../api/ApiError'
+import { SECONDI_ATTESA_429, useConteggioAllaRovescia } from './useConteggioAllaRovescia'
 
 /**
  * Invio di un form di accesso: una sola richiesta alla volta e attesa dopo un 429.

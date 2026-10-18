@@ -9,9 +9,9 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { reinviaCodice, verificaEmail } from './authThunk'
 import BarraAccesso from './BarraAccesso'
-import PulsanteEsci from './PulsanteEsci'
-import TestoPulsante from './TestoPulsante'
-import { useInvioForm } from './useInvioForm'
+import PulsanteEsci from '../../common/PulsanteEsci'
+import TestoPulsante from '../../common/TestoPulsante'
+import { useInvioForm } from '../../common/useInvioForm'
 
 /**
  * Verifica dell'email con il codice a 6 cifre (auth.md, Verifica email e Nuovo codice).

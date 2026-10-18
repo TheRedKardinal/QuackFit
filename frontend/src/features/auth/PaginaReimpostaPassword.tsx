@@ -20,10 +20,10 @@ import stili from './accesso.module.css'
 import { passwordDimenticata, reimpostaPassword } from './authThunk'
 import BarraAccesso from './BarraAccesso'
 import { MESSAGGIO_PASSWORD_DIMENTICATA } from './PaginaPasswordDimenticata'
-import RequisitoPassword from './RequisitoPassword'
-import TestoPulsante from './TestoPulsante'
+import RequisitoPassword from '../../common/RequisitoPassword'
+import TestoPulsante from '../../common/TestoPulsante'
 import type { StatoVersoLogin } from './tipi'
-import { useInvioForm } from './useInvioForm'
+import { useInvioForm } from '../../common/useInvioForm'
 
 type Campo = keyof DatiReimpostazione
 const ORDINE_CAMPI: Campo[] = ['email', 'codice', 'nuovaPassword']

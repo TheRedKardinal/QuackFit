@@ -7,8 +7,8 @@ import App from '../../App'
 import { messaggioErrore } from '../../common/messaggiErrore'
 import { MESSAGGI } from '../../common/validazione'
 import { creaStore } from '../../store/store'
-import { fetchFinto, profilo, rispostaErrore, rispostaJson } from './testUtili'
-import { leggiToken } from './tokenSalvato'
+import { fetchFinto, profilo, rispostaErrore, rispostaJson } from '../../testUtili'
+import { leggiToken } from '../../store/sessione/tokenSalvato'
 
 beforeEach(() => {
   localStorage.clear()

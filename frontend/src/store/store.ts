@@ -1,7 +1,7 @@
 import { combineReducers, configureStore, createListenerMiddleware, type UnknownAction } from '@reduxjs/toolkit'
-import { registraListenerSessione } from '../features/auth/sessioneListener'
-import sessioneReducer, { logout, statoSessioneVuoto } from '../features/auth/sessioneSlice'
-import { leggiToken } from '../features/auth/tokenSalvato'
+import { registraListenerSessione } from './sessione/sessioneListener'
+import sessioneReducer, { logout, statoSessioneVuoto } from './sessione/sessioneSlice'
+import { leggiToken } from './sessione/tokenSalvato'
 
 const reducerApp = combineReducers({
   sessione: sessioneReducer,

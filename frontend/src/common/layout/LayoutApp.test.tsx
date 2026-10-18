@@ -5,8 +5,8 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MeResponse } from '../../api/tipi'
 import App from '../../App'
-import { fetchFinto, profilo, rispostaJson } from '../../features/auth/testUtili'
-import { salvaToken } from '../../features/auth/tokenSalvato'
+import { fetchFinto, profilo, rispostaJson } from '../../testUtili'
+import { salvaToken } from '../../store/sessione/tokenSalvato'
 import { creaStore } from '../../store/store'
 
 beforeEach(() => {

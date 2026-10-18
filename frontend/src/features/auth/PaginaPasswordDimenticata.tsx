@@ -10,8 +10,8 @@ import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { passwordDimenticata } from './authThunk'
 import BarraAccesso from './BarraAccesso'
-import TestoPulsante from './TestoPulsante'
-import { useInvioForm } from './useInvioForm'
+import TestoPulsante from '../../common/TestoPulsante'
+import { useInvioForm } from '../../common/useInvioForm'
 
 /** Stesso testo della risposta del backend: non rivela se l'email è registrata. */
 export const MESSAGGIO_PASSWORD_DIMENTICATA = "Se l'email è registrata, riceverai un codice per reimpostare la password."

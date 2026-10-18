@@ -73,11 +73,6 @@
   list-style: none;
 }
 
-.requisitoOk {
-  color: var(--colore-successo-scuro);
-  font-weight: 700;
-}
-
 .nota {
   margin-bottom: 0;
 }

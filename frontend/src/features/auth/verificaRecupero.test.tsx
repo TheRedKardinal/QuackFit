@@ -10,8 +10,8 @@ import { creaStore } from '../../store/store'
 import { reimpostaPassword } from './authThunk'
 import { MESSAGGIO_PASSWORD_DIMENTICATA } from './PaginaPasswordDimenticata'
 import { MESSAGGIO_PASSWORD_AGGIORNATA } from './PaginaReimpostaPassword'
-import { fetchFinto, profilo, rispostaErrore, rispostaJson } from './testUtili'
-import { leggiToken, salvaToken } from './tokenSalvato'
+import { fetchFinto, profilo, rispostaErrore, rispostaJson } from '../../testUtili'
+import { leggiToken, salvaToken } from '../../store/sessione/tokenSalvato'
 
 beforeEach(() => {
   localStorage.clear()

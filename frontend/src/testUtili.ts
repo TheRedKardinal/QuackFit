@@ -1,8 +1,8 @@
 // Utilità condivise dai test della sessione e delle guardie (non usate dall'app).
 import { vi } from 'vitest'
-import type { DatiErrore } from '../../api/ApiError'
-import type { MeResponse } from '../../api/tipi'
-import { createAppAsyncThunk } from '../../store/hooks'
+import type { DatiErrore } from './api/ApiError'
+import type { MeResponse } from './api/tipi'
+import { createAppAsyncThunk } from './store/hooks'
 
 export const fetchFinto = vi.fn<typeof fetch>()
 

@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import ErroreAvvio from './ErroreAvvio'
 import SchermataCaricamento from './SchermataCaricamento'
-import { caricaProfilo } from './sessioneSlice'
+import { caricaProfilo } from '../../store/sessione/sessioneSlice'
 
 /**
  * Prima guardia: senza token si va al login. Con il token si carica /api/me e, finché non è riuscito,

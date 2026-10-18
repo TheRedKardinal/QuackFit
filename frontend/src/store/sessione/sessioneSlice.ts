@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { datiErrore, type DatiErrore } from '../../api/ApiError'
 import { richiesta } from '../../api/client'
 import type { MeResponse } from '../../api/tipi'
-import { createAppAsyncThunk } from '../../store/hooks'
+import { createAppAsyncThunk } from '../hooks'
 
 export type StatoCaricamento = 'inattivo' | 'in_corso' | 'riuscito' | 'fallito'
 

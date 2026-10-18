@@ -1,4 +1,4 @@
-import stili from './accesso.module.css'
+import stili from './RequisitoPassword.module.css'
 
 interface Props {
   ok: boolean
