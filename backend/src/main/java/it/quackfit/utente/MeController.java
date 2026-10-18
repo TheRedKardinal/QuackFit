@@ -2,6 +2,7 @@ package it.quackfit.utente;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,13 +27,15 @@ public class MeController {
 	private final MeService meService;
 	private final AvatarService avatarService;
 	private final CambioEmailService cambioEmailService;
+	private final CancellazioneAccountService cancellazioneService;
 	private final VerificaEmailService verificaEmailService;
 
 	public MeController(MeService meService, AvatarService avatarService, CambioEmailService cambioEmailService,
-			VerificaEmailService verificaEmailService) {
+			CancellazioneAccountService cancellazioneService, VerificaEmailService verificaEmailService) {
 		this.meService = meService;
 		this.avatarService = avatarService;
 		this.cambioEmailService = cambioEmailService;
+		this.cancellazioneService = cancellazioneService;
 		this.verificaEmailService = verificaEmailService;
 	}
 
@@ -52,6 +55,14 @@ public class MeController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cambiaPassword(@AuthenticationPrincipal Utente utente, @Valid @RequestBody CambioPasswordRequest richiesta) {
 		meService.cambiaPassword(utente.getId(), richiesta);
+	}
+
+	/** Cancellazione dell'account con anonimizzazione; logout ovunque (il token usato non vale più). */
+	@DeleteMapping
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void cancellaAccount(@AuthenticationPrincipal Utente utente,
+			@Valid @RequestBody CancellazioneAccountRequest richiesta) {
+		cancellazioneService.cancella(utente.getId(), richiesta);
 	}
 
 	/**

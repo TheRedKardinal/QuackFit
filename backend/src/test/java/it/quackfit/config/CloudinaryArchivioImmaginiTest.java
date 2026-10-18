@@ -158,6 +158,49 @@ class CloudinaryArchivioImmaginiTest {
 				.isInstanceOf(CaricamentoImmagineFallitoException.class);
 	}
 
+	// --- eliminazione ---
+
+	@Test
+	void eliminaConLaRichiestaFirmataDiDestroy() {
+		corpoDaRispondere = "{\"result\": \"ok\"}";
+
+		archivio().elimina("avatar/abc");
+
+		assertThat(percorsoRicevuto.get()).isEqualTo("/" + CLOUD + "/image/destroy");
+		Map<String, String> campi = campiRicevuti();
+		assertThat(campi).containsEntry("public_id", "avatar/abc")
+				.containsEntry("invalidate", "true")
+				.containsEntry("timestamp", String.valueOf(ADESSO.getEpochSecond()))
+				.containsEntry("api_key", API_KEY)
+				.doesNotContainKey("overwrite")
+				.doesNotContainKey("file");
+		TreeMap<String, String> firmati = new TreeMap<>(Map.of(
+				"public_id", "avatar/abc",
+				"invalidate", "true",
+				"timestamp", String.valueOf(ADESSO.getEpochSecond())));
+		assertThat(campi.get("signature")).isEqualTo(CloudinaryArchivioImmagini.firma(firmati, API_SECRET));
+		assertThat(corpoRicevuto.get()).doesNotContain(API_SECRET);
+	}
+
+	@Test
+	void eliminareUnaFotoCheNonCEsNonEUnErrore() {
+		corpoDaRispondere = "{\"result\": \"not found\"}";
+
+		assertThatCode(() -> archivio().elimina("avatar/abc")).doesNotThrowAnyException();
+	}
+
+	@Test
+	void eliminazioneRifiutataOStatoDiErrore() {
+		corpoDaRispondere = "{\"result\": \"error\"}";
+		assertThatThrownBy(() -> archivio().elimina("avatar/abc"))
+				.isInstanceOf(CaricamentoImmagineFallitoException.class);
+
+		statoDaRispondere = 500;
+		assertThatThrownBy(() -> archivio().elimina("avatar/abc"))
+				.isInstanceOf(CaricamentoImmagineFallitoException.class)
+				.hasMessage("Cloudinary ha risposto con lo stato HTTP 500");
+	}
+
 	// --- chiavi ---
 
 	@Test

@@ -322,9 +322,9 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
   Nei profili default e `test` le chiavi Cloudinary sono facoltative: senza, l'app parte e il caricamento della foto
   risponde 500 con un errore chiaro nel log.
 - Regole di Cloudinary (`config/ArchivioImmagini`, implementazione `CloudinaryArchivioImmagini`):
-  - API REST di upload chiamata con l'HttpClient del JDK, come Brevo: **nessuna dipendenza** (niente SDK).
+  - API REST `upload` e `destroy` chiamate con l'HttpClient del JDK, come Brevo: **nessuna dipendenza** (niente SDK).
     Timeout di 10 secondi (connessione e risposta). Il file viaggia come data URI base64 in un form urlencoded.
-  - **Firma**: i parametri da firmare (`invalidate`, `overwrite`, `public_id`, `timestamp`) in ordine alfabetico,
+  - **Firma**: i parametri da firmare (`invalidate`, `overwrite` solo per l'upload, `public_id`, `timestamp`) in ordine alfabetico,
     uniti come `chiave=valore` con `&`, seguiti dall'`api_secret`, passati in SHA-1 (esadecimale). Cloudinary rifà
     lo stesso calcolo con il suo secret: firme uguali = richiesta autentica e parametri non modificati. Il secret
     non viaggia mai. La firma è provata con l'esempio della documentazione di Cloudinary.

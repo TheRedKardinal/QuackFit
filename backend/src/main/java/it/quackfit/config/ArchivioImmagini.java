@@ -17,4 +17,11 @@ public interface ArchivioImmagini {
 	 */
 	String carica(byte[] contenuto, String tipoMime, String idPubblico);
 
+	/**
+	 * Elimina l'immagine con quell'id pubblico. Se non c'è (già eliminata), non è un errore.
+	 *
+	 * @throws CaricamentoImmagineFallitoException se l'archivio non è configurato, non risponde o rifiuta la richiesta
+	 */
+	void elimina(String idPubblico);
+
 }

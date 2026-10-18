@@ -123,20 +123,26 @@ Body: `codice`. Risponde **204**.
 ## Cancellazione account — DELETE /api/me
 Body: `password`. Risponde **204**.
 
-- Password sbagliata → 400 `PASSWORD_ATTUALE_ERRATA`.
-- Il SUPERADMIN non può cancellare il proprio account → 403 `ACCESSO_NEGATO`.
+Controlli, in ordine:
+1. password mancante → 400 `VALIDAZIONE` (*"La password è obbligatoria"*)
+2. password sbagliata → 400 `PASSWORD_ATTUALE_ERRATA`
+3. il SUPERADMIN non può cancellare il proprio account → 403 `ACCESSO_NEGATO`
+   (*"Il superadmin non può cancellare il proprio account"*). Gli ADMIN invece possono.
 - Anonimizzazione (non si elimina la riga Utente, perché i tentativi restano):
   - `nome` = "Utente", `cognome` = "Eliminato"
   - `email` = `deleted-<id>@quackfit.local`
   - password = hash di un valore casuale (nessuno potrà più fare login)
   - `foto_profilo` = null
   - `deleted_at` = adesso
-  - logout ovunque
+  - logout ovunque (`token_validi_dal` = lo stesso istante di `deleted_at`)
 - La **Streak** viene eliminata definitivamente.
 - I **CodiceVerifica** dell'utente vengono eliminati.
 - I **tentativi** restano, collegati all'utente anonimizzato.
-- La foto su Cloudinary viene cancellata; se Cloudinary fallisce l'anonimizzazione va avanti
-  comunque e l'errore finisce nel log.
+- Anonimizzazione, eliminazione di Streak e codici: una sola transazione.
+- La foto su Cloudinary (API `destroy`, id `avatar/<id utente>`, `invalidate`) viene cancellata **dopo il commit**
+  (`@TransactionalEventListener(AFTER_COMMIT)`), e solo se l'utente aveva una foto: se la transazione fallisce, la foto
+  resta. Se Cloudinary fallisce l'anonimizzazione è già fatta, la risposta resta 204 e l'errore finisce nel log.
+  Una foto già assente ("not found") non è un errore.
 - L'email originale torna libera: chi vuole può registrarsi di nuovo con quell'indirizzo.
 
 ---
