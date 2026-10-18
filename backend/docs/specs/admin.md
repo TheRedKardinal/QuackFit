@@ -79,6 +79,13 @@ Gli ordini degli elementi attivi sono sempre **1, 2, 3… senza buchi**.
 - **Cancellazione:** gli elementi rimasti vengono rinumerati.
 - Le **lezioni** si riordinano solo dentro la propria tappa: spostarle in un'altra tappa non è previsto.
 - Le **domande** non si riordinano: l'utente le vede mescolate; l'ordine di creazione serve solo per il resoconto e la vista admin.
+- **Admin in contemporanea**: ogni operazione che cambia l'ordine (creazione, riordino, cancellazione) blocca prima
+  le righe con un lock pessimistico (`PESSIMISTIC_WRITE`) e poi rinumera, così due admin non lasciano ordini
+  duplicati o buchi:
+  - tappe: tutte le tappe attive, sempre in ordine di `ordine` e `id` (stessa sequenza ovunque, niente deadlock)
+  - lezioni: la riga della tappa genitore, che esiste anche quando la tappa non ha lezioni
+  - **Limite accettato**: due creazioni simultanee della **prima** tappa a tabella vuota non hanno righe da bloccare
+    e possono uscire entrambe con ordine 1. Si sistema con un riordino.
 
 ## Tappe
 
@@ -86,11 +93,27 @@ Gli ordini degli elementi attivi sono sempre **1, 2, 3… senza buchi**.
 Risponde **200** con tutte le tappe attive in ordine. Per ogni tappa: `id`, `titolo`, `descrizione`, `ordine`
 e le sue lezioni attive in ordine (`id`, `titolo`, `descrizione`, `ordine`, `numeroDomande`).
 
+### Risposte di creazione e modifica (tappe e lezioni)
+Un solo formato per risorsa, lo stesso dell'elenco:
+- tappa: `id`, `titolo`, `descrizione`, `ordine`, `lezioni` (solo attive, in ordine; vuota alla creazione)
+- lezione: `id`, `titolo`, `descrizione`, `ordine`, `tappaId`, `numeroDomande` (0 alla creazione)
+
+La risposta basta a sostituire l'elemento nella lista **solo** per la modifica di `titolo` e `descrizione`.
+Creazione, cancellazione e una PATCH con `ordine` cambiano la posizione anche degli altri elementi: il frontend
+deve rifare `GET /api/admin/stages` invece di aggiornare la lista a mano (vale anche per le lezioni, che arrivano
+dentro le tappe). Nessun formato di risposta aggiuntivo.
+
 ### Creazione — POST /api/admin/stages
 Body: `titolo`, `descrizione`. Risponde **201** con la tappa creata, in fondo all'ordine.
 
 ### Modifica — PATCH /api/admin/stages/{stageId}
 Body (tutti opzionali, `null`/assente = invariato): `titolo`, `descrizione`, `ordine`. Risponde **200** con la tappa.
+
+Regole della PATCH (anche per le lezioni):
+- un testo presente non può essere vuoto o di soli spazi → 400 `VALIDAZIONE` (*"Il titolo non può essere vuoto"*,
+  *"La descrizione non può essere vuota"*); le lunghezze massime valgono come in creazione (*"Massimo N caratteri"*)
+- `ordine` minore di 1 → 400 (*"La posizione deve essere almeno 1"*); maggiore del numero di elementi → 400
+  (*"La posizione deve essere tra 1 e n"*), sempre con il campo `ordine` in `campi` e senza modificare nulla
 
 ### Cancellazione — DELETE /api/admin/stages/{stageId}
 Risponde **204**. Soft delete (`deleted_at = adesso`) della tappa e, **a cascata**, delle sue lezioni e domande.
@@ -154,6 +177,7 @@ Si può cancellare anche l'ultima domanda: la lezione resta, ma finché non ha d
 - Comune: `id`, `testo`, `spiegazione`, `tipo`, `ordine`
 - `VERO_FALSO` e `SCELTA_MULTIPLA`: `opzioni` in ordine, ognuna con `id`, `testo`, `corretta`
 - `ABBINAMENTO`: `coppie` in ordine, ognuna con `sinistro` (`id`, `testo`) e `destro` (`id`, `testo`)
+- I due campi `opzioni` e `coppie` ci sono sempre: quello che non riguarda il tipo è una lista vuota (`[]`, mai `null`).
 
 ---
 
@@ -168,7 +192,11 @@ Si può cancellare anche l'ultima domanda: la lezione resta, ma finché non ha d
 - Cambio ruolo: ogni cella della tabella dei permessi; nessuno modifica sé stesso; nessuno assegna o toglie SUPERADMIN;
   stesso ruolo → 204 senza logout; utente cancellato → 404; token precedenti rifiutati dopo un cambio effettivo.
 - Ordine: creazione in fondo; riordino verso l'alto e verso il basso; posizione fuori limite → 400;
-  rinumerazione dopo una cancellazione; lezioni riordinate solo dentro la propria tappa.
+  rinumerazione dopo una cancellazione; lezioni riordinate solo dentro la propria tappa; dopo ogni operazione,
+  rileggendo l'elenco, gli ordini sono 1…n senza buchi né duplicati.
+- Risposte di creazione e modifica: stessa forma dell'elenco (`lezioni` vuota per una tappa nuova, `numeroDomande` 0
+  per una lezione nuova).
+- Concorrenza: il lock non si prova su H2; verifica manuale su PostgreSQL con due sessioni.
 - Cancellazione a cascata: tappa → lezioni e domande; lezione → domande; elementi nascosti agli utenti e alla mappa;
   tentativi precedenti ancora leggibili.
 - Creazione domande: i tre tipi validi; troppe o poche opzioni; zero o due opzioni corrette; campi di un altro tipo;
