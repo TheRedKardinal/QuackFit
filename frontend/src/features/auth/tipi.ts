@@ -35,9 +35,3 @@ export interface ReimpostaPasswordRequest {
 export interface MessaggioResponse {
   messaggio: string
 }
-
-/** State del router dalla reimpostazione al login: solo messaggio ed email, mai codice o password. */
-export interface StatoVersoLogin {
-  messaggio: string
-  email: string
-}

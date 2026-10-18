@@ -5,7 +5,6 @@ import CampoTesto from '../../common/CampoTesto'
 import { messaggioErrore } from '../../common/messaggiErrore'
 import {
   MASSIMO_NOME,
-  requisitiPassword,
   strip,
   validaRegistrazione,
   type DatiRegistrazione,
@@ -17,7 +16,7 @@ import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { registra } from './authThunk'
 import BarraAccesso from './BarraAccesso'
-import RequisitoPassword from '../../common/RequisitoPassword'
+import RiquadroRequisiti from '../../common/RiquadroRequisiti'
 import TestoPulsante from '../../common/TestoPulsante'
 import { useInvioForm } from '../../common/useInvioForm'
 
@@ -40,7 +39,6 @@ function PaginaRegistrazione() {
   const [mostraPassword, setMostraPassword] = useState(false)
   const campi = useRef<Partial<Record<Campo, HTMLInputElement | null>>>({})
 
-  const requisiti = requisitiPassword(dati.password)
 
   function cambia(campo: Campo, valore: string) {
     setDati((precedenti) => ({ ...precedenti, [campo]: valore }))
@@ -171,15 +169,7 @@ function PaginaRegistrazione() {
           }}
         />
 
-        <section className={stili.riquadro} aria-label="Requisiti di sicurezza">
-          <p className={stili.titoloRiquadro}>Requisiti di sicurezza</p>
-          <ul className={stili.requisiti}>
-            <RequisitoPassword ok={requisiti.caratteri} testo="8+ caratteri" />
-            <RequisitoPassword ok={requisiti.maiuscola} testo="1 maiuscola" />
-            <RequisitoPassword ok={requisiti.numero} testo="1 numero" />
-            <RequisitoPassword ok={requisiti.speciale} testo="1 speciale (!@#$)" />
-          </ul>
-        </section>
+        <RiquadroRequisiti password={dati.password} />
 
         <div className={stili.riquadro}>
           <p className={stili.nota}>Registrandoti riceverai un codice a 6 cifre via email per verificare il tuo indirizzo.</p>

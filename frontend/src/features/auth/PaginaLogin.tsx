@@ -12,7 +12,7 @@ import stili from './accesso.module.css'
 import { accedi } from './authThunk'
 import BarraAccesso from './BarraAccesso'
 import TestoPulsante from '../../common/TestoPulsante'
-import type { StatoVersoLogin } from './tipi'
+import type { StatoVersoLogin } from '../../common/statoVersoLogin'
 import { useInvioForm } from '../../common/useInvioForm'
 
 type Campo = keyof DatiLogin
