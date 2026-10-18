@@ -45,7 +45,7 @@ describe('guardie delle rotte', () => {
     fetchFinto.mockResolvedValue(rispostaJson(200, profilo()))
     apri('/profile', 'token-valido')
 
-    expect(await screen.findByRole('heading', { name: 'Profilo' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Mario Rossi' })).toBeInTheDocument()
   })
 
   it('con l\'email non verificata porta alla schermata del codice', async () => {
@@ -87,7 +87,7 @@ describe('guardie delle rotte', () => {
   it('401 da una chiamata successiva riporta al login', async () => {
     fetchFinto.mockResolvedValue(rispostaJson(200, profilo()))
     const store = apri('/profile', 'token-valido')
-    await screen.findByRole('heading', { name: 'Profilo' })
+    await screen.findByRole('heading', { name: 'Mario Rossi' })
 
     await act(() => store.dispatch(thunkCheFallisce('NON_AUTENTICATO')))
 
@@ -97,7 +97,7 @@ describe('guardie delle rotte', () => {
   it('403 EMAIL_NON_VERIFICATA da una chiamata successiva porta alla schermata del codice', async () => {
     fetchFinto.mockResolvedValue(rispostaJson(200, profilo()))
     const store = apri('/profile', 'token-valido')
-    await screen.findByRole('heading', { name: 'Profilo' })
+    await screen.findByRole('heading', { name: 'Mario Rossi' })
 
     await act(() => store.dispatch(thunkCheFallisce('EMAIL_NON_VERIFICATA')))
 
@@ -107,7 +107,7 @@ describe('guardie delle rotte', () => {
   it('il pulsante Esci fa logout e porta al login', async () => {
     fetchFinto.mockResolvedValue(rispostaJson(200, profilo()))
     apri('/profile', 'token-valido')
-    await screen.findByRole('heading', { name: 'Profilo' })
+    await screen.findByRole('heading', { name: 'Mario Rossi' })
 
     await userEvent.click(screen.getByRole('button', { name: 'Esci' }))
 
@@ -122,7 +122,7 @@ describe('avvio con /api/me fallito', () => {
     apri('/profile', 'token-valido')
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Impossibile contattare il server')
-    expect(screen.queryByRole('heading', { name: 'Profilo' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Mario Rossi' })).not.toBeInTheDocument()
     expect(fetchFinto).toHaveBeenCalledTimes(1)
     expect(leggiToken()).toBe('token-valido')
   })
@@ -135,7 +135,7 @@ describe('avvio con /api/me fallito', () => {
     fetchFinto.mockResolvedValue(rispostaJson(200, profilo()))
     await userEvent.click(screen.getByRole('button', { name: 'Riprova' }))
 
-    expect(await screen.findByRole('heading', { name: 'Profilo' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Mario Rossi' })).toBeInTheDocument()
     expect(fetchFinto).toHaveBeenCalledTimes(2)
   })
 
