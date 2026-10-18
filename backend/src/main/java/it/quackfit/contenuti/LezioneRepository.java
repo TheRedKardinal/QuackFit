@@ -6,9 +6,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
 
 /**
  * Tutte le query vedono solo le lezioni attive (@SQLRestriction). Per cancellare non si usa delete():
@@ -27,6 +30,14 @@ public interface LezioneRepository extends JpaRepository<Lezione, UUID> {
 	 */
 	@Query("select l.tappa.id from Lezione l where l.id = :id")
 	Optional<UUID> tappaIdDi(@Param("id") UUID id);
+
+	/**
+	 * Una lezione attiva con un lock pessimistico. Lo chiamano creazione e cancellazione delle domande, che cambiano
+	 * l'ordine delle domande della lezione (la lezione esiste anche quando non ha ancora domande).
+	 */
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("select l from Lezione l where l.id = :id")
+	Optional<Lezione> blocca(@Param("id") UUID id);
 
 	/** Ordine più alto tra le lezioni attive della tappa (0 se non ce ne sono). */
 	@Query("select coalesce(max(l.ordine), 0) from Lezione l where l.tappa = :tappa")
