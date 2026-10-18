@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom'
+import SezioneCambioEmail from './SezioneCambioEmail'
 import SezioneCambioPassword from './SezioneCambioPassword'
+import SezioneCancellazione from './SezioneCancellazione'
 import SezioneDatiPersonali from './SezioneDatiPersonali'
+import SezioneFoto from './SezioneFoto'
 import stili from './profilo.module.css'
 
 /**
- * Modifica profilo (schermata Stitch "modifica-profilo"): dati personali e password.
- * Foto, cambio email e cancellazione dell'account arrivano nella task 28.
+ * Modifica profilo (schermata Stitch "modifica-profilo"): foto, dati personali, password, email e cancellazione
+ * dell'account, nello stesso ordine della schermata.
  */
 function PaginaModificaProfilo() {
   return (
@@ -16,8 +19,11 @@ function PaginaModificaProfilo() {
           Torna al profilo
         </Link>
       </div>
+      <SezioneFoto />
       <SezioneDatiPersonali />
       <SezioneCambioPassword />
+      <SezioneCambioEmail />
+      <SezioneCancellazione />
     </section>
   )
 }
