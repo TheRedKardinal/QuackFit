@@ -151,6 +151,7 @@ Gestione centralizzata in `common/ExceptionsHandler` (`@RestControllerAdvice`). 
   | --- | --- |
   | Body JSON malformato o con tipi sbagliati | 400 `VALIDAZIONE`, `campi` vuoto |
   | Parametro dell'URL del tipo sbagliato (es. id non UUID) | 400 `VALIDAZIONE`, `campi` con il nome del parametro |
+  | Parametro della query fuori dai limiti di `@Min`/`@Max` (es. `size=51`) | 400 `VALIDAZIONE`, `campi` con il nome del parametro e il messaggio dell'annotazione |
   | Endpoint inesistente | 404 `NON_TROVATO` |
   | Metodo HTTP non previsto | 405 `METODO_NON_CONSENTITO` |
 - Le spec indicano quale codice usare in ogni caso. **Un codice nuovo si aggiunge solo dopo averlo chiesto**
