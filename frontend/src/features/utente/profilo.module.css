@@ -122,3 +122,45 @@
   font-weight: 700;
   text-decoration: underline;
 }
+
+.zonaFoto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.anteprima {
+  width: 6rem;
+  height: 6rem;
+  border: 2px solid var(--colore-primario);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.pulsanti {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.zonaPericolo {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px dashed var(--colore-errore);
+  border-radius: 1.25rem;
+  background-color: var(--colore-superficie);
+}
+
+.titoloPericolo {
+  margin-bottom: 0.75rem;
+  color: var(--colore-errore);
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+/* l'input del file è nascosto: quando ha il focus (tastiera) si evidenzia il pulsante che lo apre */
+.inputFoto:focus-visible + label {
+  outline: 3px solid var(--colore-primario-scuro);
+  outline-offset: 2px;
+}

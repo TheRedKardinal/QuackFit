@@ -60,6 +60,12 @@ const sessioneSlice = createSlice({
         stato.utente.cognome = action.payload.cognome
       }
     },
+    /** Nuova foto profilo (PATCH /api/me/avatar): si aggiorna l'URL in memoria, senza ricaricare /api/me. */
+    fotoProfiloAggiornata(stato, action: PayloadAction<string>) {
+      if (stato.utente) {
+        stato.utente.fotoProfilo = action.payload
+      }
+    },
     /** Il backend ha risposto 403 EMAIL_NON_VERIFICATA: le guardie portano alla schermata del codice. */
     emailNonVerificata(stato) {
       if (stato.utente) {
@@ -84,6 +90,12 @@ const sessioneSlice = createSlice({
   },
 })
 
-export const { impostaToken, logout, emailConfermata, datiAnagraficiAggiornati, emailNonVerificata } =
-  sessioneSlice.actions
+export const {
+  impostaToken,
+  logout,
+  emailConfermata,
+  datiAnagraficiAggiornati,
+  fotoProfiloAggiornata,
+  emailNonVerificata,
+} = sessioneSlice.actions
 export default sessioneSlice.reducer

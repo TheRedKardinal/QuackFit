@@ -43,7 +43,8 @@ src
 │   └── admin      gestione utenti e contenuti
 ├── common       componenti riusabili (pulsanti, drawer, mascotte, campi, guscio), errori, validazione, utilità
 ├── styles       variabili CSS (design token) e stili globali
-└── testUtili.ts utilità condivise dai test (fetch finto, profilo di prova, risposte)
+├── testUtili.ts utilità condivise dai test (fetch finto, profilo di prova, risposte)
+└── testCanvas.ts canvas e createImageBitmap finti per i test della foto (jsdom non disegna immagini)
 ```
 - Ogni feature contiene i suoi componenti, il suo slice Redux, i suoi thunk e i suoi tipi.
 - Una feature può usare `common`, `api` e `store` (sessione compresa), ma non gli interni di un'altra feature.
@@ -161,7 +162,7 @@ Percorsi in inglese, come i path delle API:
   - contenuto in una **colonna centrata di ~480 px**, anche su desktop (le barre restano a tutta larghezza).
     Il layout desktop vero (sidebar) lo ha solo l'admin, nella sua task.
 - Le pagine di accesso (login, registrazione, codice, recupero) **non** usano il guscio.
-- Componenti comuni in `common`: `Pulsante` (varianti primario, successo, neutro sulla classe `btn-push`; di default
+- Componenti comuni in `common`: `Pulsante` (varianti primario, successo, neutro, pericolo sulla classe `btn-push`; di default
   `type="button"`), `Scheda`, `MessaggioErrore` (`role="alert"`, traduce il codice), `Drawer` (pannello dal basso,
   tono successo o errore, `role="dialog"`, focus al pannello, Esc opzionale), `CampoTesto`, `CodiceSeiCifre`.
   Le schermate usano questi invece di riscrivere pulsanti, card ed errori a mano.
@@ -203,8 +204,20 @@ Percorsi in inglese, come i path delle API:
   valori puliti (reducer `datiAnagraficiAggiornati`), senza ricaricare `/api/me` (il caricamento smonterebbe la pagina).
 - Cambio password: `PASSWORD_ATTUALE_ERRATA` sotto il campo; nuova password con le regole della registrazione e diversa
   dall'attuale; dopo il 204 logout e login con il messaggio (vedi Verifica email e recupero password).
-- **Avatar**: campo file con `accept="image/*"` **senza** `capture` (galleria o fotocamera). Prima dell'invio si
-  ridimensiona su un canvas a circa 512×512 e si comprime in jpeg/webp per restare sotto i 2 MB.
+- **Avatar**: campo file con `accept="image/*"` **senza** `capture` (galleria o fotocamera). Prima dell'invio
+  (`common/immagine`): **quadrato centrale** portato a 512×512 (mai ingrandito), sfondo bianco, **JPEG qualità 0,85**,
+  sotto i 2 MB. Si vede l'**anteprima** con "Salva foto" e "Annulla": nessuna chiamata finché l'utente non conferma.
+  Un'immagine che il browser non sa leggere (es. HEIC su Chrome) dà un messaggio locale; `FILE_NON_VALIDO` il suo
+  messaggio. Dopo il salvataggio l'URL nuovo va nel profilo in memoria (`fotoProfiloAggiornata`).
+- **Cambio email** in due passaggi: nuova email (regole della registrazione, diversa dall'attuale) e password →
+  codice alla nuova email ("Invia di nuovo" dopo 60 secondi, "Usa un'altra email") → conferma → `/logout` e login
+  con "Email aggiornata: accedi con la nuova email." e la **nuova** email. `EMAIL_GIA_USATA` alla conferma riporta
+  alla richiesta.
+- **Cancellazione** nella "Zona pericolo" (rosso, `Pulsante variante="pericolo"`), con un secondo passaggio (mai
+  `window.confirm`): testo *"Questa azione è irreversibile: il tuo profilo, la tua email e la tua foto verranno
+  eliminati. I tuoi progressi resteranno solo in forma anonima."*, password, "Elimina definitivamente" e "Annulla"
+  (chiude e svuota la password). Dopo il 204 `/logout` e login con "Account eliminato." senza email. Al SUPERADMIN
+  la sezione mostra solo che non può eliminare il proprio account.
 
 ### Admin (conforme a `../backend/docs/specs/admin.md`)
 - **Desktop**: sidebar fissa; utenti in tabella; contenuti su due colonne (tappe e lezioni a sinistra, editor domande a destra).

@@ -9,3 +9,6 @@ export interface StatoVersoLogin {
 }
 
 export const MESSAGGIO_PASSWORD_AGGIORNATA = 'Password aggiornata: accedi con la nuova password.'
+export const MESSAGGIO_EMAIL_AGGIORNATA = 'Email aggiornata: accedi con la nuova email.'
+/** Dopo la cancellazione dell'account non si precompila nessuna email. */
+export const MESSAGGIO_ACCOUNT_ELIMINATO = 'Account eliminato.'

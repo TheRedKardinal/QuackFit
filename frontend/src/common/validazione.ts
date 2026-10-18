@@ -4,7 +4,8 @@
  *
  * Fonti da tenere allineate (vedi frontend/CLAUDE.md, Validazione dei form):
  * - backend/docs/specs/auth.md (Registrazione, Login, Verifica email, Password dimenticata, Reimpostazione) e me.md
- *   (Modifica dati, Cambio password), con i record ModificaDatiRequest, CambioPasswordRequest e
+ *   (Modifica dati, Cambio password, Cambio email, Cancellazione), con i record ModificaDatiRequest,
+ *   CambioPasswordRequest, CambioEmailRequest, ConfermaCambioEmailRequest, CancellazioneAccountRequest e
  *   RegistrazioneRequest, LoginRequest, VerificaEmailRequest, PasswordDimenticataRequest, ReimpostaPasswordRequest
  * - @PasswordValida e PasswordValidaValidator (backend/CLAUDE.md, Password)
  * Messaggi identici a quelli del backend.
@@ -19,6 +20,7 @@ export const MESSAGGI = {
   nuovaPasswordObbligatoria: 'La nuova password è obbligatoria',
   passwordAttualeObbligatoria: 'La password attuale è obbligatoria',
   passwordUguale: 'La nuova password deve essere diversa da quella attuale',
+  emailUguale: 'La nuova email deve essere diversa da quella attuale',
   codiceObbligatorio: 'Il codice è obbligatorio',
   passwordNonValida:
     'La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale (massimo 72 byte)',
@@ -111,6 +113,17 @@ function erroreNome(valore: string, messaggioObbligatorio: string): string | und
   return valore.length > MASSIMO_NOME ? MESSAGGI.massimo50 : undefined
 }
 
+/** Email già pulita: obbligatoria, poi formato, poi al massimo 254 caratteri (registrazione e cambio email). */
+function erroreEmail(email: string): string | undefined {
+  if (vuoto(email)) {
+    return MESSAGGI.emailObbligatoria
+  }
+  if (!FORMATO_EMAIL.test(email)) {
+    return MESSAGGI.emailNonValida
+  }
+  return email.length > MASSIMO_EMAIL ? MESSAGGI.massimo254 : undefined
+}
+
 function aggiungiErrore(errori: ErroriCampi, campo: string, errore: string | undefined): void {
   if (errore) {
     errori[campo] = errore
@@ -138,13 +151,7 @@ export function validaRegistrazione(dati: DatiRegistrazione): ErroriCampi {
   aggiungiErrore(errori, 'nome', erroreNome(nome, MESSAGGI.nomeObbligatorio))
   aggiungiErrore(errori, 'cognome', erroreNome(cognome, MESSAGGI.cognomeObbligatorio))
 
-  if (vuoto(email)) {
-    errori.email = MESSAGGI.emailObbligatoria
-  } else if (!FORMATO_EMAIL.test(email)) {
-    errori.email = MESSAGGI.emailNonValida
-  } else if (email.length > MASSIMO_EMAIL) {
-    errori.email = MESSAGGI.massimo254
-  }
+  aggiungiErrore(errori, 'email', erroreEmail(email))
 
   if (vuoto(dati.password)) {
     errori.password = MESSAGGI.passwordObbligatoria
@@ -242,4 +249,31 @@ export function validaCambioPassword(dati: DatiCambioPassword): ErroriCampi {
     errori.nuovaPassword = MESSAGGI.passwordUguale
   }
   return errori
+}
+
+export interface DatiCambioEmail {
+  nuovaEmail: string
+  password: string
+}
+
+/**
+ * Cambio email: nuova email con le regole della registrazione e diversa dall'attuale (confronto dopo la pulizia,
+ * come nel backend); password solo obbligatoria (sbagliata la segnala il backend).
+ */
+export function validaCambioEmail(dati: DatiCambioEmail, emailAttuale: string): ErroriCampi {
+  const errori: ErroriCampi = {}
+  const nuovaEmail = pulisciEmail(dati.nuovaEmail)
+  aggiungiErrore(errori, 'nuovaEmail', erroreEmail(nuovaEmail))
+  if (!errori.nuovaEmail && nuovaEmail === emailAttuale) {
+    errori.nuovaEmail = MESSAGGI.emailUguale
+  }
+  if (vuoto(dati.password)) {
+    errori.password = MESSAGGI.passwordObbligatoria
+  }
+  return errori
+}
+
+/** Cancellazione dell'account: password solo obbligatoria. */
+export function validaCancellazione(password: string): ErroriCampi {
+  return vuoto(password) ? { password: MESSAGGI.passwordObbligatoria } : {}
 }
