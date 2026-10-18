@@ -7,7 +7,6 @@ import { messaggioErrore } from '../../common/messaggiErrore'
 import { SECONDI_ATTESA_429 } from '../../common/useConteggioAllaRovescia'
 import {
   pulisciEmail,
-  requisitiPassword,
   validaPasswordDimenticata,
   validaReimpostazione,
   type DatiReimpostazione,
@@ -20,16 +19,13 @@ import stili from './accesso.module.css'
 import { passwordDimenticata, reimpostaPassword } from './authThunk'
 import BarraAccesso from './BarraAccesso'
 import { MESSAGGIO_PASSWORD_DIMENTICATA } from './PaginaPasswordDimenticata'
-import RequisitoPassword from './RequisitoPassword'
-import TestoPulsante from './TestoPulsante'
-import type { StatoVersoLogin } from './tipi'
-import { useInvioForm } from './useInvioForm'
+import RiquadroRequisiti from '../../common/RiquadroRequisiti'
+import TestoPulsante from '../../common/TestoPulsante'
+import { MESSAGGIO_PASSWORD_AGGIORNATA, type StatoVersoLogin } from '../../common/statoVersoLogin'
+import { useInvioForm } from '../../common/useInvioForm'
 
 type Campo = keyof DatiReimpostazione
 const ORDINE_CAMPI: Campo[] = ['email', 'codice', 'nuovaPassword']
-
-/** Messaggio mostrato dal login dopo un reset riuscito. */
-export const MESSAGGIO_PASSWORD_AGGIORNATA = 'Password aggiornata: accedi con la nuova password.'
 
 /**
  * Reimpostazione della password con il codice (auth.md, Reimpostazione password).
@@ -51,7 +47,6 @@ function PaginaReimpostaPassword() {
   const campoCodice = useRef<CodiceSeiCifreHandle>(null)
   const campoPassword = useRef<HTMLInputElement>(null)
 
-  const requisiti = requisitiPassword(dati.nuovaPassword)
 
   function cambia(campo: Campo, valore: string) {
     setDati((precedenti) => ({ ...precedenti, [campo]: valore }))
@@ -172,15 +167,7 @@ function PaginaReimpostaPassword() {
             ref={campoPassword}
           />
 
-          <section className={stili.riquadro} aria-label="Requisiti di sicurezza">
-            <p className={stili.titoloRiquadro}>Requisiti di sicurezza</p>
-            <ul className={stili.requisiti}>
-              <RequisitoPassword ok={requisiti.caratteri} testo="8+ caratteri" />
-              <RequisitoPassword ok={requisiti.maiuscola} testo="1 maiuscola" />
-              <RequisitoPassword ok={requisiti.numero} testo="1 numero" />
-              <RequisitoPassword ok={requisiti.speciale} testo="1 speciale (!@#$)" />
-            </ul>
-          </section>
+          <RiquadroRequisiti password={dati.nuovaPassword} />
 
           {avviso && (
             <p

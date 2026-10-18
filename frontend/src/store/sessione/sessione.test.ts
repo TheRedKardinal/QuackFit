@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { creaStore } from '../../store/store'
+import { creaStore } from '../store'
 import { caricaProfilo, impostaToken, logout } from './sessioneSlice'
-import { fetchFinto, profilo, rispostaErrore, rispostaJson, thunkCheFallisce } from './testUtili'
+import { fetchFinto, profilo, rispostaErrore, rispostaJson, thunkCheFallisce } from '../../testUtili'
 import { leggiToken, salvaToken } from './tokenSalvato'
 
 beforeEach(() => {

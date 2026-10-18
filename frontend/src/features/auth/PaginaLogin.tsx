@@ -11,9 +11,9 @@ import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { accedi } from './authThunk'
 import BarraAccesso from './BarraAccesso'
-import TestoPulsante from './TestoPulsante'
-import type { StatoVersoLogin } from './tipi'
-import { useInvioForm } from './useInvioForm'
+import TestoPulsante from '../../common/TestoPulsante'
+import type { StatoVersoLogin } from '../../common/statoVersoLogin'
+import { useInvioForm } from '../../common/useInvioForm'
 
 type Campo = keyof DatiLogin
 const ORDINE_CAMPI: Campo[] = ['email', 'password']

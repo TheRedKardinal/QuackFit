@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { datiErrore, type DatiErrore } from '../../api/ApiError'
 import { richiesta } from '../../api/client'
 import type { MeResponse } from '../../api/tipi'
-import { createAppAsyncThunk } from '../../store/hooks'
+import { createAppAsyncThunk } from '../hooks'
 
 export type StatoCaricamento = 'inattivo' | 'in_corso' | 'riuscito' | 'fallito'
 
@@ -53,6 +53,13 @@ const sessioneSlice = createSlice({
         stato.utente.emailVerificata = true
       }
     },
+    /** Nome e cognome modificati (PATCH /api/me, 204): si aggiorna il profilo in memoria, senza ricaricare /api/me. */
+    datiAnagraficiAggiornati(stato, action: PayloadAction<{ nome: string; cognome: string }>) {
+      if (stato.utente) {
+        stato.utente.nome = action.payload.nome
+        stato.utente.cognome = action.payload.cognome
+      }
+    },
     /** Il backend ha risposto 403 EMAIL_NON_VERIFICATA: le guardie portano alla schermata del codice. */
     emailNonVerificata(stato) {
       if (stato.utente) {
@@ -77,5 +84,6 @@ const sessioneSlice = createSlice({
   },
 })
 
-export const { impostaToken, logout, emailConfermata, emailNonVerificata } = sessioneSlice.actions
+export const { impostaToken, logout, emailConfermata, datiAnagraficiAggiornati, emailNonVerificata } =
+  sessioneSlice.actions
 export default sessioneSlice.reducer

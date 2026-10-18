@@ -3,7 +3,9 @@ import {
   MESSAGGI,
   requisitiPassword,
   strip,
+  validaCambioPassword,
   validaCodice,
+  validaDatiProfilo,
   validaLogin,
   validaPasswordDimenticata,
   validaRegistrazione,
@@ -134,5 +136,30 @@ describe('verifica email e recupero password', () => {
       nuovaPassword: MESSAGGI.passwordNonValida,
     })
     expect(validaReimpostazione({ email: 'strana', codice: '1', nuovaPassword: 'Àbcdefg1!' })).toEqual({})
+  })
+})
+
+describe('profilo (me.md)', () => {
+  it('dati personali: stesse regole di nome e cognome della registrazione', () => {
+    expect(validaDatiProfilo({ nome: '  Mario ', cognome: 'Rossi' })).toEqual({})
+    expect(validaDatiProfilo({ nome: '   ', cognome: 'a'.repeat(51) })).toEqual({
+      nome: MESSAGGI.nomeObbligatorio,
+      cognome: MESSAGGI.massimo50,
+    })
+    expect(validaDatiProfilo({ nome: `  ${'a'.repeat(50)}  `, cognome: 'Rossi' })).toEqual({})
+  })
+
+  it('cambio password: attuale solo obbligatoria, nuova valida e diversa', () => {
+    expect(validaCambioPassword({ passwordAttuale: '', nuovaPassword: '' })).toEqual({
+      passwordAttuale: MESSAGGI.passwordAttualeObbligatoria,
+      nuovaPassword: MESSAGGI.nuovaPasswordObbligatoria,
+    })
+    expect(validaCambioPassword({ passwordAttuale: 'x', nuovaPassword: 'Password 12' })).toEqual({
+      nuovaPassword: MESSAGGI.passwordNonValida,
+    })
+    expect(validaCambioPassword({ passwordAttuale: 'Password1!', nuovaPassword: 'Password1!' })).toEqual({
+      nuovaPassword: MESSAGGI.passwordUguale,
+    })
+    expect(validaCambioPassword({ passwordAttuale: 'qualunque', nuovaPassword: 'Nuova123!' })).toEqual({})
   })
 })

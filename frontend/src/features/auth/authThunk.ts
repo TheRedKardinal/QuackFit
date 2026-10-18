@@ -1,7 +1,7 @@
 import { datiErrore } from '../../api/ApiError'
 import { richiesta } from '../../api/client'
 import { createAppAsyncThunk } from '../../store/hooks'
-import { emailConfermata, impostaToken, logout } from './sessioneSlice'
+import { emailConfermata, impostaToken, logout } from '../../store/sessione/sessioneSlice'
 import type {
   LoginRequest,
   MessaggioResponse,

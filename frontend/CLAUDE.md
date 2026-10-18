@@ -34,17 +34,22 @@ Tutto ciò che non è nella progettazione è fuori perimetro (versione "vanilla"
 src
 ├── api          client HTTP comune (fetch, token, errori) e tipi delle risposte
 ├── store        configurazione di Redux (store, hook tipizzati)
+│   └── sessione   sessione di tutta l'app: token, profilo di /api/me, logout, reazione a 401/403
 ├── features
-│   ├── auth       registrazione, login, verifica email, password dimenticata
+│   ├── auth       registrazione, login, verifica email, password dimenticata, guardie delle rotte
 │   ├── utente     profilo, modifica dati, password, avatar, cambio email, cancellazione
 │   ├── percorso   mappa delle tappe e delle lezioni
 │   ├── lezione    svolgimento (quiz), vittoria/sconfitta, resoconto
 │   └── admin      gestione utenti e contenuti
-├── common       componenti riusabili (pulsanti, drawer, mascotte), errori, utilità
-└── styles       variabili CSS (design token) e stili globali
+├── common       componenti riusabili (pulsanti, drawer, mascotte, campi, guscio), errori, validazione, utilità
+├── styles       variabili CSS (design token) e stili globali
+└── testUtili.ts utilità condivise dai test (fetch finto, profilo di prova, risposte)
 ```
 - Ogni feature contiene i suoi componenti, il suo slice Redux, i suoi thunk e i suoi tipi.
-- Una feature può usare `common` e `api`, ma non gli interni di un'altra feature.
+- Una feature può usare `common`, `api` e `store` (sessione compresa), ma non gli interni di un'altra feature.
+  Ciò che serve a più feature (la sessione, `useInvioForm`, `TestoPulsante`, `RequisitoPassword`, `PulsanteEsci`)
+  sta in `store` o in `common`, non in una feature.
+- `store` e `common` **non importano mai** da `features/*` (niente dipendenze circolari).
 
 ## Convenzioni di codice
 - Solo componenti funzionali con hook. Un componente per file, nome del file = nome del componente.
@@ -83,7 +88,7 @@ src
 - **`ERRORE_RETE`** esiste solo nel frontend: richiesta che non arriva al server (o risposta che non arriva a noi),
   `ApiError` con `status` 0. Ha il suo messaggio, diverso da quello di `ERRORE_INTERNO`.
 - La reazione a 401 `NON_AUTENTICATO` e 403 `EMAIL_NON_VERIFICATA` è **globale**: i thunk rifiutano sempre con
-  `rejectWithValue(DatiErrore)` e un listener di Redux (`features/auth/sessioneListener.ts`) fa logout o segna l'email
+  `rejectWithValue(DatiErrore)` e un listener di Redux (`store/sessione/sessioneListener.ts`) fa logout o segna l'email
   come non verificata; le guardie delle rotte spostano l'utente. Le schermate non gestiscono questi due casi.
 - Il login fallito mostra **sempre il messaggio unico del backend** (non distingue email o password errate).
 
@@ -99,7 +104,7 @@ src
 - Form con `noValidate`: con errori non si invia, si mostrano gli errori sotto i campi e il cursore va sul primo campo
   sbagliato. L'errore di un campo sparisce appena lo si modifica.
 - Il login controlla solo i campi obbligatori, mai le regole della password.
-- Durante l'invio il pulsante è disattivato e un secondo click non parte (`features/auth/useInvioForm`).
+- Durante l'invio il pulsante è disattivato e un secondo click non parte (`common/useInvioForm`).
 - Codici a 6 cifre (verifica email, reimpostazione): campo `common/CodiceSeiCifre`, sei caselle che si riempiono in
   ordine senza buchi, solo cifre, incolla e autocompletamento (`one-time-code`). Nel frontend il codice è solo
   obbligatorio: un codice sbagliato lo segnala il backend.
@@ -114,6 +119,10 @@ src
 - Dopo un reset riuscito: si cancella l'eventuale token salvato (invalidato dal logout ovunque) e si va al login con
   un messaggio di conferma e l'email già compilata. **Nello state del router passano solo messaggio ed email**, mai
   codice o password; il login li legge e poi pulisce lo state con una navigazione `replace` (con F5 non riappaiono).
+- Stesso esito dopo il **cambio password** e la **conferma del cambio email** (204 senza nuovo token, logout ovunque):
+  messaggio ed email nello state (`common/statoVersoLogin`). Da una pagina protetta si va a **`/logout`**, che fa il
+  logout e poi porta al login con lo state: se il logout partisse dalla pagina, la sua guardia porterebbe al login da
+  sola, senza state, e il messaggio andrebbe perso.
 
 ## Sicurezza
 - Il token JWT si salva in **`localStorage`** e viaggia nell'header `Authorization`. Al logout si cancellano il token
@@ -132,8 +141,9 @@ Percorsi in inglese, come i path delle API:
 | --- | --- | --- |
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | accesso | solo senza token (con il token → `/`) |
 | `/verify-email` | codice di verifica | autenticato |
-| `/`, `/profile` | mappa, profilo | autenticato + email verificata |
+| `/`, `/profile`, `/profile/edit` | mappa, profilo, modifica profilo | autenticato + email verificata |
 | `/admin` | gestione | autenticato + email verificata + `ADMIN`/`SUPERADMIN` (altrimenti → `/`) |
+| `/logout` | tecnica: logout e poi `/login` con lo stesso state (`common/Uscita`) | nessuna |
 | qualunque altro | — | → `/` |
 
 ### Avvio della sessione
@@ -187,7 +197,12 @@ Percorsi in inglese, come i path delle API:
 ### Profilo — `GET /api/me`
 - Avatar, nome, cognome, email, etichetta del ruolo; solo tre metriche: streak attuale, record, lezioni completate.
 - `emailVerificata` serve solo a decidere dove portare l'utente (schermata del codice); non si mostra nel profilo.
-- Modifica nome e cognome, cambio password, cambio email (con codice), cambio avatar, cancellazione account.
+- `/profile` mostra il profilo (con "Modifica profilo" ed "Esci"); `/profile/edit` è la schermata "Modifica profilo":
+  dati personali e password (task 27), foto, cambio email con codice e cancellazione account (task 28).
+- Modifica di nome e cognome: stesse regole della registrazione; dopo il 204 il profilo in memoria si aggiorna con i
+  valori puliti (reducer `datiAnagraficiAggiornati`), senza ricaricare `/api/me` (il caricamento smonterebbe la pagina).
+- Cambio password: `PASSWORD_ATTUALE_ERRATA` sotto il campo; nuova password con le regole della registrazione e diversa
+  dall'attuale; dopo il 204 logout e login con il messaggio (vedi Verifica email e recupero password).
 - **Avatar**: campo file con `accept="image/*"` **senza** `capture` (galleria o fotocamera). Prima dell'invio si
   ridimensiona su un canvas a circa 512×512 e si comprime in jpeg/webp per restare sotto i 2 MB.
 

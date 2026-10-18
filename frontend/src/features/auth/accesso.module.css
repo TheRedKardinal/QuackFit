@@ -64,20 +64,6 @@
   letter-spacing: 0.05em;
 }
 
-.requisiti {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.25rem 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.requisitoOk {
-  color: var(--colore-successo-scuro);
-  font-weight: 700;
-}
-
 .nota {
   margin-bottom: 0;
 }

@@ -1,6 +1,6 @@
-import Pulsante from '../../common/Pulsante'
-import { useAppDispatch } from '../../store/hooks'
-import { logout } from './sessioneSlice'
+import Pulsante from './Pulsante'
+import { useAppDispatch } from '../store/hooks'
+import { logout } from '../store/sessione/sessioneSlice'
 
 /** Logout volontario: cancella token e stato; le guardie riportano al login. */
 function PulsanteEsci() {
