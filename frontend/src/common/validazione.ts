@@ -3,7 +3,8 @@
  * e i suoi errori `campi` hanno sempre la precedenza. Il frontend non deve MAI essere più severo del backend.
  *
  * Fonti da tenere allineate (vedi frontend/CLAUDE.md, Validazione dei form):
- * - backend/docs/specs/auth.md (Registrazione, Login, Verifica email, Password dimenticata, Reimpostazione) e i record
+ * - backend/docs/specs/auth.md (Registrazione, Login, Verifica email, Password dimenticata, Reimpostazione) e me.md
+ *   (Modifica dati, Cambio password), con i record ModificaDatiRequest, CambioPasswordRequest e
  *   RegistrazioneRequest, LoginRequest, VerificaEmailRequest, PasswordDimenticataRequest, ReimpostaPasswordRequest
  * - @PasswordValida e PasswordValidaValidator (backend/CLAUDE.md, Password)
  * Messaggi identici a quelli del backend.
@@ -16,6 +17,8 @@ export const MESSAGGI = {
   emailNonValida: 'Formato email non valido',
   passwordObbligatoria: 'La password è obbligatoria',
   nuovaPasswordObbligatoria: 'La nuova password è obbligatoria',
+  passwordAttualeObbligatoria: 'La password attuale è obbligatoria',
+  passwordUguale: 'La nuova password deve essere diversa da quella attuale',
   codiceObbligatorio: 'Il codice è obbligatorio',
   passwordNonValida:
     'La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale (massimo 72 byte)',
@@ -100,6 +103,20 @@ function passwordValida(password: string): boolean {
 
 export type ErroriCampi = Record<string, string>
 
+/** Nome o cognome già puliti: obbligatorio, poi al massimo 50 caratteri (registrazione e modifica dati). */
+function erroreNome(valore: string, messaggioObbligatorio: string): string | undefined {
+  if (vuoto(valore)) {
+    return messaggioObbligatorio
+  }
+  return valore.length > MASSIMO_NOME ? MESSAGGI.massimo50 : undefined
+}
+
+function aggiungiErrore(errori: ErroriCampi, campo: string, errore: string | undefined): void {
+  if (errore) {
+    errori[campo] = errore
+  }
+}
+
 export interface DatiRegistrazione {
   nome: string
   cognome: string
@@ -118,17 +135,8 @@ export function validaRegistrazione(dati: DatiRegistrazione): ErroriCampi {
   const cognome = strip(dati.cognome)
   const email = pulisciEmail(dati.email)
 
-  if (vuoto(nome)) {
-    errori.nome = MESSAGGI.nomeObbligatorio
-  } else if (nome.length > MASSIMO_NOME) {
-    errori.nome = MESSAGGI.massimo50
-  }
-
-  if (vuoto(cognome)) {
-    errori.cognome = MESSAGGI.cognomeObbligatorio
-  } else if (cognome.length > MASSIMO_NOME) {
-    errori.cognome = MESSAGGI.massimo50
-  }
+  aggiungiErrore(errori, 'nome', erroreNome(nome, MESSAGGI.nomeObbligatorio))
+  aggiungiErrore(errori, 'cognome', erroreNome(cognome, MESSAGGI.cognomeObbligatorio))
 
   if (vuoto(email)) {
     errori.email = MESSAGGI.emailObbligatoria
@@ -193,6 +201,45 @@ export function validaReimpostazione(dati: DatiReimpostazione): ErroriCampi {
     errori.nuovaPassword = MESSAGGI.nuovaPasswordObbligatoria
   } else if (!passwordValida(dati.nuovaPassword)) {
     errori.nuovaPassword = MESSAGGI.passwordNonValida
+  }
+  return errori
+}
+
+// --- profilo (me.md) ---
+
+export interface DatiProfilo {
+  nome: string
+  cognome: string
+}
+
+/** Modifica dati: nome e cognome con le stesse regole della registrazione. */
+export function validaDatiProfilo(dati: DatiProfilo): ErroriCampi {
+  const errori: ErroriCampi = {}
+  aggiungiErrore(errori, 'nome', erroreNome(strip(dati.nome), MESSAGGI.nomeObbligatorio))
+  aggiungiErrore(errori, 'cognome', erroreNome(strip(dati.cognome), MESSAGGI.cognomeObbligatorio))
+  return errori
+}
+
+export interface DatiCambioPassword {
+  passwordAttuale: string
+  nuovaPassword: string
+}
+
+/**
+ * Cambio password: l'attuale solo obbligatoria (sbagliata la segnala il backend), la nuova con le regole della
+ * registrazione e diversa dall'attuale (stesso messaggio del backend; qui si controlla prima di inviare).
+ */
+export function validaCambioPassword(dati: DatiCambioPassword): ErroriCampi {
+  const errori: ErroriCampi = {}
+  if (vuoto(dati.passwordAttuale)) {
+    errori.passwordAttuale = MESSAGGI.passwordAttualeObbligatoria
+  }
+  if (vuoto(dati.nuovaPassword)) {
+    errori.nuovaPassword = MESSAGGI.nuovaPasswordObbligatoria
+  } else if (!passwordValida(dati.nuovaPassword)) {
+    errori.nuovaPassword = MESSAGGI.passwordNonValida
+  } else if (dati.nuovaPassword === dati.passwordAttuale) {
+    errori.nuovaPassword = MESSAGGI.passwordUguale
   }
   return errori
 }

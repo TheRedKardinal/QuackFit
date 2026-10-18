@@ -1,0 +1,124 @@
+/* Stili delle pagine del profilo (visualizzazione e modifica). */
+
+.intestazione {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.nome {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.email {
+  margin: 0;
+}
+
+.ruolo {
+  padding: 0.125rem 0.75rem;
+  border: 2px solid var(--colore-bordo);
+  border-radius: 999px;
+  background-color: var(--colore-sfondo);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.titoloSezione {
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.metriche {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+}
+
+.metrica {
+  /* nel markup prima l'etichetta (dt) e poi il valore (dd); a schermo il numero sta sopra */
+  display: flex;
+  flex-direction: column-reverse;
+  /* con column-reverse, flex-end è in alto: i numeri restano allineati anche se un'etichetta va a capo */
+  justify-content: flex-end;
+  padding: 0.75rem 0.5rem;
+  border: 2px solid var(--colore-bordo);
+  border-bottom-width: 4px;
+  border-radius: 1rem;
+  background-color: var(--colore-superficie);
+  text-align: center;
+}
+
+.valore {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.iconaStreak {
+  color: var(--colore-streak);
+}
+
+.etichettaMetrica {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.azioni {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.barraModifica {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.titoloPagina {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.link {
+  color: inherit;
+  font-weight: 700;
+}
+
+.riga {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.messaggioOk {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid var(--colore-successo);
+  border-radius: 1rem;
+  background-color: var(--colore-superficie);
+  font-weight: 700;
+}
+
+.nota {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid var(--colore-bordo);
+  border-radius: 1rem;
+  background-color: var(--colore-sfondo);
+}
+
+.mostra {
+  padding: 0;
+  border: none;
+  background: none;
+  font-weight: 700;
+  text-decoration: underline;
+}
