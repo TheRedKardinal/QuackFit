@@ -3,6 +3,8 @@ package it.quackfit.utente;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -33,6 +35,21 @@ public interface UtenteRepository extends JpaRepository<Utente, UUID> {
 
 	/** Serve al seeder: c'è già un utente con questo ruolo? (il SUPERADMIN non può cancellarsi, vedi me.md) */
 	boolean existsByRuolo(Ruolo ruolo);
+
+	/** Lista dell'admin senza ricerca: solo utenti attivi, nell'ordine indicato dal Pageable. */
+	Page<Utente> findByDeletedAtIsNull(Pageable pagina);
+
+	/**
+	 * Lista dell'admin con ricerca: `modello` è già in minuscolo, con i jolly del LIKE "protetti" da '!' e circondato
+	 * da % (vedi AdminUtentiService). Query parametrizzata: il testo cercato non entra mai nel JPQL.
+	 */
+	@Query("""
+			select u from Utente u
+			where u.deletedAt is null
+			and (lower(u.nome) like :modello escape '!'
+				or lower(u.cognome) like :modello escape '!'
+				or lower(u.email) like :modello escape '!')""")
+	Page<Utente> cercaAttivi(@Param("modello") String modello, Pageable pagina);
 
 	/**
 	 * Salva solo l'URL della foto, con una UPDATE della sola colonna: dopo l'upload (fuori transazione) non si
