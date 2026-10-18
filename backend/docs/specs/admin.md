@@ -84,6 +84,9 @@ Gli ordini degli elementi attivi sono sempre **1, 2, 3… senza buchi**.
   duplicati o buchi:
   - tappe: tutte le tappe attive, sempre in ordine di `ordine` e `id` (stessa sequenza ovunque, niente deadlock)
   - lezioni: la riga della tappa genitore, che esiste anche quando la tappa non ha lezioni
+  - domande (creazione e cancellazione): la riga della lezione genitore; se dopo il lock la lezione risulta
+    inesistente o cancellata → 404 senza creare nulla
+  - i lock si prendono sempre dall'alto verso il basso (tappa → lezione): per le domande si blocca solo la lezione
   - **Limite accettato**: due creazioni simultanee della **prima** tappa a tabella vuota non hanno righe da bloccare
     e possono uscire entrambe con ordine 1. Si sistema con un riordino.
 
@@ -153,6 +156,29 @@ Lezione inesistente o cancellata → 404 `NON_TROVATO`. Qualunque regola violata
 
 I campi di un tipo diverso da quello indicato devono essere assenti.
 
+Come si controlla (400 `VALIDAZIONE`, con il campo in `campi`):
+- `@Valid` controlla solo testi e lunghezze: `testo`, `spiegazione`, `tipo` obbligatori; testi di opzioni e coppie
+  obbligatori e al massimo 200 caratteri (es. `campi["opzioni[0].testo"]`). `corretta` assente vale `false`.
+- Le regole del tipo le controlla il service, tutte in un solo metodo senza dipendenze da Spring (`RegoleDomanda`),
+  dopo `@Valid` (quindi in un secondo giro):
+
+  | Caso | Campo | Messaggio |
+  | --- | --- | --- |
+  | `VERO_FALSO` senza `rispostaVero` | `rispostaVero` | *"Indica se la risposta giusta è Vero o Falso"* |
+  | campo di un altro tipo presente | `rispostaVero` / `opzioni` / `coppie` | *"Non previsto per questo tipo di domanda"* |
+  | opzioni assenti, meno di 2 o più di 6 | `opzioni` | *"Servono da 2 a 6 opzioni"* |
+  | zero o più di una opzione corretta | `opzioni` | *"Una sola opzione deve essere corretta"* |
+  | coppie assenti, meno di 2 o più di 6 | `coppie` | *"Servono da 2 a 6 coppie"* |
+  | opzione ripetuta | `opzioni[i].testo` | *"Questa opzione è uguale a un'altra"* |
+  | elemento di sinistra ripetuto | `coppie[i].sinistra` | *"Questo elemento è uguale a un altro della colonna di sinistra"* |
+  | elemento di destra ripetuto | `coppie[i].destra` | *"Questo elemento è uguale a un altro della colonna di destra"* |
+
+- **Testi ripetuti**: vietati dentro la stessa lista (opzioni; elementi di sinistra; elementi di destra), confrontati
+  dopo `strip()` e senza distinguere maiuscole e minuscole; l'errore va sul secondo. Tra liste diverse sono ammessi:
+  lo stesso testo può stare a sinistra e a destra. Il frontend non ha regole proprie: mostra l'errore del backend
+  sotto il campo.
+- Prima le regole (400), poi la lezione: inesistente o cancellata → 404 e non si crea nulla.
+
 ### Modifica — PATCH /api/admin/questions/{questionId}
 Si modificano **solo i testi**. Risponde **200** con la domanda.
 
@@ -167,9 +193,28 @@ Regole:
 - su `VERO_FALSO` i testi delle opzioni non si modificano ("Vero" e "Falso" sono fissi)
 - **non si cambiano** `tipo`, quale opzione è corretta, il numero di opzioni o coppie né i collegamenti dell'abbinamento:
   la **struttura** si cambia cancellando e ricreando la domanda
+- i campi di struttura nel body (`tipo`, `corretta`, `rispostaVero`, `coppie`) vengono **ignorati**: il record della
+  PATCH ha solo i campi modificabili, la struttura resta invariata e i testi validi si salvano (come in tutte le PATCH,
+  nessuna configurazione speciale di Jackson). Il frontend, in modifica, non mostra controlli per il tipo né per la
+  risposta corretta: per cambiare la struttura si crea una nuova domanda e si cancella la vecchia.
+- le regole sui testi valgono anche qui, controllate sul **risultato finale** (testi nuovi al posto dei vecchi):
+  lunghezze, testo presente non vuoto (*"Il testo non può essere vuoto"*, *"La spiegazione non può essere vuota"*),
+  testi ripetuti nella stessa lista. Il testo ripetuto si segnala sul campo della richiesta che lo ha reso uguale
+  (es. `campi["opzioni[0].testo"]`, `campi["elementi[1].testo"]`)
+- errori del service (400 `VALIDAZIONE`):
+
+  | Caso | Campo | Messaggio |
+  | --- | --- | --- |
+  | `opzioni` su `VERO_FALSO` | `opzioni` | *"I testi di Vero e Falso non si modificano"* |
+  | `opzioni` su `ABBINAMENTO`, `elementi` su un altro tipo | `opzioni` / `elementi` | *"Non previsto per questo tipo di domanda"* |
+  | `id` che non appartiene alla domanda | `opzioni[i].id` / `elementi[i].id` | *"Non appartiene a questa domanda"* |
+  | stesso `id` due volte | `opzioni[i].id` / `elementi[i].id` | *"Indicato più di una volta"* |
+
+- con un errore non si salva nulla, nemmeno i testi validi della stessa richiesta
 
 ### Cancellazione — DELETE /api/admin/questions/{questionId}
 Risponde **204**. Soft delete della domanda; le altre vengono rinumerate.
+Creazione e cancellazione bloccano la riga della **lezione genitore** (vedi Ordine, Admin in contemporanea).
 Si può cancellare anche l'ultima domanda: la lezione resta, ma finché non ha domande non si può avviare
 (404 `NON_TROVATO`, vedi `percorso.md`).
 
@@ -200,8 +245,12 @@ Si può cancellare anche l'ultima domanda: la lezione resta, ma finché non ha d
 - Cancellazione a cascata: tappa → lezioni e domande; lezione → domande; elementi nascosti agli utenti e alla mappa;
   tentativi precedenti ancora leggibili.
 - Creazione domande: i tre tipi validi; troppe o poche opzioni; zero o due opzioni corrette; campi di un altro tipo;
-  testi vuoti o troppo lunghi.
-- Modifica domanda: solo i testi; id di un'altra domanda → 400; tentativo di cambiare struttura non possibile;
-  opzioni di VERO_FALSO non modificabili.
+  testi vuoti o troppo lunghi; un test per ogni regola di `RegoleDomanda`; testi ripetuti in ogni lista (opzioni,
+  sinistra, destra), anche con maiuscole diverse e spazi ai bordi; stesso testo a sinistra e a destra ammesso;
+  lezione cancellata → 404.
+- Modifica domanda: solo i testi; id di un'altra domanda → 400; campi di struttura nel body ignorati (domanda riletta
+  con la struttura invariata e i testi aggiornati); testo reso ripetuto → 400 sul campo; opzioni di VERO_FALSO non
+  modificabili.
+- Cancellazione domanda: rinumerazione 1…n; una nuova domanda va in fondo; si può cancellare l'ultima.
 - Permessi: un UTENTE su qualunque endpoint admin → 403 `ACCESSO_NEGATO` (anche se non verificato); senza token → 401;
   un ADMIN con email non verificata → 403 `EMAIL_NON_VERIFICATA`.

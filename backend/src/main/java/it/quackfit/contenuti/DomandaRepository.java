@@ -2,6 +2,7 @@ package it.quackfit.contenuti;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,6 +19,10 @@ public interface DomandaRepository extends JpaRepository<Domanda, UUID> {
 	List<Domanda> findByLezioneOrderByOrdineAsc(Lezione lezione);
 
 	long countByLezione(Lezione lezione);
+
+	/** Id della lezione di una domanda attiva, senza caricare la domanda (si legge prima di bloccare la lezione). */
+	@Query("select d.lezione.id from Domanda d where d.id = :id")
+	Optional<UUID> lezioneIdDi(@Param("id") UUID id);
 
 	/** Numero di domande attive per ogni lezione che ne ha (le lezioni senza domande non compaiono). */
 	@Query("select new it.quackfit.contenuti.ConteggioDomande(d.lezione.id, count(d)) from Domanda d group by d.lezione.id")

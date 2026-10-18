@@ -40,6 +40,10 @@ QuackFit/
 - Lavora **a piccoli passi**, seguendo gli step della checklist della card Trello.
 - Non modificare file che non riguardano la task in corso. Se serve, chiedi prima.
 - Spiega le scelte non ovvie: questo progetto serve anche a imparare e va discusso all'esame.
+- **Preferisci la soluzione più semplice**, la più vicina a quanto si vede nei corsi Spring Boot standard
+  (`@Valid`, service, repository), a meno che non siano in gioco la sicurezza o la corruzione dei dati.
+  Se una soluzione richiede strumenti nuovi (validator personalizzati, lock, async, SQL a mano), scrivilo nel piano
+  con l'alternativa semplice accanto, in due righe, e lascia scegliere all'utente.
 
 ## Git
 ### Branch

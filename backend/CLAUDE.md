@@ -244,10 +244,11 @@ Si applicano senza chiedere e si indicano nel piano della task; si chiede solo p
    **rileggi il dato dal database** dopo l'errore.
 2. **Contatori**: la lettura dell'utente di cui si aggiornano i contatori usa un lock pessimistico
    (`@Lock(LockModeType.PESSIMISTIC_WRITE)`), così richieste in parallelo non perdono aggiornamenti.
-   - **Ordini 1…n** (tappe e lezioni, vedi `admin.md`, Ordine): ogni operazione che cambia l'ordine (creazione,
-     riordino, cancellazione) blocca prima con `PESSIMISTIC_WRITE` e **poi** legge le righe da rinumerare.
+   - **Ordini 1…n** (tappe, lezioni e domande, vedi `admin.md`, Ordine): ogni operazione che cambia l'ordine
+     (creazione, riordino, cancellazione) blocca prima con `PESSIMISTIC_WRITE` e **poi** legge le righe da rinumerare.
      Tappe: tutte le tappe, sempre `ORDER BY ordine, id` (stessa sequenza ovunque, niente deadlock). Lezioni: la riga
-     della tappa genitore (esiste anche quando la tappa è vuota). Su H2 il lock non si prova: i test coprono la
+     della tappa genitore (esiste anche quando la tappa è vuota). Domande: la riga della lezione genitore. I lock si
+     prendono sempre dall'alto verso il basso (tappa → lezione). Su H2 il lock non si prova: i test coprono la
      rinumerazione, la concorrenza si verifica a mano su PostgreSQL con due sessioni.
 3. **Non rivelare se un'email è registrata**, né nel messaggio né nei tempi: dove l'utente non esiste (o è cancellato o
    bloccato) si confronta comunque la password con un **hash fittizio** calcolato all'avvio con lo stesso `PasswordEncoder`.
