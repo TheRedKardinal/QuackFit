@@ -1,5 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
+import CoachQuack from '../../common/CoachQuack'
 import CodiceSeiCifre, { type CodiceSeiCifreHandle } from '../../common/CodiceSeiCifre'
 import { messaggioErrore } from '../../common/messaggiErrore'
 import { SECONDI_ATTESA_429 } from '../../common/useConteggioAllaRovescia'
@@ -76,6 +77,7 @@ function PaginaVerificaEmail() {
       <BarraAccesso titolo="Verifica codice" />
 
       <div className={stili.centrato}>
+        <CoachQuack className={stili.mascotte} />
         <h2 className={stili.titolo}>Verifica la tua email</h2>
         <p className={stili.sottotitolo}>
           Abbiamo inviato un codice numerico a 6 cifre a <strong>{utente?.email}</strong>. Inseriscilo per sbloccare le

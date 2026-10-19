@@ -42,6 +42,32 @@
   text-align: center;
 }
 
+/* Coach Quack sopra il titolo (login, verifica email) */
+.mascotte {
+  margin: 0 auto 0.75rem;
+}
+
+/* scheda di Coach Quack in registrazione: mascotte a sinistra, frase a destra */
+.coach {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.coach > svg {
+  flex-shrink: 0;
+}
+
+.nomeCoach {
+  margin: 0;
+  font-weight: 800;
+}
+
+.fraseCoach {
+  margin: 0;
+}
+
 .riga {
   display: grid;
   grid-template-columns: 1fr 1fr;

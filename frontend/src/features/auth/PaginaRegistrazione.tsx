@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import type { DatiErrore } from '../../api/ApiError'
 import CampoTesto from '../../common/CampoTesto'
+import CoachQuack from '../../common/CoachQuack'
 import { messaggioErrore } from '../../common/messaggiErrore'
 import {
   MASSIMO_NOME,
@@ -12,6 +13,7 @@ import {
 } from '../../common/validazione'
 import MessaggioErrore from '../../common/MessaggioErrore'
 import Pulsante from '../../common/Pulsante'
+import Scheda from '../../common/Scheda'
 import { useAppDispatch } from '../../store/hooks'
 import stili from './accesso.module.css'
 import { registra } from './authThunk'
@@ -94,6 +96,14 @@ function PaginaRegistrazione() {
   return (
     <main className={stili.pagina}>
       <BarraAccesso titolo="Registrazione" />
+
+      <Scheda className={stili.coach}>
+        <CoachQuack dimensione={72} />
+        <div>
+          <p className={stili.nomeCoach}>Coach Quack</p>
+          <p className={stili.fraseCoach}>“Bastano pochi minuti al giorno per imparare le basi del fitness.”</p>
+        </div>
+      </Scheda>
 
       <h2 className={stili.titolo}>Crea il tuo profilo</h2>
       <p className={stili.sottotitolo}>Impara la teoria del fitness, una lezione breve alla volta.</p>
