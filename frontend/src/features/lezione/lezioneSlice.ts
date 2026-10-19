@@ -28,8 +28,12 @@ export interface StatoLezione {
   errori: number
   esito: EsitoTentativo
   ultimaRisposta: UltimaRisposta | null
-  /** Istante di avvio (ms), per il tempo impiegato mostrato a fine lezione (task 45). */
+  /** Istante di avvio (ms): il tempo mostrato a fine lezione va da qui a `fine`. */
   inizio: number | null
+  /** Istante dell'esito finale: 200 di complete (vittoria) o terzo errore (sconfitta). */
+  fine: number | null
+  /** Streak di /api/me all'avvio: la vittoria mostra "+1 OGGI" solo se quella nuova è più alta. */
+  streakPrima: number
   /** Risposta di complete: c'è solo dopo una chiusura riuscita. */
   chiusura: ChiusuraTentativo | null
 }
@@ -45,11 +49,20 @@ const statoVuoto: StatoLezione = {
   esito: 'IN_CORSO',
   ultimaRisposta: null,
   inizio: null,
+  fine: null,
+  streakPrima: 0,
   chiusura: null,
 }
 
-function nuovoTentativo(tentativoId: string, lezioneId: string, inizio: number): StatoLezione {
-  return { ...statoVuoto, tentativoId, lezioneId, inizio }
+interface DatiAvvio {
+  tentativoId: string
+  lezioneId: string
+  inizio: number
+  streakPrima: number
+}
+
+function nuovoTentativo({ tentativoId, lezioneId, inizio, streakPrima }: DatiAvvio): StatoLezione {
+  return { ...statoVuoto, tentativoId, lezioneId, inizio, streakPrima }
 }
 
 const lezioneSlice = createSlice({
@@ -57,9 +70,8 @@ const lezioneSlice = createSlice({
   initialState: statoVuoto,
   reducers: {
     /** Tentativo appena avviato dalla mappa (tentativoId nello state del router). */
-    lezioneIniziata(_stato, azione: PayloadAction<{ tentativoId: string; lezioneId: string; inizio: number }>) {
-      const { tentativoId, lezioneId, inizio } = azione.payload
-      return nuovoTentativo(tentativoId, lezioneId, inizio)
+    lezioneIniziata(_stato, azione: PayloadAction<DatiAvvio>) {
+      return nuovoTentativo(azione.payload)
     },
     /** "Continua" nel drawer: la domanda esce dalla coda (se sbagliata torna a fine giro). */
     avanti(stato) {
@@ -78,25 +90,28 @@ const lezioneSlice = createSlice({
         stato.caricata = true
       })
       .addCase(inviaRisposta.fulfilled, (stato, azione) => {
-        stato.errori = azione.payload.errori
-        stato.esito = azione.payload.esito
+        const { esito, istante } = azione.payload
+        stato.errori = esito.errori
+        stato.esito = esito.esito
+        if (esito.esito === 'FALLITO') {
+          stato.fine = istante
+        }
         const inviata = azione.meta.arg
         stato.ultimaRisposta = {
           domandaId: inviata.domandaId,
           opzioneId: 'opzioneId' in inviata ? inviata.opzioneId : null,
           coppie: 'coppie' in inviata ? inviata.coppie : [],
-          esito: azione.payload,
+          esito,
         }
       })
       .addCase(chiudiTentativo.fulfilled, (stato, azione) => {
-        stato.esito = azione.payload.esito
-        stato.errori = azione.payload.errori
-        stato.chiusura = azione.payload
+        const { chiusura, istante } = azione.payload
+        stato.esito = chiusura.esito
+        stato.errori = chiusura.errori
+        stato.chiusura = chiusura
+        stato.fine = istante
       })
-      .addCase(riavviaLezione.fulfilled, (_stato, azione) => {
-        const { tentativoId, lezioneId, inizio } = azione.payload
-        return nuovoTentativo(tentativoId, lezioneId, inizio)
-      })
+      .addCase(riavviaLezione.fulfilled, (_stato, azione) => nuovoTentativo(azione.payload))
   },
 })
 

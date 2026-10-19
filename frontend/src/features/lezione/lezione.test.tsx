@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../App'
 import { messaggioErrore } from '../../common/messaggiErrore'
@@ -80,19 +80,22 @@ interface Opzioni {
   contenuto?: () => Response
   /** Senza tentativoId nello state del router (pagina ricaricata). */
   senzaTentativo?: boolean
+  /** Profilo di /api/me dopo la chiusura (rilettura silenziosa); di default sempre profilo(). */
+  profiloDopo?: () => Response
 }
 
 /**
  * Apre /lessons/l1 come se arrivasse dalla mappa (tentativoId nello state). Il backend finto valuta le risposte con
  * GIUSTE e conta gli errori: al terzo il tentativo è FALLITO. POST /api/attempts ("Riprova") crea "t2".
  */
-function apri({ domande = [VF, SM], complete, risposta, contenuto, senzaTentativo }: Opzioni = {}) {
+function apri({ domande = [VF, SM], complete, risposta, contenuto, senzaTentativo, profiloDopo }: Opzioni = {}) {
   let errori = 0
+  let chiusa = false
   fetchFinto.mockImplementation(async (url, init) => {
     const percorso = String(url).replace(/^https?:\/\/[^/]+/, '')
     const metodo = init?.method ?? 'GET'
     if (percorso === '/api/me') {
-      return rispostaJson(200, profilo())
+      return chiusa && profiloDopo ? profiloDopo() : rispostaJson(200, profilo())
     }
     if (percorso === '/api/path/lessons/l1') {
       const corpo: ContenutoLezione = { id: 'l1', titolo: 'I muscoli', descrizione: 'D', domande }
@@ -136,6 +139,7 @@ function apri({ domande = [VF, SM], complete, risposta, contenuto, senzaTentativ
       return rispostaJson(200, esito)
     }
     if (percorso.endsWith('/complete')) {
+      chiusa = true
       return complete ? complete() : rispostaJson(200, CHIUSURA)
     }
     return rispostaErrore(500, 'ERRORE_INTERNO')
@@ -145,9 +149,15 @@ function apri({ domande = [VF, SM], complete, risposta, contenuto, senzaTentativ
     <Provider store={creaStore()}>
       <MemoryRouter initialEntries={[{ pathname: '/lessons/l1', state: senzaTentativo ? null : { tentativoId: 't1' } }]}>
         <App />
+        <Percorso />
       </MemoryRouter>
     </Provider>,
   )
+}
+
+/** Mostra il percorso corrente del router, per controllare dove portano i pulsanti. */
+function Percorso() {
+  return <output data-testid="percorso">{useLocation().pathname}</output>
 }
 
 function chiamate(fine: string) {
@@ -274,7 +284,9 @@ describe('lezione: coda, riproposta e chiusura', () => {
     await utente.click(await screen.findByRole('button', { name: 'Continua' }))
 
     expect(await screen.findByRole('heading', { name: 'Lezione non superata' })).toBeInTheDocument()
-    expect(screen.getByText('Errori 3/3', { selector: 'p' })).toBeInTheDocument()
+    expect(screen.getByText('3/3', { selector: 'dd' })).toBeInTheDocument()
+    expect(screen.getByText('Non superata')).toBeInTheDocument()
+    expect(screen.getByText('Tempo')).toBeInTheDocument()
     expect(chiamate('/complete')).toHaveLength(0)
 
     await utente.click(screen.getByRole('button', { name: 'Riprova' }))
@@ -400,6 +412,79 @@ describe('lezione: abbinamento', () => {
 
     expect(await screen.findByRole('heading', { name: 'Lezione completata!' })).toBeInTheDocument()
     expect(chiamate('/complete')).toHaveLength(1)
+  })
+})
+
+describe('lezione: vittoria e streak', () => {
+  /** Vince una lezione con le due domande giuste al primo colpo. */
+  async function vinci(utente: ReturnType<typeof userEvent.setup>) {
+    await rispondi(utente, 'Vero')
+    await utente.click(await screen.findByRole('button', { name: 'Continua' }))
+    await rispondi(utente, 'Il bicipite')
+    await utente.click(await screen.findByRole('button', { name: 'Continua' }))
+    await screen.findByRole('heading', { name: 'Lezione completata!' })
+  }
+
+  it('vittoria: streak e record dalla risposta, "+1 oggi" perché è salita, tracker, esito, errori e tempo', async () => {
+    const utente = userEvent.setup()
+    apri()
+
+    await vinci(utente)
+
+    expect(screen.getByText('Streak: 4 giorni')).toBeInTheDocument()
+    expect(screen.getByText('+1 oggi')).toBeInTheDocument()
+    expect(screen.getByRole('list', { name: 'Giorni di streak di questa settimana' })).toBeInTheDocument()
+    expect(screen.getByText('Superata')).toBeInTheDocument()
+    expect(screen.getByText('1/3', { selector: 'dd' })).toBeInTheDocument()
+    expect(screen.getByText(/^\d+s$/)).toBeInTheDocument()
+  })
+
+  it('"+1 oggi" non compare se la streak non è salita (seconda lezione dello stesso giorno)', async () => {
+    const utente = userEvent.setup()
+    // profilo() ha streak 2: la chiusura la lascia a 2
+    apri({ complete: () => rispostaJson(200, { esito: 'SUPERATO', errori: 0, streak: { valore: 2, record: 5 } }) })
+
+    await vinci(utente)
+
+    expect(screen.getByText('Streak: 2 giorni')).toBeInTheDocument()
+    expect(screen.queryByText('+1 oggi')).not.toBeInTheDocument()
+  })
+
+  it('dopo complete il profilo si rilegge: la barra della mappa mostra la streak nuova', async () => {
+    const utente = userEvent.setup()
+    apri({ profiloDopo: () => rispostaJson(200, profilo({ streak: { valore: 4, record: 7 }, lezioniCompletate: 4 })) })
+
+    await vinci(utente)
+    await utente.click(screen.getByRole('button', { name: 'Continua' }))
+
+    expect(await screen.findByRole('heading', { name: 'Percorso' })).toBeInTheDocument()
+    expect(await screen.findByLabelText(/Streak: 4/)).toBeInTheDocument()
+  })
+
+  it('rilettura del profilo fallita: nessun errore e la vittoria resta', async () => {
+    const utente = userEvent.setup()
+    apri({ profiloDopo: () => rispostaErrore(500, 'ERRORE_INTERNO') })
+
+    await vinci(utente)
+
+    await vi.waitFor(() =>
+      expect(fetchFinto.mock.calls.filter(([url]) => String(url).endsWith('/api/me')).length).toBeGreaterThan(1),
+    )
+    expect(screen.getByRole('heading', { name: 'Lezione completata!' })).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('PROVVISORIO (task 46): "Rivedi risposte" porta a /attempts/:id con il tentativo; "Torna alla mappa" funziona', async () => {
+    const utente = userEvent.setup()
+    apri()
+
+    await vinci(utente)
+    await utente.click(screen.getByRole('button', { name: 'Rivedi risposte' }))
+
+    expect(await screen.findByText('Resoconto in arrivo: presto potrai rivedere qui le tue risposte.')).toBeInTheDocument()
+    expect(screen.getByTestId('percorso')).toHaveTextContent('/attempts/t1')
+    await utente.click(screen.getByRole('button', { name: 'Torna alla mappa' }))
+    expect(await screen.findByRole('heading', { name: 'Percorso' })).toBeInTheDocument()
   })
 })
 
