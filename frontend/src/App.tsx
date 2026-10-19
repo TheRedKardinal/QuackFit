@@ -8,6 +8,7 @@ import PaginaRegistrazione from './features/auth/PaginaRegistrazione'
 import PaginaReimpostaPassword from './features/auth/PaginaReimpostaPassword'
 import PaginaVerificaEmail from './features/auth/PaginaVerificaEmail'
 import LayoutAdmin from './features/admin/LayoutAdmin'
+import PaginaContenuti from './features/admin/PaginaContenuti'
 import PaginaUtenti from './features/admin/PaginaUtenti'
 import RichiedeAdmin from './features/auth/RichiedeAdmin'
 import RichiedeAutenticazione from './features/auth/RichiedeAutenticazione'
@@ -19,7 +20,7 @@ import PaginaProfilo from './features/utente/PaginaProfilo'
 /**
  * Rotte dell'app con le guardie annidate: autenticato → email verificata → admin.
  * Le pagine dell'app stanno nel guscio LayoutApp (barra in alto e in basso), quelle admin in LayoutAdmin
- * (sidebar su desktop, barra Utenti/Contenuti su mobile). Mappa e contenuti admin sono ancora segnaposto.
+ * (sidebar su desktop, barra Utenti/Contenuti su mobile). La mappa è ancora un segnaposto.
  * Il router (BrowserRouter) sta in main.tsx, così i test possono usare MemoryRouter.
  */
 function App() {
@@ -45,7 +46,7 @@ function App() {
             <Route path="/admin" element={<LayoutAdmin />}>
               <Route index element={<Navigate to="/admin/users" replace />} />
               <Route path="users" element={<PaginaUtenti />} />
-              <Route path="content" element={<Segnaposto titolo="Gestione contenuti" />} />
+              <Route path="content" element={<PaginaContenuti />} />
             </Route>
           </Route>
         </Route>

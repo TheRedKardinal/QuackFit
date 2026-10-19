@@ -353,3 +353,126 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
+/* --- pagina contenuti: tappe e lezioni --- */
+
+.intestazionePagina {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.elencoTappe,
+.elencoLezioni {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tappa {
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+/* l'intera intestazione apre e chiude la tappa: è un vero <button> con aria-expanded */
+.intestazioneTappa {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+
+.numeroTappa {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-bottom: 3px solid var(--colore-primario-scuro);
+  border-radius: 0.75rem;
+  background-color: var(--colore-primario);
+  font-weight: 900;
+}
+
+.testiTappa,
+.testiLezione {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.titoloTappa {
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.titoloLezione {
+  font-weight: 800;
+}
+
+.descrizioneTappa {
+  font-size: 0.875rem;
+}
+
+.conteggio {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.freccia {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.azioniElemento {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+}
+
+.azioniElemento > button {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.corpoTappa {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--colore-bordo);
+}
+
+.etichettaSezione {
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.lezione {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border: 2px solid var(--colore-bordo);
+  border-radius: 1rem;
+  background-color: var(--colore-sfondo);
+}
+
+.formContenuto {
+  margin: 0;
+}
+
+.intestazioneForm {
+  margin-bottom: 0.75rem;
+  font-weight: 800;
+}

@@ -23,3 +23,29 @@ export interface Pagina<T> {
 
 /** I soli ruoli che si possono assegnare: SUPERADMIN non si assegna mai. */
 export type RuoloAssegnabile = 'UTENTE' | 'ADMIN'
+
+/** Una lezione nella vista admin (LezioneAdminResponse): stessa forma nell'elenco e nelle risposte. */
+export interface LezioneAdmin {
+  id: string
+  titolo: string
+  descrizione: string
+  ordine: number
+  tappaId: string
+  numeroDomande: number
+}
+
+/** Una tappa nella vista admin (TappaAdminResponse), con le sue lezioni attive in ordine. */
+export interface TappaAdmin {
+  id: string
+  titolo: string
+  descrizione: string
+  ordine: number
+  lezioni: LezioneAdmin[]
+}
+
+/** Body di creazione e modifica di tappe e lezioni; in modifica ogni campo è facoltativo. */
+export interface DatiContenutoRequest {
+  titolo?: string
+  descrizione?: string
+  ordine?: number
+}

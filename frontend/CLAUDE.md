@@ -248,6 +248,25 @@ Percorsi in inglese, come i path delle API:
   - Dello Stitch **non** si realizzano: contatori per ruolo (il backend dà solo il totale), colonna ID, riquadri
     RBAC/endpoint, "Backend online", le voci Panoramica/Report/Asset e il selettore "Mostra".
 - Contenuti: riordino di tappe e lezioni con pulsanti **Su / Giù** (`PATCH` con `ordine`); le domande **non si riordinano**.
+  - **Tappe e lezioni** (`features/admin/PaginaContenuti`, task 33): una colonna sola; l'editor delle domande (la
+    seconda colonna su desktop) arriva con la task 34.
+  - **Accordion** su mobile e su desktop: ogni tappa ha un pulsante con `aria-expanded`, **una sola tappa aperta** alla
+    volta, all'avvio la prima. Si ricorda l'**id** della tappa aperta, non la posizione: dopo un riordino o una
+    rilettura resta aperta la stessa; se viene cancellata si apre la prima. Una tappa appena creata si apre.
+  - **Form in linea** nella card (titolo e descrizione), uno solo aperto alla volta: "+ Nuova tappa", Modifica,
+    "+ Aggiungi lezione". Regole in `common/validazione` (`validaContenuto`: obbligatori, massimo 100 e 300 caratteri
+    dopo `strip()`, messaggi del backend); in modifica si inviano sempre entrambi i testi.
+  - **Su/Giù**: `ordine` ∓ 1; Su disattivato sul primo e Giù sull'ultimo; durante un riordino tutti i Su/Giù sono
+    disattivati (una richiesta alla volta).
+  - **Dopo ogni operazione si rilegge l'elenco** (`GET /api/admin/stages`), anche dopo una modifica dei soli testi:
+    una strada sola.
+  - **Cancellazione** con conferma nel `Drawer` rosso, con quello che sparisce: *"Eliminare la tappa «X»? Verranno
+    eliminate anche le sue N lezioni e le loro domande."*, *"Eliminare la lezione «X»? Verranno eliminate anche le sue
+    N domande."* (senza la seconda frase se non c'è nulla sotto).
+  - Un **404** (elemento cancellato da un altro admin) o un 400 sull'ordine: messaggio del codice e rilettura
+    dell'elenco; con un 404 il form aperto si chiude. Gli altri errori di un form restano nel form.
+  - Dello Stitch **non** si realizzano: "tempo stimato" (il backend non lo dà), riquadri con gli endpoint,
+    "Backend online", le voci Panoramica/Report/Asset.
   Nell'editor domande le soluzioni sono visibili (solo admin). Nella modifica di una domanda si cambiano solo i testi;
   per cambiare tipo o struttura si cancella e si ricrea. Cancellare chiede sempre conferma.
 
