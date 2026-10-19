@@ -1,12 +1,15 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { avanza, codaIniziale, type Coda } from './codaLezione'
 import { caricaContenuto, chiudiTentativo, inviaRisposta, riavviaLezione } from './lezioneThunk'
-import type { ChiusuraTentativo, DomandaLezione, EsitoRisposta, EsitoTentativo } from './tipi'
+import type { ChiusuraTentativo, Coppia, DomandaLezione, EsitoRisposta, EsitoTentativo } from './tipi'
 
 /** L'esito appena arrivato, mostrato nel drawer finché l'utente non preme "Continua". */
 export interface UltimaRisposta {
   domandaId: string
-  opzioneId: string
+  /** Opzione scelta (null per l'abbinamento). */
+  opzioneId: string | null
+  /** Coppie scelte (vuota per Vero/Falso e Scelta multipla). */
+  coppie: Coppia[]
   esito: EsitoRisposta
 }
 
@@ -65,13 +68,6 @@ const lezioneSlice = createSlice({
         stato.ultimaRisposta = null
       }
     },
-    /**
-     * PROVVISORIO (task 44): una domanda di abbinamento si salta senza rispondere ("Domanda in arrivo"), quindi la
-     * chiusura risponderà 400. Da togliere quando c'è l'abbinamento.
-     */
-    domandaSaltata(stato) {
-      stato.coda = avanza(stato.coda, true)
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -84,7 +80,13 @@ const lezioneSlice = createSlice({
       .addCase(inviaRisposta.fulfilled, (stato, azione) => {
         stato.errori = azione.payload.errori
         stato.esito = azione.payload.esito
-        stato.ultimaRisposta = { ...azione.meta.arg, esito: azione.payload }
+        const inviata = azione.meta.arg
+        stato.ultimaRisposta = {
+          domandaId: inviata.domandaId,
+          opzioneId: 'opzioneId' in inviata ? inviata.opzioneId : null,
+          coppie: 'coppie' in inviata ? inviata.coppie : [],
+          esito: azione.payload,
+        }
       })
       .addCase(chiudiTentativo.fulfilled, (stato, azione) => {
         stato.esito = azione.payload.esito
@@ -98,5 +100,5 @@ const lezioneSlice = createSlice({
   },
 })
 
-export const { lezioneIniziata, avanti, domandaSaltata } = lezioneSlice.actions
+export const { lezioneIniziata, avanti } = lezioneSlice.actions
 export default lezioneSlice.reducer

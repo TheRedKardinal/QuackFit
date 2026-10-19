@@ -1,7 +1,7 @@
 import { datiErrore } from '../../api/ApiError'
 import { richiesta } from '../../api/client'
 import { createAppAsyncThunk } from '../../store/hooks'
-import type { ChiusuraTentativo, ContenutoLezione, EsitoRisposta } from './tipi'
+import type { ChiusuraTentativo, ContenutoLezione, EsitoRisposta, RispostaRequest } from './tipi'
 
 /** Domande della lezione, già mescolate dal backend (GET /api/path/lessons/{id}). */
 export const caricaContenuto = createAppAsyncThunk(
@@ -15,15 +15,18 @@ export const caricaContenuto = createAppAsyncThunk(
   },
 )
 
-/** Una risposta alla volta (POST /api/attempts/{id}/answers): opzione per Vero/Falso e Scelta multipla. */
+/**
+ * Una risposta alla volta (POST /api/attempts/{id}/answers): l'opzione per Vero/Falso e Scelta multipla, tutte le
+ * coppie insieme per l'abbinamento. Il corpo contiene solo il campo del tipo.
+ */
 export const inviaRisposta = createAppAsyncThunk(
   'lezione/inviaRisposta',
-  async ({ domandaId, opzioneId }: { domandaId: string; opzioneId: string }, { getState, rejectWithValue }) => {
+  async (risposta: RispostaRequest, { getState, rejectWithValue }) => {
     const { sessione, lezione } = getState()
     try {
       return await richiesta<EsitoRisposta>(`/api/attempts/${lezione.tentativoId}/answers`, {
         metodo: 'POST',
-        corpo: { domandaId, opzioneId },
+        corpo: risposta,
         token: sessione.token,
       })
     } catch (errore) {

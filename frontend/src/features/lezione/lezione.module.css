@@ -189,3 +189,76 @@
   display: grid;
   gap: 0.75rem;
 }
+
+/* --- abbinamento --- */
+
+.contatoreCoppie {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.abbinamento {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.colonna {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tessera {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.625rem 0.75rem;
+  border: 2px solid var(--colore-bordo);
+  border-bottom-width: 4px;
+  border-radius: 1rem;
+  background-color: var(--colore-superficie);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.tessera:focus-visible {
+  outline: 3px solid var(--colore-streak);
+  outline-offset: 2px;
+}
+
+.tessera:disabled {
+  color: inherit;
+  cursor: default;
+}
+
+.collegata {
+  border-color: var(--colore-primario-scuro);
+}
+
+.numeroCoppia {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background-color: var(--colore-sfondo);
+  font-weight: 800;
+}
+
+.esitoCoppie {
+  padding-left: 0;
+  list-style: none;
+}
