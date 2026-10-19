@@ -8,6 +8,8 @@
  *   CambioPasswordRequest, CambioEmailRequest, ConfermaCambioEmailRequest, CancellazioneAccountRequest e
  *   RegistrazioneRequest, LoginRequest, VerificaEmailRequest, PasswordDimenticataRequest, ReimpostaPasswordRequest
  * - @PasswordValida e PasswordValidaValidator (backend/CLAUDE.md, Password)
+ * - backend/docs/specs/admin.md (Tappe, Lezioni) con i record CreazioneTappaRequest, ModificaTappaRequest,
+ *   CreazioneLezioneRequest e ModificaLezioneRequest
  * Messaggi identici a quelli del backend.
  */
 
@@ -26,10 +28,17 @@ export const MESSAGGI = {
     'La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale (massimo 72 byte)',
   massimo50: 'Massimo 50 caratteri',
   massimo254: 'Massimo 254 caratteri',
+  titoloObbligatorio: 'Il titolo è obbligatorio',
+  descrizioneObbligatoria: 'La descrizione è obbligatoria',
+  massimo100: 'Massimo 100 caratteri',
+  massimo300: 'Massimo 300 caratteri',
 } as const
 
 export const MASSIMO_NOME = 50
 export const MASSIMO_EMAIL = 254
+/** Titolo e descrizione di tappe e lezioni (Tappa/Lezione.MAX_TITOLO e MAX_DESCRIZIONE). */
+export const MASSIMO_TITOLO = 100
+export const MASSIMO_DESCRIZIONE = 300
 const MINIMO_CARATTERI_PASSWORD = 8
 /** Limite di BCrypt, in byte UTF-8 (PasswordValidaValidator.MASSIMO_BYTE). */
 const MASSIMO_BYTE_PASSWORD = 72
@@ -276,4 +285,33 @@ export function validaCambioEmail(dati: DatiCambioEmail, emailAttuale: string): 
 /** Cancellazione dell'account: password solo obbligatoria. */
 export function validaCancellazione(password: string): ErroriCampi {
   return vuoto(password) ? { password: MESSAGGI.passwordObbligatoria } : {}
+}
+
+// --- admin: tappe e lezioni ---
+
+export interface DatiContenuto {
+  titolo: string
+  descrizione: string
+}
+
+/**
+ * Titolo e descrizione di una tappa o di una lezione, in creazione e in modifica: obbligatori e con un massimo,
+ * contati dopo strip() come fa il backend. In modifica il frontend invia sempre entrambi i campi, quindi vale la stessa
+ * regola (il backend accetta anche un campo assente, ma un testo presente non può essere vuoto).
+ */
+export function validaContenuto(dati: DatiContenuto): ErroriCampi {
+  const errori: ErroriCampi = {}
+  const titolo = strip(dati.titolo)
+  const descrizione = strip(dati.descrizione)
+  if (titolo === '') {
+    errori.titolo = MESSAGGI.titoloObbligatorio
+  } else if (titolo.length > MASSIMO_TITOLO) {
+    errori.titolo = MESSAGGI.massimo100
+  }
+  if (descrizione === '') {
+    errori.descrizione = MESSAGGI.descrizioneObbligatoria
+  } else if (descrizione.length > MASSIMO_DESCRIZIONE) {
+    errori.descrizione = MESSAGGI.massimo300
+  }
+  return errori
 }
