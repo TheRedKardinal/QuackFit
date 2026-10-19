@@ -1,0 +1,203 @@
+/* Coach Quack: colori solo dai token, animazioni solo CSS. */
+
+.mascotte {
+  display: block;
+  overflow: visible;
+}
+
+/* le trasformazioni ruotano e scalano ogni parte attorno al proprio centro */
+.figura,
+.ala,
+.occhi,
+.goccia {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.figura {
+  transform-origin: center bottom;
+}
+
+/* le ali ruotano attorno alla spalla */
+.alaSinistra {
+  transform-origin: right top;
+}
+
+.alaDestra {
+  transform-origin: left top;
+}
+
+.ombra {
+  fill: var(--colore-bordo);
+}
+
+.corpo {
+  fill: var(--colore-primario);
+}
+
+.ala {
+  fill: var(--colore-primario-scuro);
+}
+
+.pancia {
+  fill: var(--colore-primario-chiaro);
+}
+
+.arancio {
+  fill: var(--colore-streak);
+}
+
+.boccaAperta {
+  fill: var(--colore-streak-scuro);
+}
+
+.fascia {
+  fill: var(--colore-mascotte-fascia);
+}
+
+.guancia {
+  fill: var(--colore-streak);
+  opacity: 0.35;
+}
+
+.pupilla {
+  fill: var(--colore-mascotte-occhi);
+}
+
+.riflesso {
+  fill: var(--colore-superficie);
+}
+
+.occhioChiuso,
+.sopracciglio {
+  fill: none;
+  stroke: var(--colore-mascotte-occhi);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.goccia {
+  fill: var(--colore-superficie);
+  stroke: var(--colore-bordo-scuro);
+  stroke-width: 1.2;
+}
+
+/* --- neutro: ondeggia piano e sbatte le palpebre --- */
+
+.neutro .figura {
+  animation: ondeggia 3s ease-in-out infinite;
+}
+
+.neutro .occhi {
+  animation: sbatte 4s ease-in-out infinite;
+}
+
+@keyframes ondeggia {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes sbatte {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+/* --- contento: saltella e sbatte le ali --- */
+
+.contento .figura {
+  animation: saltella 0.9s ease-in-out infinite;
+}
+
+.contento .alaSinistra {
+  transform: rotate(35deg);
+  animation: alaSinistra 0.45s ease-in-out infinite alternate;
+}
+
+.contento .alaDestra {
+  transform: rotate(-35deg);
+  animation: alaDestra 0.45s ease-in-out infinite alternate;
+}
+
+@keyframes saltella {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  15% {
+    transform: translateY(0) scale(1.04, 0.96);
+  }
+  50% {
+    transform: translateY(-10px) scale(0.98, 1.02);
+  }
+}
+
+@keyframes alaSinistra {
+  from {
+    transform: rotate(20deg);
+  }
+  to {
+    transform: rotate(50deg);
+  }
+}
+
+@keyframes alaDestra {
+  from {
+    transform: rotate(-20deg);
+  }
+  to {
+    transform: rotate(-50deg);
+  }
+}
+
+/* --- triste: si piega piano e suda --- */
+
+.triste .figura {
+  transform: rotate(-3deg) translateY(2px);
+  animation: sospira 3.5s ease-in-out infinite;
+}
+
+.triste .goccia {
+  animation: cade 2.2s ease-in infinite;
+}
+
+@keyframes sospira {
+  0%,
+  100% {
+    transform: rotate(-3deg) translateY(2px);
+  }
+  50% {
+    transform: rotate(-5deg) translateY(4px);
+  }
+}
+
+@keyframes cade {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+
+/* con la riduzione del movimento resta solo la posa dello stato */
+@media (prefers-reduced-motion: reduce) {
+  .mascotte * {
+    animation: none !important;
+  }
+}

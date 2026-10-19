@@ -8,11 +8,19 @@
   --colore-bordo: #e5e7eb;
   --colore-errore: #ba1a1a;
 
+  /* Coach Quack: fascia sportiva e occhi (gli altri colori della mascotte sono quelli sopra) */
+  --colore-mascotte-fascia: #e53935;
+  --colore-mascotte-occhi: #1f1f1f;
+
   /* Tonalità scure per il bordo dei pulsanti "push", ricavate dal colore base */
   --colore-primario-scuro: color-mix(in srgb, var(--colore-primario), black 15%);
   --colore-successo-scuro: color-mix(in srgb, var(--colore-successo), black 15%);
   --colore-bordo-scuro: color-mix(in srgb, var(--colore-bordo), black 15%);
   --colore-errore-scuro: color-mix(in srgb, var(--colore-errore), black 15%);
+
+  /* Tonalità ricavate per la mascotte: pancia più chiara e interno del becco aperto */
+  --colore-primario-chiaro: color-mix(in srgb, var(--colore-primario), white 55%);
+  --colore-streak-scuro: color-mix(in srgb, var(--colore-streak), black 30%);
 
   --font-base: 'Nunito Sans', system-ui, sans-serif;
 }
