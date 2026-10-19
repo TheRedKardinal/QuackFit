@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import CoachQuack from './CoachQuack'
 import Drawer from './Drawer'
 import { messaggioErrore } from './messaggiErrore'
 import MessaggioErrore from './MessaggioErrore'
@@ -76,5 +77,25 @@ describe('Drawer', () => {
     await utente.keyboard('{Escape}')
 
     expect(onChiudi).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('CoachQuack', () => {
+  it('è decorativo e di default neutro', () => {
+    const { container } = render(<CoachQuack />)
+
+    const svg = container.querySelector('svg')
+    expect(svg).toHaveAttribute('aria-hidden', 'true')
+    expect(svg).toHaveAttribute('data-stato', 'neutro')
+    expect(svg).toHaveAttribute('width', '120')
+  })
+
+  it.each(['neutro', 'contento', 'triste'] as const)('disegna lo stato %s', (stato) => {
+    const { container } = render(<CoachQuack stato={stato} dimensione={72} />)
+
+    const svg = container.querySelector('svg')
+    expect(svg).toHaveAttribute('data-stato', stato)
+    expect(svg).toHaveAttribute('width', '72')
+    expect(svg?.getAttribute('class')).toContain(stato)
   })
 })

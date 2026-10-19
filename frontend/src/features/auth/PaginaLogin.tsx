@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { DatiErrore } from '../../api/ApiError'
 import CampoTesto from '../../common/CampoTesto'
+import CoachQuack from '../../common/CoachQuack'
 import { messaggioErrore } from '../../common/messaggiErrore'
 import { validaLogin, type DatiLogin, type ErroriCampi } from '../../common/validazione'
 import MessaggioErrore from '../../common/MessaggioErrore'
@@ -91,6 +92,7 @@ function PaginaLogin() {
       <BarraAccesso titolo="Login" />
 
       <div className={stili.centrato}>
+        <CoachQuack className={stili.mascotte} />
         <h2 className={stili.titolo}>Bentornato su QuackFit!</h2>
         <p className={stili.sottotitolo}>Accedi per continuare la tua streak di apprendimento.</p>
       </div>
