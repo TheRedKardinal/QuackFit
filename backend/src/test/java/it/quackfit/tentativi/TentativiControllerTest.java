@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,12 +39,15 @@ import it.quackfit.contenuti.Tappa;
 import it.quackfit.contenuti.TappaRepository;
 import it.quackfit.contenuti.TipoDomanda;
 import it.quackfit.security.JwtService;
+import it.quackfit.utente.Streak;
+import it.quackfit.utente.StreakRepository;
 import it.quackfit.utente.Utente;
 import it.quackfit.utente.UtenteRepository;
 
 /**
- * Test di integrazione di avvio e risposte con H2 (tentativi.md, Regole generali, Avvio, Risposta).
- * Il lock sul tentativo non si prova qui (su H2 non dimostra la concorrenza): si verifica a mano su PostgreSQL.
+ * Test di integrazione di avvio, risposte e chiusura con H2 (tentativi.md, Regole generali, Avvio, Risposta,
+ * Chiusura). I lock su tentativo e streak non si provano qui (su H2 non dimostrano la concorrenza): si verificano a mano
+ * su PostgreSQL. Tutti i casi della streak sono negli unit test di {@link TentativiService#aggiornaStreak}.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -72,7 +78,13 @@ class TentativiControllerTest {
 	private TentativoLezioneRepository tentativoRepository;
 
 	@Autowired
+	private StreakRepository streakRepository;
+
+	@Autowired
 	private JdbcTemplate jdbc;
+
+	@Autowired
+	private Clock clock;
 
 	private Utente mario;
 	private Tappa tappa;
@@ -102,7 +114,7 @@ class TentativiControllerTest {
 		abbinamento = domandaRepository.save(abbinamento);
 	}
 
-	/** Prima risposte e tentativi, poi i contenuti con SQL diretto (soft delete), infine gli utenti. */
+	/** Prima risposte e tentativi, poi i contenuti con SQL diretto (soft delete), infine streak e utenti. */
 	@AfterEach
 	void pulisci() {
 		jdbc.update("delete from risposta_abbinamento");
@@ -114,6 +126,7 @@ class TentativiControllerTest {
 		jdbc.update("delete from domanda");
 		jdbc.update("delete from lezione");
 		jdbc.update("delete from tappa");
+		jdbc.update("delete from streak");
 		utenteRepository.deleteAll();
 	}
 
@@ -177,6 +190,31 @@ class TentativiControllerTest {
 
 	private void cancella(String tabella, UUID id) {
 		jdbc.update("update " + tabella + " set deleted_at = ? where id = ?", Timestamp.from(CREAZIONE), id);
+	}
+
+	private ResultActions chiusura(Utente utente, UUID tentativo) throws Exception {
+		return mockMvc.perform(post("/api/attempts/" + tentativo + "/complete")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.genera(utente)));
+	}
+
+	/** Streak di mario con valore, record e ultima attività dati. */
+	private Streak streak(int valore, int record, LocalDate ultimaAttivita) {
+		Streak streak = new Streak(mario, CREAZIONE);
+		streak.setValore(valore);
+		streak.setRecord(record);
+		streak.setUltimaAttivita(ultimaAttivita);
+		return streakRepository.save(streak);
+	}
+
+	private Streak streakDiMario() {
+		return streakRepository.findByUtente(mario).orElseThrow();
+	}
+
+	private void rispondiGiustoATutte(UUID id) throws Exception {
+		conOpzione(id, veroFalso, opzione(veroFalso, "Falso")).andExpect(jsonPath("$.corretta").value(true));
+		conOpzione(id, multipla, opzione(multipla, "B")).andExpect(jsonPath("$.corretta").value(true));
+		conCoppie(id, abbinamento, coppia(abbinamento, "Bicipite", "Braccio"),
+				coppia(abbinamento, "Quadricipite", "Coscia")).andExpect(jsonPath("$.corretta").value(true));
 	}
 
 	// --- avvio ---
@@ -526,6 +564,127 @@ class TentativiControllerTest {
 				.andExpect(jsonPath("$.corretta").value(false));
 	}
 
+	// --- chiusura ---
+
+	@Test
+	void chiusuraSuperataAggiornaLaStreakESbloccaLaLezioneSuccessiva() throws Exception {
+		LocalDate oggi = LocalDate.now(clock);
+		streak(2, 2, oggi.minusDays(1));
+		Lezione seconda = lezioneRepository.save(new Lezione(tappa, "Seconda", "D", 2, CREAZIONE));
+		Domanda vf = new Domanda(seconda, "Vf", "S", TipoDomanda.VERO_FALSO, 1, CREAZIONE);
+		vf.aggiungiOpzione("Vero", true);
+		vf.aggiungiOpzione("Falso", false);
+		domandaRepository.save(vf);
+		UUID id = avvia(lezione);
+		conOpzione(id, multipla, opzione(multipla, "A")).andExpect(jsonPath("$.errori").value(1));
+		rispondiGiustoATutte(id);
+
+		chiusura(mario, id)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.esito").value("SUPERATO"))
+				.andExpect(jsonPath("$.errori").value(1))
+				.andExpect(jsonPath("$.streak.valore").value(3))
+				.andExpect(jsonPath("$.streak.record").value(3));
+
+		assertThat(tentativo(id).getEsito()).isEqualTo(EsitoTentativo.SUPERATO);
+		assertThat(tentativo(id).getFinitoAt()).isNotNull();
+		assertThat(streakDiMario().getValore()).isEqualTo(3);
+		assertThat(streakDiMario().getUltimaAttivita()).isEqualTo(oggi);
+		mockMvc.perform(get("/api/path/stages").header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.genera(mario)))
+				.andExpect(jsonPath("$[0].lezioni[0].stato").value("COMPLETATA"))
+				.andExpect(jsonPath("$[0].lezioni[1].stato").value("SBLOCCATA"));
+	}
+
+	@Test
+	void chiusuraConDomandeNonRisolte400SenzaCampi() throws Exception {
+		streak(0, 0, null);
+		UUID id = avvia(lezione);
+
+		// nessuna risposta
+		chiusura(mario, id).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.codice").value("VALIDAZIONE"))
+				.andExpect(jsonPath("$.messaggio").value(TentativiService.MSG_NON_TUTTE_RISOLTE))
+				.andExpect(jsonPath("$.campi").isEmpty());
+
+		// risposte a tutte, ma la multipla sbagliata e non ripetuta
+		conOpzione(id, veroFalso, opzione(veroFalso, "Falso"));
+		conOpzione(id, multipla, opzione(multipla, "A"));
+		conCoppie(id, abbinamento, coppia(abbinamento, "Bicipite", "Braccio"), coppia(abbinamento, "Quadricipite", "Coscia"));
+		chiusura(mario, id).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.messaggio").value(TentativiService.MSG_NON_TUTTE_RISOLTE));
+		assertThat(tentativo(id).getEsito()).isEqualTo(EsitoTentativo.IN_CORSO);
+		assertThat(streakDiMario().getValore()).isZero();
+
+		// ripetuta e giusta: ora si chiude
+		conOpzione(id, multipla, opzione(multipla, "B"));
+		chiusura(mario, id).andExpect(status().isOk())
+				.andExpect(jsonPath("$.streak.valore").value(1))
+				.andExpect(jsonPath("$.streak.record").value(1));
+	}
+
+	@Test
+	void chiusuraIgnoraLaDomandaAggiuntaENonContaQuellaCancellata() throws Exception {
+		streak(0, 0, null);
+		UUID id = avvia(lezione);
+		Domanda nuova = new Domanda(lezione, "Nuova", "S", TipoDomanda.VERO_FALSO, 4, Instant.now().plusSeconds(3600));
+		nuova.aggiungiOpzione("Vero", true);
+		nuova.aggiungiOpzione("Falso", false);
+		domandaRepository.save(nuova);
+		conOpzione(id, veroFalso, opzione(veroFalso, "Falso"));
+		conOpzione(id, multipla, opzione(multipla, "B"));
+		// l'abbinamento non è risolto, ma viene cancellato
+		cancella("domanda", abbinamento.getId());
+
+		chiusura(mario, id).andExpect(status().isOk()).andExpect(jsonPath("$.esito").value("SUPERATO"));
+	}
+
+	@Test
+	void chiusuraInesistenteAltruiOLezioneCancellata404() throws Exception {
+		streak(0, 0, null);
+		UUID id = avvia(lezione);
+		rispondiGiustoATutte(id);
+		Utente luigi = utente("luigi@example.com");
+
+		chiusura(mario, UUID.randomUUID()).andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.messaggio").value(TentativiService.MSG_TENTATIVO_NON_TROVATO));
+		chiusura(luigi, id).andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.messaggio").value(TentativiService.MSG_TENTATIVO_NON_TROVATO));
+		cancella("lezione", lezione.getId());
+		chiusura(mario, id).andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.messaggio").value(TentativiService.MSG_LEZIONE_NON_TROVATA));
+		assertThat(tentativo(id).getEsito()).isEqualTo(EsitoTentativo.IN_CORSO);
+	}
+
+	@Test
+	void chiusuraDiUnTentativoGiaConcluso409() throws Exception {
+		streak(0, 0, null);
+		UUID id = avvia(lezione);
+		rispondiGiustoATutte(id);
+		chiusura(mario, id).andExpect(status().isOk());
+
+		chiusura(mario, id).andExpect(status().isConflict())
+				.andExpect(jsonPath("$.codice").value("TENTATIVO_CHIUSO"))
+				.andExpect(jsonPath("$.messaggio").value(TentativiService.MSG_TENTATIVO_CHIUSO));
+		assertThat(streakDiMario().getValore()).isEqualTo(1);
+	}
+
+	@Test
+	void unTentativoFallitoNonToccaLaStreakENonSiChiude() throws Exception {
+		LocalDate ieri = LocalDate.now(clock).minusDays(1);
+		streak(4, 6, ieri);
+		UUID id = avvia(lezione);
+		conOpzione(id, veroFalso, opzione(veroFalso, "Vero"));
+		conOpzione(id, multipla, opzione(multipla, "A"));
+		conOpzione(id, multipla, opzione(multipla, "C")).andExpect(jsonPath("$.esito").value("FALLITO"));
+
+		chiusura(mario, id).andExpect(status().isConflict())
+				.andExpect(jsonPath("$.codice").value("TENTATIVO_CHIUSO"));
+		Streak streak = streakDiMario();
+		assertThat(streak.getValore()).isEqualTo(4);
+		assertThat(streak.getRecord()).isEqualTo(6);
+		assertThat(streak.getUltimaAttivita()).isEqualTo(ieri);
+	}
+
 	@Test
 	void senzaTokenOEmailNonVerificata() throws Exception {
 		mockMvc.perform(post("/api/attempts").contentType(MediaType.APPLICATION_JSON)
@@ -533,6 +692,9 @@ class TentativiControllerTest {
 		Utente nonVerificato = new Utente("Nuovo", "Utente", "nuovo@example.com", "hash", CREAZIONE);
 		nonVerificato = utenteRepository.save(nonVerificato);
 		avvio(nonVerificato, "{\"lezioneId\": \"" + lezione.getId() + "\"}").andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.codice").value("EMAIL_NON_VERIFICATA"));
+		mockMvc.perform(post("/api/attempts/" + UUID.randomUUID() + "/complete")).andExpect(status().isUnauthorized());
+		chiusura(nonVerificato, UUID.randomUUID()).andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.codice").value("EMAIL_NON_VERIFICATA"));
 	}
 
