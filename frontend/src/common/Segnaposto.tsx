@@ -5,7 +5,7 @@ interface Props {
   children?: ReactNode
 }
 
-/** Pagina provvisoria (dentro LayoutApp) per le rotte le cui schermate arrivano nelle prossime task (27, 32, 42). */
+/** Pagina provvisoria (dentro LayoutApp) per le rotte le cui schermate arrivano nelle prossime task (la lezione, task 43). */
 function Segnaposto({ titolo, children }: Props) {
   return (
     <section>
