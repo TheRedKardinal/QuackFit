@@ -476,3 +476,169 @@
   margin-bottom: 0.75rem;
   font-weight: 800;
 }
+
+/* --- editor delle domande (task 34) --- */
+
+.lezioneScelta {
+  border-color: var(--colore-primario-scuro);
+  box-shadow: inset 4px 0 0 var(--colore-primario);
+}
+
+.editor {
+  min-width: 0;
+}
+
+.editorVuoto {
+  text-align: center;
+}
+
+.titoloEditor {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 900;
+}
+
+.nota {
+  padding: 0.75rem 1rem;
+  border-radius: 0.875rem;
+  background-color: var(--colore-bordo);
+  font-size: 0.875rem;
+}
+
+.domanda {
+  margin: 0;
+}
+
+.intestazioneDomanda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tipoDomanda {
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  background-color: var(--colore-bordo);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.azioniDomanda {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.azioniDomanda > button {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.testoDomanda {
+  margin: 0.75rem 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.spiegazione {
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background-color: var(--colore-sfondo);
+  font-size: 0.875rem;
+}
+
+.spiegazione .etichettaSezione {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.soluzioni {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.opzione,
+.coppia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border: 2px solid var(--colore-bordo);
+  border-radius: 0.75rem;
+}
+
+.corretta {
+  border-color: var(--colore-successo);
+  font-weight: 800;
+}
+
+.etichettaCorretta {
+  flex-shrink: 0;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background-color: var(--colore-successo-scuro);
+  color: var(--colore-superficie);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.formDomanda {
+  margin: 0;
+}
+
+.gruppo {
+  margin-bottom: 1rem;
+  padding: 0;
+  border: 0;
+}
+
+.legenda {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.sceltaTipo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 700;
+}
+
+/* campi allineati in alto (un errore sotto un campo non sposta gli altri); radio e "Togli" all'altezza dell'input */
+.riga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.riga > div {
+  flex: 1 1 10rem;
+  margin-bottom: 0;
+}
+
+.riga > label,
+.riga > button {
+  margin-top: 1.875rem;
+}
+
+.erroreGruppo {
+  color: var(--colore-errore);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
