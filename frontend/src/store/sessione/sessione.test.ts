@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { creaStore } from '../store'
-import { caricaProfilo, impostaToken, logout } from './sessioneSlice'
+import { caricaProfilo, impostaToken, logout, rileggiProfilo } from './sessioneSlice'
 import { fetchFinto, profilo, rispostaErrore, rispostaJson, thunkCheFallisce } from '../../testUtili'
 import { leggiToken, salvaToken } from './tokenSalvato'
 
@@ -22,6 +22,45 @@ async function storeConProfilo() {
   await store.dispatch(caricaProfilo())
   return store
 }
+
+describe('rilettura silenziosa del profilo', () => {
+  it('sostituisce il profilo senza passare dallo stato di caricamento', async () => {
+    const store = await storeConProfilo()
+    const stati: string[] = []
+    store.subscribe(() => stati.push(store.getState().sessione.caricamento))
+    fetchFinto.mockResolvedValue(rispostaJson(200, profilo({ streak: { valore: 3, record: 5 }, lezioniCompletate: 4 })))
+
+    await store.dispatch(rileggiProfilo())
+
+    expect(store.getState().sessione.utente?.streak.valore).toBe(3)
+    expect(store.getState().sessione.utente?.lezioniCompletate).toBe(4)
+    expect(stati.every((stato) => stato === 'riuscito')).toBe(true)
+  })
+
+  it('se fallisce (rete o 500) il profilo resta quello di prima, senza errori né logout', async () => {
+    const store = await storeConProfilo()
+    fetchFinto.mockResolvedValue(rispostaErrore(500, 'ERRORE_INTERNO'))
+
+    await store.dispatch(rileggiProfilo())
+    fetchFinto.mockRejectedValue(new TypeError('rete'))
+    await store.dispatch(rileggiProfilo())
+
+    const { sessione } = store.getState()
+    expect(sessione.utente).toEqual(profilo())
+    expect(sessione.caricamento).toBe('riuscito')
+    expect(sessione.errore).toBeNull()
+    expect(sessione.token).toBe('token-valido')
+  })
+
+  it('un 401 chiude comunque la sessione, come per ogni thunk', async () => {
+    const store = await storeConProfilo()
+    fetchFinto.mockResolvedValue(rispostaErrore(401, 'NON_AUTENTICATO'))
+
+    await store.dispatch(rileggiProfilo())
+
+    expect(store.getState().sessione.token).toBeNull()
+  })
+})
 
 describe('sessione', () => {
   it('all\'avvio prende il token salvato in localStorage', () => {
