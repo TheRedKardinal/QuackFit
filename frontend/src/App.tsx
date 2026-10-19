@@ -7,6 +7,7 @@ import PaginaPasswordDimenticata from './features/auth/PaginaPasswordDimenticata
 import PaginaRegistrazione from './features/auth/PaginaRegistrazione'
 import PaginaReimpostaPassword from './features/auth/PaginaReimpostaPassword'
 import PaginaVerificaEmail from './features/auth/PaginaVerificaEmail'
+import PaginaMappa from './features/percorso/PaginaMappa'
 import LayoutAdmin from './features/admin/LayoutAdmin'
 import PaginaContenuti from './features/admin/PaginaContenuti'
 import PaginaUtenti from './features/admin/PaginaUtenti'
@@ -20,7 +21,8 @@ import PaginaProfilo from './features/utente/PaginaProfilo'
 /**
  * Rotte dell'app con le guardie annidate: autenticato → email verificata → admin.
  * Le pagine dell'app stanno nel guscio LayoutApp (barra in alto e in basso), quelle admin in LayoutAdmin
- * (sidebar su desktop, barra Utenti/Contenuti su mobile). La mappa è ancora un segnaposto.
+ * (sidebar su desktop, barra Utenti/Contenuti su mobile). La lezione è ancora un segnaposto (arriva con la task 43):
+ * la mappa la avvia e porta a /lessons/:id con il `tentativoId` nello state del router.
  * Il router (BrowserRouter) sta in main.tsx, così i test possono usare MemoryRouter.
  */
 function App() {
@@ -37,7 +39,8 @@ function App() {
         <Route path="/verify-email" element={<PaginaVerificaEmail />} />
         <Route element={<RichiedeEmailVerificata />}>
           <Route element={<LayoutApp />}>
-            <Route path="/" element={<Segnaposto titolo="Percorso" />} />
+            <Route path="/" element={<PaginaMappa />} />
+            <Route path="/lessons/:id" element={<Segnaposto titolo="Lezione" />} />
             <Route path="/profile" element={<PaginaProfilo />} />
             <Route path="/profile/edit" element={<PaginaModificaProfilo />} />
           </Route>

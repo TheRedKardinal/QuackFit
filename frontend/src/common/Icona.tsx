@@ -2,7 +2,17 @@
  * Icone disegnate a mano in SVG (nessuna libreria). Sono sempre decorative (aria-hidden): accanto c'è sempre un testo
  * o un'etichetta accessibile. Il colore è quello del testo (currentColor).
  */
-export type NomeIcona = 'percorso' | 'profilo' | 'fiamma' | 'admin' | 'utenti' | 'contenuti' | 'indietro'
+export type NomeIcona =
+  | 'percorso'
+  | 'profilo'
+  | 'fiamma'
+  | 'admin'
+  | 'utenti'
+  | 'contenuti'
+  | 'indietro'
+  | 'spunta'
+  | 'lucchetto'
+  | 'manubrio'
 
 const TRACCIATI: Record<NomeIcona, string> = {
   // sentiero che sale a zig-zag con una bandierina in cima
@@ -19,6 +29,12 @@ const TRACCIATI: Record<NomeIcona, string> = {
   contenuti: 'M12 6.5C10.3 5 7.8 4.5 3 4.5v14c4.8 0 7.3.5 9 2 1.7-1.5 4.2-2 9-2v-14c-4.8 0-7.3.5-9 2zM12 6.5v14',
   // freccia verso sinistra
   indietro: 'M19 12H5M11 6l-6 6 6 6',
+  // segno di spunta
+  spunta: 'M5 12.5l4.5 4.5L19 7.5',
+  // lucchetto chiuso
+  lucchetto: 'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3M12 15v2',
+  // manubrio da palestra
+  manubrio: 'M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12',
 }
 
 interface Props {
