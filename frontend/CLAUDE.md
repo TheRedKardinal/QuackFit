@@ -143,7 +143,8 @@ Percorsi in inglese, come i path delle API:
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | accesso | solo senza token (con il token → `/`) |
 | `/verify-email` | codice di verifica | autenticato |
 | `/`, `/profile`, `/profile/edit` | mappa, profilo, modifica profilo | autenticato + email verificata |
-| `/admin` | gestione | autenticato + email verificata + `ADMIN`/`SUPERADMIN` (altrimenti → `/`) |
+| `/admin` | reindirizza a `/admin/users` (`replace`) | autenticato + email verificata + `ADMIN`/`SUPERADMIN` (altrimenti → `/`) |
+| `/admin/users`, `/admin/content` | gestione utenti, gestione contenuti (task 33) | la stessa di `/admin`, messa una volta sola sulla rotta del layout e ereditata dalle figlie |
 | `/logout` | tecnica: logout e poi `/login` con lo stesso state (`common/Uscita`) | nessuna |
 | qualunque altro | — | → `/` |
 
@@ -160,7 +161,13 @@ Percorsi in inglese, come i path delle API:
   - **barra in basso**: Percorso e Profilo; **Admin solo per `ADMIN`/`SUPERADMIN`** (comodità, il backend decide).
     La voce attiva ha `aria-current="page"`, grassetto e una barretta sopra (non solo il colore)
   - contenuto in una **colonna centrata di ~480 px**, anche su desktop (le barre restano a tutta larghezza).
-    Il layout desktop vero (sidebar) lo ha solo l'admin, nella sua task.
+    Il layout desktop vero (sidebar) lo ha solo l'admin, in `features/admin/LayoutAdmin`.
+- Il pannello admin ha un suo guscio, **fuori da `LayoutApp`**: `features/admin/LayoutAdmin`
+  - barra in alto con il marchio, l'etichetta "Admin" e **"Torna all'app"** (porta a `/`)
+  - le sezioni Utenti e Contenuti sono una sola lista, mostrata come **sidebar da `lg` in su** e come **barra in basso
+    sotto `lg`** con le classi responsive di Bootstrap (`d-none d-lg-block`, `d-lg-none`): nessun codice che misura lo
+    schermo. Il link attivo ha `aria-current="page"`, grassetto e una barretta (non solo il colore)
+  - su mobile c'è una sola barra in basso, quella admin; la voce "Admin" di `LayoutApp` (solo per gli admin) porta a `/admin`
 - Le pagine di accesso (login, registrazione, codice, recupero) **non** usano il guscio.
 - Componenti comuni in `common`: `Pulsante` (varianti primario, successo, neutro, pericolo sulla classe `btn-push`; di default
   `type="button"`), `Scheda`, `MessaggioErrore` (`role="alert"`, traduce il codice), `Drawer` (pannello dal basso,
@@ -224,6 +231,22 @@ Percorsi in inglese, come i path delle API:
 - **Mobile**: barra di navigazione in basso (Utenti, Contenuti), card al posto delle tabelle, accordion per le tappe.
 - Utenti: ricerca `q`, paginazione (`size` massimo 50). Nascondere le azioni di ruolo non consentite (non su sé stessi,
   non su un SUPERADMIN, solo il SUPERADMIN retrocede un ADMIN), ma gestire comunque il 403.
+  - **Ricerca**: form con "Cerca" (o Invio) e "Pulisci"; il testo passa da `trim()`, vuoto = nessun filtro; ogni ricerca
+    riporta alla prima pagina. Una richiesta per ricerca: niente ricerca mentre si scrive (debounce) né `AbortController`;
+    una risposta arrivata dopo un cambio di pagina o di ricerca si ignora.
+  - **Paginazione**: Precedente/Successivo con "N utenti · Pagina x di y", letti dalla risposta. Il frontend **non invia
+    `size`**: vale il default del backend (20). Scelta consapevole rispetto allo Stitch, che mostra "Mostra: 20": il
+    backend supporta già `size` (1…50) e il selettore si può aggiungere in seguito.
+  - **Azioni di ruolo**: le decide `features/admin/azioneRuolo` (funzione pura, stessi testi dei 403 del backend); dove
+    non c'è un'azione si mostra il motivo. Chi è collegato si riconosce dall'**email** (`/api/me` non ha l'id; l'email è
+    unica tra gli utenti attivi) ed è segnato con "Tu".
+  - **Conferma** nel `Drawer` (mai `window.confirm`): *"Promuovere «nome» ad ADMIN? Dovrà rifare il login."* (verde) o
+    *"Togliere il ruolo ADMIN a «nome»? Dovrà rifare il login."* (rosso), con Conferma/Annulla; durante l'invio Conferma
+    è disattivato e un secondo click non parte (`useInvioForm`). Dopo il 204 messaggio di esito e lista ricaricata;
+    un 403 o 404 mostra il messaggio del codice e ricarica la lista (la pagina non era aggiornata).
+  - Tabella su desktop e card su mobile sono due blocchi nello stesso componente, mostrati o nascosti dal CSS di Bootstrap.
+  - Dello Stitch **non** si realizzano: contatori per ruolo (il backend dà solo il totale), colonna ID, riquadri
+    RBAC/endpoint, "Backend online", le voci Panoramica/Report/Asset e il selettore "Mostra".
 - Contenuti: riordino di tappe e lezioni con pulsanti **Su / Giù** (`PATCH` con `ordine`); le domande **non si riordinano**.
   Nell'editor domande le soluzioni sono visibili (solo admin). Nella modifica di una domanda si cambiano solo i testi;
   per cambiare tipo o struttura si cancella e si ricrea. Cancellare chiede sempre conferma.

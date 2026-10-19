@@ -62,11 +62,15 @@ describe('guardie delle rotte', () => {
     expect(await screen.findByRole('heading', { name: 'Percorso' })).toBeInTheDocument()
   })
 
-  it('un admin vede /admin', async () => {
-    fetchFinto.mockResolvedValue(rispostaJson(200, profilo({ ruolo: 'ADMIN' })))
+  it('un admin vede /admin (la gestione utenti)', async () => {
+    fetchFinto
+      .mockResolvedValueOnce(rispostaJson(200, profilo({ ruolo: 'ADMIN' })))
+      .mockResolvedValueOnce(
+        rispostaJson(200, { contenuto: [], pagina: 0, dimensione: 20, totaleElementi: 0, totalePagine: 0 }),
+      )
     apri('/admin', 'token-valido')
 
-    expect(await screen.findByRole('heading', { name: 'Admin' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Gestione utenti' })).toBeInTheDocument()
   })
 
   it('chi ha già un token non vede il login', async () => {
