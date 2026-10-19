@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { isDatiErrore } from '../../api/ApiError'
 import Icona from '../../common/Icona'
 import MessaggioErrore from '../../common/MessaggioErrore'
@@ -29,10 +29,16 @@ const ZIG_ZAG = [stili.centro, stili.destra, stili.centro, stili.sinistra]
  * da fare. Il tocco su una lezione la avvia (POST /api/attempts) e porta alla lezione; una bloccata non si tocca.
  * Avvio con 404 (lezione senza domande, percorso.md, Lezioni senza domande): riquadro "Lezione in arrivo" e mappa
  * riletta; con 403 LEZIONE_BLOCCATA (mappa non aggiornata) messaggio e mappa riletta.
+ * Dalla lezione si può tornare con un `codiceErrore` nello state del router (es. TENTATIVO_CHIUSO): si mostra una
+ * volta e lo state si pulisce, così con F5 non riappare.
  */
 function PaginaMappa() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [erroreDallaLezione] = useState<string | null>(
+    () => (location.state as { codiceErrore?: string } | null)?.codiceErrore ?? null,
+  )
   /** Aumenta per rileggere la mappa. */
   const [ricarica, setRicarica] = useState(0)
   const [ricaricaArrivata, setRicaricaArrivata] = useState<number | null>(null)
@@ -67,6 +73,12 @@ function PaginaMappa() {
       valida = false
     }
   }, [dispatch, ricarica])
+
+  useEffect(() => {
+    if (erroreDallaLezione) {
+      navigate('.', { replace: true, state: null })
+    }
+  }, [erroreDallaLezione, navigate])
 
   // la prima volta che la mappa c'è, porta in vista il nodo da fare (jsdom non ha scrollIntoView)
   useEffect(() => {
@@ -135,6 +147,7 @@ function PaginaMappa() {
         </Scheda>
       )}
       {avviso?.tipo === 'errore' && <MessaggioErrore codice={avviso.codice} />}
+      {!avviso && erroreDallaLezione && <MessaggioErrore codice={erroreDallaLezione} />}
       {erroreCaricamento && <MessaggioErrore codice={erroreCaricamento} />}
 
       {tappe.length === 0 && <p>Il percorso è in preparazione: torna a trovarci presto.</p>}

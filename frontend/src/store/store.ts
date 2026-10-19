@@ -1,10 +1,13 @@
 import { combineReducers, configureStore, createListenerMiddleware, type UnknownAction } from '@reduxjs/toolkit'
+// unica eccezione alla regola "store non importa da features": qui si registrano i reducer delle feature
+import lezioneReducer from '../features/lezione/lezioneSlice'
 import { registraListenerSessione } from './sessione/sessioneListener'
 import sessioneReducer, { logout, statoSessioneVuoto } from './sessione/sessioneSlice'
 import { leggiToken } from './sessione/tokenSalvato'
 
 const reducerApp = combineReducers({
   sessione: sessioneReducer,
+  lezione: lezioneReducer,
 })
 
 export type RootState = ReturnType<typeof reducerApp>
@@ -23,7 +26,8 @@ export function creaStore(token: string | null = leggiToken()) {
   registraListenerSessione(listener)
   return configureStore({
     reducer: reducerRadice,
-    preloadedState: { sessione: { ...statoSessioneVuoto, token } },
+    // stato iniziale di ogni reducer (le feature comprese), con il token di partenza nella sessione
+    preloadedState: { ...reducerApp(undefined, { type: '@@quackfit/init' }), sessione: { ...statoSessioneVuoto, token } },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(listener.middleware),
   })
 }

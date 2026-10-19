@@ -1,12 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import LayoutApp from './common/layout/LayoutApp'
-import Segnaposto from './common/Segnaposto'
 import Uscita from './common/Uscita'
 import PaginaLogin from './features/auth/PaginaLogin'
 import PaginaPasswordDimenticata from './features/auth/PaginaPasswordDimenticata'
 import PaginaRegistrazione from './features/auth/PaginaRegistrazione'
 import PaginaReimpostaPassword from './features/auth/PaginaReimpostaPassword'
 import PaginaVerificaEmail from './features/auth/PaginaVerificaEmail'
+import PaginaLezione from './features/lezione/PaginaLezione'
 import PaginaMappa from './features/percorso/PaginaMappa'
 import LayoutAdmin from './features/admin/LayoutAdmin'
 import PaginaContenuti from './features/admin/PaginaContenuti'
@@ -21,8 +21,8 @@ import PaginaProfilo from './features/utente/PaginaProfilo'
 /**
  * Rotte dell'app con le guardie annidate: autenticato → email verificata → admin.
  * Le pagine dell'app stanno nel guscio LayoutApp (barra in alto e in basso), quelle admin in LayoutAdmin
- * (sidebar su desktop, barra Utenti/Contenuti su mobile). La lezione è ancora un segnaposto (arriva con la task 43):
- * la mappa la avvia e porta a /lessons/:id con il `tentativoId` nello state del router.
+ * (sidebar su desktop, barra Utenti/Contenuti su mobile). La lezione è una pagina a sé, fuori da LayoutApp: la mappa
+ * la avvia e porta a /lessons/:id con il `tentativoId` nello state del router.
  * Il router (BrowserRouter) sta in main.tsx, così i test possono usare MemoryRouter.
  */
 function App() {
@@ -40,10 +40,11 @@ function App() {
         <Route element={<RichiedeEmailVerificata />}>
           <Route element={<LayoutApp />}>
             <Route path="/" element={<PaginaMappa />} />
-            <Route path="/lessons/:id" element={<Segnaposto titolo="Lezione" />} />
             <Route path="/profile" element={<PaginaProfilo />} />
             <Route path="/profile/edit" element={<PaginaModificaProfilo />} />
           </Route>
+          {/* lezione: pagina a sé, con la sua barra in alto e senza la barra in basso */}
+          <Route path="/lessons/:id" element={<PaginaLezione />} />
           {/* pannello admin: un suo guscio (LayoutAdmin), fuori da LayoutApp; la guardia vale per tutte le sezioni */}
           <Route element={<RichiedeAdmin />}>
             <Route path="/admin" element={<LayoutAdmin />}>
