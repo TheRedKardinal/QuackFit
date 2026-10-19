@@ -1,6 +1,7 @@
 package it.quackfit.tentativi;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
@@ -45,8 +46,8 @@ import it.quackfit.utente.Utente;
 import it.quackfit.utente.UtenteRepository;
 
 /**
- * Test di integrazione di avvio, risposte e chiusura con H2 (tentativi.md, Regole generali, Avvio, Risposta,
- * Chiusura). I lock su tentativo e streak non si provano qui (su H2 non dimostrano la concorrenza): si verificano a mano
+ * Test di integrazione di avvio, risposte, chiusura e resoconto con H2 (tentativi.md, Regole generali, Avvio,
+ * Risposta, Chiusura, Resoconto). I lock su tentativo e streak non si provano qui (su H2 non dimostrano la concorrenza): si verificano a mano
  * su PostgreSQL. Tutti i casi della streak sono negli unit test di {@link TentativiService#aggiornaStreak}.
  */
 @SpringBootTest
@@ -208,6 +209,11 @@ class TentativiControllerTest {
 
 	private Streak streakDiMario() {
 		return streakRepository.findByUtente(mario).orElseThrow();
+	}
+
+	private ResultActions resoconto(Utente utente, UUID tentativo) throws Exception {
+		return mockMvc.perform(get("/api/attempts/" + tentativo)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.genera(utente)));
 	}
 
 	private void rispondiGiustoATutte(UUID id) throws Exception {
@@ -685,6 +691,95 @@ class TentativiControllerTest {
 		assertThat(streak.getUltimaAttivita()).isEqualTo(ieri);
 	}
 
+	// --- resoconto ---
+
+	@Test
+	void resocontoDiUnTentativoSuperatoNellOrdineDellAdminConLaPrimaRisposta() throws Exception {
+		streak(0, 0, null);
+		UUID id = avvia(lezione);
+		// risposte in un ordine diverso da quello dell'admin; la multipla prima sbagliata e poi ripetuta giusta
+		conCoppie(id, abbinamento, coppia(abbinamento, "Bicipite", "Braccio"), coppia(abbinamento, "Quadricipite", "Coscia"));
+		conOpzione(id, multipla, opzione(multipla, "A"));
+		conOpzione(id, veroFalso, opzione(veroFalso, "Falso"));
+		conOpzione(id, multipla, opzione(multipla, "B"));
+		chiusura(mario, id).andExpect(status().isOk());
+
+		resoconto(mario, id)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(id.toString()))
+				.andExpect(jsonPath("$.esito").value("SUPERATO"))
+				.andExpect(jsonPath("$.errori").value(1))
+				.andExpect(jsonPath("$.iniziatoAt").isNotEmpty())
+				.andExpect(jsonPath("$.finitoAt").isNotEmpty())
+				.andExpect(jsonPath("$.lezione.id").value(lezione.getId().toString()))
+				.andExpect(jsonPath("$.lezione.titolo").value("Lezione"))
+				.andExpect(jsonPath("$.domande[*].testo", contains("Vero o falso?", "Quale?", "Abbina")))
+				// vero o falso: giusta al primo colpo
+				.andExpect(jsonPath("$.domande[0].tipo").value("VERO_FALSO"))
+				.andExpect(jsonPath("$.domande[0].corretta").value(true))
+				.andExpect(jsonPath("$.domande[0].risposta.testo").value("Falso"))
+				.andExpect(jsonPath("$.domande[0].soluzione.id").value(opzione(veroFalso, "Falso").toString()))
+				.andExpect(jsonPath("$.domande[0].spiegazione").value("Perché è falso"))
+				.andExpect(jsonPath("$.domande[0].coppie", hasSize(0)))
+				// scelta multipla: conta la prima risposta (sbagliata), non la ripetizione
+				.andExpect(jsonPath("$.domande[1].corretta").value(false))
+				.andExpect(jsonPath("$.domande[1].risposta.id").value(opzione(multipla, "A").toString()))
+				.andExpect(jsonPath("$.domande[1].risposta.testo").value("A"))
+				.andExpect(jsonPath("$.domande[1].soluzione.testo").value("B"))
+				// abbinamento: coppie nell'ordine dei sinistri, risposta e soluzione null
+				.andExpect(jsonPath("$.domande[2].tipo").value("ABBINAMENTO"))
+				.andExpect(jsonPath("$.domande[2].corretta").value(true))
+				.andExpect(jsonPath("$.domande[2].risposta").value(nullValue()))
+				.andExpect(jsonPath("$.domande[2].soluzione").value(nullValue()))
+				.andExpect(jsonPath("$.domande[2].coppie[*].sinistro.testo", contains("Bicipite", "Quadricipite")))
+				.andExpect(jsonPath("$.domande[2].coppie[*].destro.testo", contains("Braccio", "Coscia")))
+				.andExpect(jsonPath("$.domande[2].coppie[*].corretta", contains(true, true)));
+	}
+
+	@Test
+	void resocontoDiUnTentativoInCorsoSoloLeDomandeRisposte() throws Exception {
+		UUID id = avvia(lezione);
+		conCoppie(id, abbinamento, coppia(abbinamento, "Bicipite", "Coscia"), coppia(abbinamento, "Quadricipite", "Braccio"));
+
+		resoconto(mario, id)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.esito").value("IN_CORSO"))
+				.andExpect(jsonPath("$.errori").value(2))
+				.andExpect(jsonPath("$.finitoAt").value(nullValue()))
+				.andExpect(jsonPath("$.domande", hasSize(1)))
+				.andExpect(jsonPath("$.domande[0].corretta").value(false))
+				.andExpect(jsonPath("$.domande[0].coppie[*].destro.testo", contains("Coscia", "Braccio")))
+				.andExpect(jsonPath("$.domande[0].coppie[*].soluzione.testo", contains("Braccio", "Coscia")))
+				.andExpect(jsonPath("$.domande[0].coppie[*].corretta", contains(false, false)));
+	}
+
+	@Test
+	void resocontoConDomandaELezioneCancellateDopoIlTentativo() throws Exception {
+		UUID id = avvia(lezione);
+		conOpzione(id, veroFalso, opzione(veroFalso, "Falso"));
+		conOpzione(id, multipla, opzione(multipla, "C"));
+		cancella("domanda", multipla.getId());
+		cancella("lezione", lezione.getId());
+
+		resoconto(mario, id)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.lezione.titolo").value("Lezione"))
+				.andExpect(jsonPath("$.domande[*].testo", contains("Vero o falso?", "Quale?")))
+				.andExpect(jsonPath("$.domande[1].risposta.testo").value("C"))
+				.andExpect(jsonPath("$.domande[1].soluzione.testo").value("B"));
+	}
+
+	@Test
+	void resocontoInesistenteOAltrui404ConLoStessoMessaggio() throws Exception {
+		UUID id = avvia(lezione);
+		Utente luigi = utente("luigi@example.com");
+
+		resoconto(mario, UUID.randomUUID()).andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.messaggio").value(TentativiService.MSG_TENTATIVO_NON_TROVATO));
+		resoconto(luigi, id).andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.messaggio").value(TentativiService.MSG_TENTATIVO_NON_TROVATO));
+	}
+
 	@Test
 	void senzaTokenOEmailNonVerificata() throws Exception {
 		mockMvc.perform(post("/api/attempts").contentType(MediaType.APPLICATION_JSON)
@@ -695,6 +790,9 @@ class TentativiControllerTest {
 				.andExpect(jsonPath("$.codice").value("EMAIL_NON_VERIFICATA"));
 		mockMvc.perform(post("/api/attempts/" + UUID.randomUUID() + "/complete")).andExpect(status().isUnauthorized());
 		chiusura(nonVerificato, UUID.randomUUID()).andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.codice").value("EMAIL_NON_VERIFICATA"));
+		mockMvc.perform(get("/api/attempts/" + UUID.randomUUID())).andExpect(status().isUnauthorized());
+		resoconto(nonVerificato, UUID.randomUUID()).andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.codice").value("EMAIL_NON_VERIFICATA"));
 	}
 
