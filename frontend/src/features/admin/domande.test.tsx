@@ -194,6 +194,8 @@ describe('nuova domanda', () => {
       { l2: [json(dettaglio('l2', [])), json(dettaglio('l2', [VERO_FALSO]))] },
       { 'POST /api/admin/lessons/l2/questions': () => rispostaJson(201, VERO_FALSO) },
     )
+    const rigaSudore = (await screen.findByText('L2 · Sudore')).closest('li')!
+    expect(within(rigaSudore).getByText('senza domande')).toBeInTheDocument()
     await scegli(utente, 'Sudore')
     await utente.click(await within(editor()).findByRole('button', { name: '+ Nuova domanda' }))
 
@@ -215,6 +217,8 @@ describe('nuova domanda', () => {
     ])
     expect(within(editor()).getByRole('heading', { name: 'Sudore' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Domande della lezione «Sudore»' })).toHaveTextContent('Domande (1)')
+    // con la prima domanda l'etichetta sparisce (conteggio dall'editor, senza rileggere l'elenco)
+    expect(within(rigaSudore).queryByText('senza domande')).not.toBeInTheDocument()
   })
 
   it('scelta multipla: da 2 a 6 opzioni, una sola corretta, e il body con le opzioni', async () => {
