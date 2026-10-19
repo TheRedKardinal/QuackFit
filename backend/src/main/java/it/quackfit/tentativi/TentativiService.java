@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,13 +32,17 @@ import it.quackfit.contenuti.PercorsoService;
 import it.quackfit.contenuti.TipoDomanda;
 import it.quackfit.tentativi.EsitoRispostaResponse.CoppiaSoluzioneResponse;
 import it.quackfit.tentativi.EsitoRispostaResponse.SoluzioneResponse;
+import it.quackfit.tentativi.ResocontoResponse.CoppiaResponse;
+import it.quackfit.tentativi.ResocontoResponse.DomandaResponse;
+import it.quackfit.tentativi.ResocontoResponse.VoceResponse;
 import it.quackfit.tentativi.RispostaRequest.CoppiaRequest;
 import it.quackfit.utente.Streak;
 import it.quackfit.utente.StreakRepository;
 import it.quackfit.utente.UtenteRepository;
 
 /**
- * Avvio di un tentativo, risposte e chiusura (tentativi.md, Regole generali, Avvio, Risposta, Chiusura).
+ * Avvio di un tentativo, risposte, chiusura e resoconto (tentativi.md, Regole generali, Avvio, Risposta, Chiusura,
+ * Resoconto).
  *
  * Dal tentativo e dalle risposte non si naviga verso i contenuti (possono essere cancellati): si usano query con gli id
  * (backend/CLAUDE.md, Soft delete). Le risposte leggono il tentativo con un lock pessimistico, così due risposte quasi
@@ -74,6 +80,7 @@ public class TentativiService {
 	private final UtenteRepository utenteRepository;
 	private final StreakRepository streakRepository;
 	private final PercorsoService percorsoService;
+	private final ResocontoQuery resocontoQuery;
 	private final NamedParameterJdbcTemplate jdbc;
 	private final Clock clock;
 
@@ -81,7 +88,8 @@ public class TentativiService {
 			RispostaOpzioneRepository rispostaOpzioneRepository,
 			RispostaAbbinamentoRepository rispostaAbbinamentoRepository, LezioneRepository lezioneRepository,
 			DomandaRepository domandaRepository, UtenteRepository utenteRepository, StreakRepository streakRepository,
-			PercorsoService percorsoService, NamedParameterJdbcTemplate jdbc, Clock clock) {
+			PercorsoService percorsoService, ResocontoQuery resocontoQuery, NamedParameterJdbcTemplate jdbc,
+			Clock clock) {
 		this.tentativoRepository = tentativoRepository;
 		this.rispostaOpzioneRepository = rispostaOpzioneRepository;
 		this.rispostaAbbinamentoRepository = rispostaAbbinamentoRepository;
@@ -90,6 +98,7 @@ public class TentativiService {
 		this.utenteRepository = utenteRepository;
 		this.streakRepository = streakRepository;
 		this.percorsoService = percorsoService;
+		this.resocontoQuery = resocontoQuery;
 		this.jdbc = jdbc;
 		this.clock = clock;
 	}
@@ -339,6 +348,49 @@ public class TentativiService {
 		streak.setRecord(Math.max(streak.getRecord(), streak.getValore()));
 		streak.setUltimaAttivita(oggi);
 		streak.setUpdatedAt(adesso);
+	}
+
+	// --- resoconto ---
+
+	/** Una domanda del resoconto con il suo ordine, per unire domande a opzioni e abbinamenti. */
+	private record DomandaInOrdine(int ordine, DomandaResponse domanda) {
+	}
+
+	/**
+	 * Resoconto (tentativi.md, Resoconto): funziona in ogni stato e anche con contenuti cancellati dopo il tentativo,
+	 * perché legge tutto con le query native di ResocontoQuery. Un tentativo inesistente o di un altro utente → 404.
+	 * Solo le domande già risposte, con la prima risposta, nell'ordine dell'admin.
+	 */
+	@Transactional(readOnly = true)
+	public ResocontoResponse resoconto(UUID utenteId, UUID tentativoId) {
+		IntestazioneResoconto intestazione = resocontoQuery.intestazione(tentativoId, utenteId)
+				.orElseThrow(() -> new ApplicazioneException(CodiceErrore.NON_TROVATO, MSG_TENTATIVO_NON_TROVATO));
+		List<DomandaInOrdine> domande = new ArrayList<>();
+		for (RigaResocontoOpzione riga : resocontoQuery.righeOpzioni(tentativoId, utenteId)) {
+			domande.add(new DomandaInOrdine(riga.ordine(), new DomandaResponse(riga.domandaId(), riga.testo(),
+					riga.tipo(), riga.spiegazione(), riga.corretta(),
+					new VoceResponse(riga.opzioneId(), riga.opzioneTesto()),
+					new VoceResponse(riga.soluzioneId(), riga.soluzioneTesto()), List.of())));
+		}
+		// le coppie arrivano già in ordine: si raggruppano per domanda mantenendolo
+		Map<UUID, List<RigaResocontoAbbinamento>> abbinamenti = new LinkedHashMap<>();
+		for (RigaResocontoAbbinamento riga : resocontoQuery.righeAbbinamenti(tentativoId, utenteId)) {
+			abbinamenti.computeIfAbsent(riga.domandaId(), id -> new ArrayList<>()).add(riga);
+		}
+		for (List<RigaResocontoAbbinamento> righe : abbinamenti.values()) {
+			List<CoppiaResponse> coppie = righe.stream()
+					.map(riga -> new CoppiaResponse(new VoceResponse(riga.sinistroId(), riga.sinistroTesto()),
+							new VoceResponse(riga.destroId(), riga.destroTesto()),
+							new VoceResponse(riga.soluzioneId(), riga.soluzioneTesto()),
+							riga.destroId().equals(riga.soluzioneId())))
+					.toList();
+			RigaResocontoAbbinamento prima = righe.get(0);
+			domande.add(new DomandaInOrdine(prima.ordine(), new DomandaResponse(prima.domandaId(), prima.testo(),
+					prima.tipo(), prima.spiegazione(), coppie.stream().allMatch(CoppiaResponse::corretta), null, null,
+					coppie)));
+		}
+		domande.sort(Comparator.comparingInt(DomandaInOrdine::ordine));
+		return ResocontoResponse.da(intestazione, domande.stream().map(DomandaInOrdine::domanda).toList());
 	}
 
 	private static ApplicazioneException campo(String campo, String messaggio) {
