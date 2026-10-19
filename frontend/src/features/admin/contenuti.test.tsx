@@ -104,6 +104,17 @@ describe('accordion delle tappe', () => {
   })
 })
 
+describe('etichetta "senza domande"', () => {
+  it('compare solo sulle lezioni con zero domande', async () => {
+    apri([[tappa('A', 1, [lezione('a1', 1, { numeroDomande: 0 }), lezione('a2', 2, { numeroDomande: 2 })])]])
+
+    const vuota = (await screen.findByText('L1 · Lezione a1')).closest('li')!
+    const piena = screen.getByText('L2 · Lezione a2').closest('li')!
+    expect(within(vuota).getByText('senza domande')).toBeInTheDocument()
+    expect(within(piena).queryByText('senza domande')).not.toBeInTheDocument()
+  })
+})
+
 describe('riordino', () => {
   it('Su e Giù inviano ordine ∓ 1 e sono disattivati ai bordi', async () => {
     const utente = userEvent.setup()
