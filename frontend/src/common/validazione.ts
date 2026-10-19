@@ -8,8 +8,8 @@
  *   CambioPasswordRequest, CambioEmailRequest, ConfermaCambioEmailRequest, CancellazioneAccountRequest e
  *   RegistrazioneRequest, LoginRequest, VerificaEmailRequest, PasswordDimenticataRequest, ReimpostaPasswordRequest
  * - @PasswordValida e PasswordValidaValidator (backend/CLAUDE.md, Password)
- * - backend/docs/specs/admin.md (Tappe, Lezioni) con i record CreazioneTappaRequest, ModificaTappaRequest,
- *   CreazioneLezioneRequest e ModificaLezioneRequest
+ * - backend/docs/specs/admin.md (Tappe, Lezioni, Domande) con i record CreazioneTappaRequest, ModificaTappaRequest,
+ *   CreazioneLezioneRequest, ModificaLezioneRequest, CreazioneDomandaRequest e ModificaDomandaRequest
  * Messaggi identici a quelli del backend.
  */
 
@@ -32,6 +32,15 @@ export const MESSAGGI = {
   descrizioneObbligatoria: 'La descrizione è obbligatoria',
   massimo100: 'Massimo 100 caratteri',
   massimo300: 'Massimo 300 caratteri',
+  testoObbligatorio: 'Il testo è obbligatorio',
+  spiegazioneObbligatoria: 'La spiegazione è obbligatoria',
+  testoVuoto: 'Il testo non può essere vuoto',
+  spiegazioneVuota: 'La spiegazione non può essere vuota',
+  massimo200: 'Massimo 200 caratteri',
+  massimo500: 'Massimo 500 caratteri',
+  massimo1000: 'Massimo 1000 caratteri',
+  rispostaVero: 'Indica se la risposta giusta è Vero o Falso',
+  unaCorretta: 'Una sola opzione deve essere corretta',
 } as const
 
 export const MASSIMO_NOME = 50
@@ -39,6 +48,10 @@ export const MASSIMO_EMAIL = 254
 /** Titolo e descrizione di tappe e lezioni (Tappa/Lezione.MAX_TITOLO e MAX_DESCRIZIONE). */
 export const MASSIMO_TITOLO = 100
 export const MASSIMO_DESCRIZIONE = 300
+/** Domande (Domanda.MAX_TESTO e MAX_SPIEGAZIONE; Opzione ed ElementoAbbinamento.MAX_TESTO). */
+export const MASSIMO_TESTO_DOMANDA = 500
+export const MASSIMO_SPIEGAZIONE = 1000
+export const MASSIMO_TESTO_OPZIONE = 200
 const MINIMO_CARATTERI_PASSWORD = 8
 /** Limite di BCrypt, in byte UTF-8 (PasswordValidaValidator.MASSIMO_BYTE). */
 const MASSIMO_BYTE_PASSWORD = 72
@@ -312,6 +325,96 @@ export function validaContenuto(dati: DatiContenuto): ErroriCampi {
     errori.descrizione = MESSAGGI.descrizioneObbligatoria
   } else if (descrizione.length > MASSIMO_DESCRIZIONE) {
     errori.descrizione = MESSAGGI.massimo300
+  }
+  return errori
+}
+
+// --- admin: domande ---
+
+/** Un testo obbligatorio con un massimo, contato dopo strip(); undefined se va bene. */
+function erroreTesto(valore: string, massimo: number, obbligatorio: string, troppoLungo: string): string | undefined {
+  const pulito = strip(valore)
+  if (pulito === '') {
+    return obbligatorio
+  }
+  return pulito.length > massimo ? troppoLungo : undefined
+}
+
+function erroreOpzione(valore: string): string | undefined {
+  return erroreTesto(valore, MASSIMO_TESTO_OPZIONE, MESSAGGI.testoObbligatorio, MESSAGGI.massimo200)
+}
+
+function aggiungi(errori: ErroriCampi, chiave: string, errore: string | undefined) {
+  if (errore) {
+    errori[chiave] = errore
+  }
+}
+
+export interface DatiNuovaDomanda {
+  tipo: 'VERO_FALSO' | 'SCELTA_MULTIPLA' | 'ABBINAMENTO'
+  testo: string
+  spiegazione: string
+  /** VERO_FALSO: null finché non si sceglie. */
+  rispostaVero: boolean | null
+  /** SCELTA_MULTIPLA: testi delle opzioni e indice di quella corretta (null finché non si sceglie). */
+  opzioni: string[]
+  corretta: number | null
+  /** ABBINAMENTO. */
+  coppie: { sinistra: string; destra: string }[]
+}
+
+/**
+ * Nuova domanda (CreazioneDomandaRequest): solo obbligatori e lunghezze, più la scelta della risposta giusta.
+ * Il numero di opzioni o coppie (2–6) lo garantisce il form e il radio permette una sola corretta; i testi ripetuti
+ * li segnala il backend (RegoleDomanda). Chiavi uguali a quelle del backend (es. `opzioni[1].testo`).
+ */
+export function validaNuovaDomanda(dati: DatiNuovaDomanda): ErroriCampi {
+  const errori: ErroriCampi = {}
+  aggiungi(errori, 'testo', erroreTesto(dati.testo, MASSIMO_TESTO_DOMANDA, MESSAGGI.testoObbligatorio, MESSAGGI.massimo500))
+  aggiungi(
+    errori,
+    'spiegazione',
+    erroreTesto(dati.spiegazione, MASSIMO_SPIEGAZIONE, MESSAGGI.spiegazioneObbligatoria, MESSAGGI.massimo1000),
+  )
+  if (dati.tipo === 'VERO_FALSO' && dati.rispostaVero === null) {
+    errori.rispostaVero = MESSAGGI.rispostaVero
+  }
+  if (dati.tipo === 'SCELTA_MULTIPLA') {
+    dati.opzioni.forEach((testo, i) => aggiungi(errori, `opzioni[${i}].testo`, erroreOpzione(testo)))
+    if (dati.corretta === null) {
+      errori.opzioni = MESSAGGI.unaCorretta
+    }
+  }
+  if (dati.tipo === 'ABBINAMENTO') {
+    dati.coppie.forEach((coppia, i) => {
+      aggiungi(errori, `coppie[${i}].sinistra`, erroreOpzione(coppia.sinistra))
+      aggiungi(errori, `coppie[${i}].destra`, erroreOpzione(coppia.destra))
+    })
+  }
+  return errori
+}
+
+export interface DatiModificaDomanda {
+  testo: string
+  spiegazione: string
+  /** Testi di opzioni (SCELTA_MULTIPLA) o elementi (ABBINAMENTO), con la chiave del backend (es. `elementi[3].testo`). */
+  testi: { chiave: string; testo: string }[]
+}
+
+/**
+ * Modifica dei soli testi (ModificaDomandaRequest): si inviano sempre tutti, quindi nessuno può essere vuoto.
+ * Testo e spiegazione hanno i messaggi della PATCH ("non può essere vuoto"), opzioni ed elementi quelli di TestoRequest.
+ */
+export function validaModificaDomanda(dati: DatiModificaDomanda): ErroriCampi {
+  const errori: ErroriCampi = {}
+  aggiungi(errori, 'testo', erroreTesto(dati.testo, MASSIMO_TESTO_DOMANDA, MESSAGGI.testoVuoto, MESSAGGI.massimo500))
+  aggiungi(
+    errori,
+    'spiegazione',
+    erroreTesto(dati.spiegazione, MASSIMO_SPIEGAZIONE, MESSAGGI.spiegazioneVuota, MESSAGGI.massimo1000),
+  )
+  for (const { chiave, testo } of dati.testi) {
+    aggiungi(errori, chiave, erroreOpzione(testo))
   }
   return errori
 }

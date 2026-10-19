@@ -49,3 +49,62 @@ export interface DatiContenutoRequest {
   descrizione?: string
   ordine?: number
 }
+
+// --- domande (admin.md, Domande e Formato di una domanda) ---
+
+export type TipoDomanda = 'VERO_FALSO' | 'SCELTA_MULTIPLA' | 'ABBINAMENTO'
+
+export interface OpzioneAdmin {
+  id: string
+  testo: string
+  corretta: boolean
+}
+
+export interface ElementoAdmin {
+  id: string
+  testo: string
+}
+
+export interface CoppiaAdmin {
+  sinistro: ElementoAdmin
+  destro: ElementoAdmin
+}
+
+/** Una domanda con le soluzioni: `opzioni` e `coppie` ci sono sempre, quella che non riguarda il tipo è []. */
+export interface DomandaAdmin {
+  id: string
+  testo: string
+  spiegazione: string
+  tipo: TipoDomanda
+  ordine: number
+  opzioni: OpzioneAdmin[]
+  coppie: CoppiaAdmin[]
+}
+
+/** GET /api/admin/lessons/{lessonId}. */
+export interface LezioneDettaglioAdmin {
+  id: string
+  titolo: string
+  descrizione: string
+  ordine: number
+  tappaId: string
+  domande: DomandaAdmin[]
+}
+
+/** POST /api/admin/lessons/{lessonId}/questions: solo i campi del tipo scelto. */
+export interface CreazioneDomandaRequest {
+  testo: string
+  spiegazione: string
+  tipo: TipoDomanda
+  rispostaVero?: boolean
+  opzioni?: { testo: string; corretta: boolean }[]
+  coppie?: { sinistra: string; destra: string }[]
+}
+
+/** PATCH /api/admin/questions/{questionId}: solo i testi. */
+export interface ModificaDomandaRequest {
+  testo: string
+  spiegazione: string
+  opzioni?: { id: string; testo: string }[]
+  elementi?: { id: string; testo: string }[]
+}

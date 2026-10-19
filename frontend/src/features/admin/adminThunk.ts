@@ -1,7 +1,16 @@
 import { datiErrore } from '../../api/ApiError'
 import { richiesta, type OpzioniRichiesta } from '../../api/client'
 import { createAppAsyncThunk } from '../../store/hooks'
-import type { DatiContenutoRequest, Pagina, RuoloAssegnabile, TappaAdmin, UtenteAdmin } from './tipi'
+import type {
+  CreazioneDomandaRequest,
+  DatiContenutoRequest,
+  LezioneDettaglioAdmin,
+  ModificaDomandaRequest,
+  Pagina,
+  RuoloAssegnabile,
+  TappaAdmin,
+  UtenteAdmin,
+} from './tipi'
 
 interface ParametriLista {
   /** Pagina da 0. */
@@ -106,5 +115,40 @@ export const modificaLezione = operazione(
 
 export const cancellaLezione = operazione('cancellaLezione', (id: string) => [
   `/api/admin/lessons/${id}`,
+  { metodo: 'DELETE' },
+])
+
+// --- domande (admin.md, Domande) ---
+
+/** Dettaglio di una lezione con tutte le sue domande e le soluzioni (GET /api/admin/lessons/{lessonId}). */
+export const caricaLezione = createAppAsyncThunk(
+  'admin/caricaLezione',
+  async (id: string, { getState, rejectWithValue }) => {
+    try {
+      return await richiesta<LezioneDettaglioAdmin>(`/api/admin/lessons/${id}`, { token: getState().sessione.token })
+    } catch (errore) {
+      return rejectWithValue(datiErrore(errore))
+    }
+  },
+)
+
+export const creaDomanda = operazione(
+  'creaDomanda',
+  ({ lezioneId, dati }: { lezioneId: string; dati: CreazioneDomandaRequest }) => [
+    `/api/admin/lessons/${lezioneId}/questions`,
+    { metodo: 'POST', corpo: dati },
+  ],
+)
+
+export const modificaDomanda = operazione(
+  'modificaDomanda',
+  ({ id, dati }: { id: string; dati: ModificaDomandaRequest }) => [
+    `/api/admin/questions/${id}`,
+    { metodo: 'PATCH', corpo: dati },
+  ],
+)
+
+export const cancellaDomanda = operazione('cancellaDomanda', (id: string) => [
+  `/api/admin/questions/${id}`,
   { metodo: 'DELETE' },
 ])

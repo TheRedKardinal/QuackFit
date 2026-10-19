@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { isDatiErrore } from '../../api/ApiError'
 import MessaggioErrore from '../../common/MessaggioErrore'
 import Pulsante from '../../common/Pulsante'
@@ -16,6 +16,7 @@ import {
   modificaTappa,
 } from './adminThunk'
 import ConfermaCancellazione from './ConfermaCancellazione'
+import EditorDomande from './EditorDomande'
 import FormContenuto from './FormContenuto'
 import type { LezioneAdmin, TappaAdmin } from './tipi'
 import stili from './admin.module.css'
@@ -56,10 +57,13 @@ function contaDomande(n: number): string {
 }
 
 /**
- * Gestione di tappe e lezioni (admin.md, Ordine, Tappe, Lezioni): accordion con una tappa aperta alla volta,
- * form in linea per creare e modificare, riordino con Su/Giù, cancellazione con conferma.
- * Dopo ogni modifica si rilegge l'elenco: creazione, cancellazione e riordino cambiano anche gli altri elementi.
- * La tappa aperta si ricorda per id, così resta la stessa dopo un riordino; se sparisce, si apre la prima.
+ * Gestione di tappe, lezioni e domande (admin.md, Ordine, Tappe, Lezioni, Domande).
+ * - A sinistra tappe e lezioni: accordion con una tappa aperta alla volta, form in linea per creare e modificare,
+ *   riordino con Su/Giù, cancellazione con conferma. Dopo ogni modifica si rilegge l'elenco. La tappa aperta si
+ *   ricorda per id, così resta la stessa dopo un riordino; se sparisce, si apre la prima.
+ * - A destra l'editor delle domande della lezione scelta con "Domande (N)" (anche lei ricordata per id).
+ * Su desktop le due colonne sono affiancate; su mobile si vede l'elenco oppure, con una lezione scelta, solo l'editor
+ * ("← Tappe" torna all'elenco). Una sola struttura: le classi di Bootstrap nascondono la colonna che non serve.
  */
 function PaginaContenuti() {
   const dispatch = useAppDispatch()
@@ -72,6 +76,10 @@ function PaginaContenuti() {
   const [idAperta, setIdAperta] = useState<string | null>(null)
   const [form, setForm] = useState<FormAperto | null>(null)
   const [daCancellare, setDaCancellare] = useState<DaCancellare | null>(null)
+  const [idLezioneScelta, setIdLezioneScelta] = useState<string | null>(null)
+  /** Domande della lezione scelta contate dall'editor: l'elenco non si rilegge dopo le operazioni sulle domande. */
+  const [conteggio, setConteggio] = useState<{ id: string; numero: number } | null>(null)
+  const aggiornaConteggio = useCallback((id: string, numero: number) => setConteggio({ id, numero }), [])
   const riordino = useInvioForm()
   const cancellazione = useInvioForm()
 
@@ -101,6 +109,14 @@ function PaginaContenuti() {
 
   function rileggi() {
     setRicarica((n) => n + 1)
+  }
+
+  /** La lezione scelta per l'editor; se non c'è più nell'elenco (cancellata) l'editor mostra un messaggio. */
+  const lezioneScelta = tappe?.flatMap((tappa) => tappa.lezioni).find((lezione) => lezione.id === idLezioneScelta)
+  const sceltaPerduta = idLezioneScelta !== null && tappe !== null && !lezioneScelta
+
+  function numeroDomande(lezione: LezioneAdmin): number {
+    return conteggio?.id === lezione.id ? conteggio.numero : lezione.numeroDomande
   }
 
   /** La tappa aperta: quella ricordata se esiste ancora, altrimenti la prima. */
@@ -162,211 +178,234 @@ function PaginaContenuti() {
   const bloccato = riordino.inviando || caricamento
 
   return (
-    <section>
-      <div className={stili.intestazionePagina}>
-        <div>
-          <h1 className={stili.titolo}>Gestione contenuti</h1>
-          <p className={stili.sottotitolo}>Tappe e lezioni del percorso, in ordine</p>
+    <section className="row g-4">
+      <div className={`col-12 col-lg-6 ${idLezioneScelta ? 'd-none d-lg-block' : ''}`}>
+        <div className={stili.intestazionePagina}>
+          <div>
+            <h1 className={stili.titolo}>Gestione contenuti</h1>
+            <p className={stili.sottotitolo}>Tappe e lezioni del percorso, in ordine</p>
+          </div>
+          <Pulsante onClick={() => apriForm({ tipo: 'nuovaTappa' })} disabled={form?.tipo === 'nuovaTappa'}>
+            + Nuova tappa
+          </Pulsante>
         </div>
-        <Pulsante onClick={() => apriForm({ tipo: 'nuovaTappa' })} disabled={form?.tipo === 'nuovaTappa'}>
-          + Nuova tappa
-        </Pulsante>
+
+        <MessaggioErrore codice={errore ?? erroreCaricamento ?? undefined} />
+
+        {form?.tipo === 'nuovaTappa' && (
+          <Scheda>
+            <FormContenuto
+              id="nuova-tappa"
+              intestazione="Nuova tappa"
+              testoInvio="Crea tappa"
+              onSalva={(dati: DatiContenuto) => salva(() => dispatch(creaTappa(dati)).unwrap(), 'nuova')}
+              onAnnulla={() => setForm(null)}
+            />
+          </Scheda>
+        )}
+
+        {!tappe && caricamento && <p>Caricamento…</p>}
+        {tappe && tappe.length === 0 && <p>Nessuna tappa: crea la prima con "+ Nuova tappa".</p>}
+
+        <ol className={stili.elencoTappe}>
+          {tappe?.map((tappa, indice) => {
+            const espansa = tappa.id === aperta
+            const idCorpo = `tappa-${tappa.id}-lezioni`
+            return (
+              <li key={tappa.id}>
+                <Scheda className={stili.tappa}>
+                  {form?.tipo === 'modificaTappa' && form.id === tappa.id ? (
+                    <FormContenuto
+                      id={`tappa-${tappa.id}`}
+                      intestazione={`Modifica la tappa «${tappa.titolo}»`}
+                      iniziale={{ titolo: tappa.titolo, descrizione: tappa.descrizione }}
+                      testoInvio="Salva"
+                      onSalva={(dati) => salva(() => dispatch(modificaTappa({ id: tappa.id, dati })).unwrap())}
+                      onAnnulla={() => setForm(null)}
+                    />
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className={stili.intestazioneTappa}
+                        aria-expanded={espansa}
+                        aria-controls={idCorpo}
+                        onClick={() => setIdAperta(tappa.id)}
+                      >
+                        <span className={stili.numeroTappa} aria-hidden="true">
+                          {tappa.ordine}
+                        </span>
+                        <span className={stili.testiTappa}>
+                          <span className={stili.titoloTappa}>
+                            <span className="visually-hidden">Tappa {tappa.ordine}: </span>
+                            {tappa.titolo}
+                          </span>
+                          <span className={stili.descrizioneTappa}>{tappa.descrizione}</span>
+                        </span>
+                        <span className={stili.conteggio}>{contaLezioni(tappa.lezioni.length)}</span>
+                        <span className={stili.freccia} aria-hidden="true">
+                          {espansa ? '▾' : '▸'}
+                        </span>
+                      </button>
+                      <div className={stili.azioniElemento}>
+                        <Pulsante
+                          variante="neutro"
+                          aria-label={`Sposta su la tappa «${tappa.titolo}»`}
+                          disabled={indice === 0 || bloccato}
+                          onClick={() =>
+                            sposta(() => dispatch(modificaTappa({ id: tappa.id, dati: { ordine: tappa.ordine - 1 } })).unwrap())
+                          }
+                        >
+                          ↑ Su
+                        </Pulsante>
+                        <Pulsante
+                          variante="neutro"
+                          aria-label={`Sposta giù la tappa «${tappa.titolo}»`}
+                          disabled={indice === tappe.length - 1 || bloccato}
+                          onClick={() =>
+                            sposta(() => dispatch(modificaTappa({ id: tappa.id, dati: { ordine: tappa.ordine + 1 } })).unwrap())
+                          }
+                        >
+                          ↓ Giù
+                        </Pulsante>
+                        <Pulsante
+                          variante="neutro"
+                          aria-label={`Modifica la tappa «${tappa.titolo}»`}
+                          onClick={() => apriForm({ tipo: 'modificaTappa', id: tappa.id })}
+                        >
+                          Modifica
+                        </Pulsante>
+                        <Pulsante
+                          variante="pericolo"
+                          aria-label={`Elimina la tappa «${tappa.titolo}»`}
+                          onClick={() => setDaCancellare({ tipo: 'tappa', tappa })}
+                        >
+                          Elimina
+                        </Pulsante>
+                      </div>
+                    </>
+                  )}
+
+                  {espansa && (
+                    <div id={idCorpo} className={stili.corpoTappa}>
+                      <p className={stili.etichettaSezione}>Lezioni</p>
+                      {tappa.lezioni.length === 0 && <p>Nessuna lezione in questa tappa.</p>}
+                      <ol className={stili.elencoLezioni}>
+                        {tappa.lezioni.map((lezione, indiceLezione) => (
+                          <li
+                            key={lezione.id}
+                            className={`${stili.lezione} ${lezione.id === idLezioneScelta ? stili.lezioneScelta : ''}`}
+                          >
+                            {form?.tipo === 'modificaLezione' && form.id === lezione.id ? (
+                              <FormContenuto
+                                id={`lezione-${lezione.id}`}
+                                intestazione={`Modifica la lezione «${lezione.titolo}»`}
+                                iniziale={{ titolo: lezione.titolo, descrizione: lezione.descrizione }}
+                                testoInvio="Salva"
+                                onSalva={(dati) => salva(() => dispatch(modificaLezione({ id: lezione.id, dati })).unwrap())}
+                                onAnnulla={() => setForm(null)}
+                              />
+                            ) : (
+                              <>
+                                <div className={stili.testiLezione}>
+                                  <span className={stili.titoloLezione}>
+                                    L{lezione.ordine} · {lezione.titolo}
+                                  </span>
+                                  <span className={stili.descrizioneTappa}>{lezione.descrizione}</span>
+                                  <span className={stili.conteggio}>{contaDomande(numeroDomande(lezione))}</span>
+                                </div>
+                                <div className={stili.azioniElemento}>
+                                  <Pulsante
+                                    variante={lezione.id === idLezioneScelta ? 'primario' : 'neutro'}
+                                    aria-label={`Domande della lezione «${lezione.titolo}»`}
+                                    aria-pressed={lezione.id === idLezioneScelta}
+                                    onClick={() => setIdLezioneScelta(lezione.id)}
+                                  >
+                                    Domande ({numeroDomande(lezione)})
+                                  </Pulsante>
+                                  <Pulsante
+                                    variante="neutro"
+                                    aria-label={`Sposta su la lezione «${lezione.titolo}»`}
+                                    disabled={indiceLezione === 0 || bloccato}
+                                    onClick={() =>
+                                      sposta(() =>
+                                        dispatch(
+                                          modificaLezione({ id: lezione.id, dati: { ordine: lezione.ordine - 1 } }),
+                                        ).unwrap(),
+                                      )
+                                    }
+                                  >
+                                    ↑ Su
+                                  </Pulsante>
+                                  <Pulsante
+                                    variante="neutro"
+                                    aria-label={`Sposta giù la lezione «${lezione.titolo}»`}
+                                    disabled={indiceLezione === tappa.lezioni.length - 1 || bloccato}
+                                    onClick={() =>
+                                      sposta(() =>
+                                        dispatch(
+                                          modificaLezione({ id: lezione.id, dati: { ordine: lezione.ordine + 1 } }),
+                                        ).unwrap(),
+                                      )
+                                    }
+                                  >
+                                    ↓ Giù
+                                  </Pulsante>
+                                  <Pulsante
+                                    variante="neutro"
+                                    aria-label={`Modifica la lezione «${lezione.titolo}»`}
+                                    onClick={() => apriForm({ tipo: 'modificaLezione', id: lezione.id })}
+                                  >
+                                    Modifica
+                                  </Pulsante>
+                                  <Pulsante
+                                    variante="pericolo"
+                                    aria-label={`Elimina la lezione «${lezione.titolo}»`}
+                                    onClick={() => setDaCancellare({ tipo: 'lezione', lezione })}
+                                  >
+                                    Elimina
+                                  </Pulsante>
+                                </div>
+                              </>
+                            )}
+                          </li>
+                        ))}
+                      </ol>
+                      {form?.tipo === 'nuovaLezione' && form.tappaId === tappa.id ? (
+                        <FormContenuto
+                          id={`nuova-lezione-${tappa.id}`}
+                          intestazione={`Nuova lezione in «${tappa.titolo}»`}
+                          testoInvio="Crea lezione"
+                          onSalva={(dati) => salva(() => dispatch(creaLezione({ tappaId: tappa.id, dati })).unwrap())}
+                          onAnnulla={() => setForm(null)}
+                        />
+                      ) : (
+                        <Pulsante
+                          variante="neutro"
+                          larghezzaPiena
+                          onClick={() => apriForm({ tipo: 'nuovaLezione', tappaId: tappa.id })}
+                        >
+                          + Aggiungi lezione
+                        </Pulsante>
+                      )}
+                    </div>
+                  )}
+                </Scheda>
+              </li>
+            )
+          })}
+        </ol>
       </div>
 
-      <MessaggioErrore codice={errore ?? erroreCaricamento ?? undefined} />
-
-      {form?.tipo === 'nuovaTappa' && (
-        <Scheda>
-          <FormContenuto
-            id="nuova-tappa"
-            intestazione="Nuova tappa"
-            testoInvio="Crea tappa"
-            onSalva={(dati: DatiContenuto) => salva(() => dispatch(creaTappa(dati)).unwrap(), 'nuova')}
-            onAnnulla={() => setForm(null)}
-          />
-        </Scheda>
-      )}
-
-      {!tappe && caricamento && <p>Caricamento…</p>}
-      {tappe && tappe.length === 0 && <p>Nessuna tappa: crea la prima con "+ Nuova tappa".</p>}
-
-      <ol className={stili.elencoTappe}>
-        {tappe?.map((tappa, indice) => {
-          const espansa = tappa.id === aperta
-          const idCorpo = `tappa-${tappa.id}-lezioni`
-          return (
-            <li key={tappa.id}>
-              <Scheda className={stili.tappa}>
-                {form?.tipo === 'modificaTappa' && form.id === tappa.id ? (
-                  <FormContenuto
-                    id={`tappa-${tappa.id}`}
-                    intestazione={`Modifica la tappa «${tappa.titolo}»`}
-                    iniziale={{ titolo: tappa.titolo, descrizione: tappa.descrizione }}
-                    testoInvio="Salva"
-                    onSalva={(dati) => salva(() => dispatch(modificaTappa({ id: tappa.id, dati })).unwrap())}
-                    onAnnulla={() => setForm(null)}
-                  />
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      className={stili.intestazioneTappa}
-                      aria-expanded={espansa}
-                      aria-controls={idCorpo}
-                      onClick={() => setIdAperta(tappa.id)}
-                    >
-                      <span className={stili.numeroTappa} aria-hidden="true">
-                        {tappa.ordine}
-                      </span>
-                      <span className={stili.testiTappa}>
-                        <span className={stili.titoloTappa}>
-                          <span className="visually-hidden">Tappa {tappa.ordine}: </span>
-                          {tappa.titolo}
-                        </span>
-                        <span className={stili.descrizioneTappa}>{tappa.descrizione}</span>
-                      </span>
-                      <span className={stili.conteggio}>{contaLezioni(tappa.lezioni.length)}</span>
-                      <span className={stili.freccia} aria-hidden="true">
-                        {espansa ? '▾' : '▸'}
-                      </span>
-                    </button>
-                    <div className={stili.azioniElemento}>
-                      <Pulsante
-                        variante="neutro"
-                        aria-label={`Sposta su la tappa «${tappa.titolo}»`}
-                        disabled={indice === 0 || bloccato}
-                        onClick={() =>
-                          sposta(() => dispatch(modificaTappa({ id: tappa.id, dati: { ordine: tappa.ordine - 1 } })).unwrap())
-                        }
-                      >
-                        ↑ Su
-                      </Pulsante>
-                      <Pulsante
-                        variante="neutro"
-                        aria-label={`Sposta giù la tappa «${tappa.titolo}»`}
-                        disabled={indice === tappe.length - 1 || bloccato}
-                        onClick={() =>
-                          sposta(() => dispatch(modificaTappa({ id: tappa.id, dati: { ordine: tappa.ordine + 1 } })).unwrap())
-                        }
-                      >
-                        ↓ Giù
-                      </Pulsante>
-                      <Pulsante
-                        variante="neutro"
-                        aria-label={`Modifica la tappa «${tappa.titolo}»`}
-                        onClick={() => apriForm({ tipo: 'modificaTappa', id: tappa.id })}
-                      >
-                        Modifica
-                      </Pulsante>
-                      <Pulsante
-                        variante="pericolo"
-                        aria-label={`Elimina la tappa «${tappa.titolo}»`}
-                        onClick={() => setDaCancellare({ tipo: 'tappa', tappa })}
-                      >
-                        Elimina
-                      </Pulsante>
-                    </div>
-                  </>
-                )}
-
-                {espansa && (
-                  <div id={idCorpo} className={stili.corpoTappa}>
-                    <p className={stili.etichettaSezione}>Lezioni</p>
-                    {tappa.lezioni.length === 0 && <p>Nessuna lezione in questa tappa.</p>}
-                    <ol className={stili.elencoLezioni}>
-                      {tappa.lezioni.map((lezione, indiceLezione) => (
-                        <li key={lezione.id} className={stili.lezione}>
-                          {form?.tipo === 'modificaLezione' && form.id === lezione.id ? (
-                            <FormContenuto
-                              id={`lezione-${lezione.id}`}
-                              intestazione={`Modifica la lezione «${lezione.titolo}»`}
-                              iniziale={{ titolo: lezione.titolo, descrizione: lezione.descrizione }}
-                              testoInvio="Salva"
-                              onSalva={(dati) => salva(() => dispatch(modificaLezione({ id: lezione.id, dati })).unwrap())}
-                              onAnnulla={() => setForm(null)}
-                            />
-                          ) : (
-                            <>
-                              <div className={stili.testiLezione}>
-                                <span className={stili.titoloLezione}>
-                                  L{lezione.ordine} · {lezione.titolo}
-                                </span>
-                                <span className={stili.descrizioneTappa}>{lezione.descrizione}</span>
-                                <span className={stili.conteggio}>{contaDomande(lezione.numeroDomande)}</span>
-                              </div>
-                              <div className={stili.azioniElemento}>
-                                <Pulsante
-                                  variante="neutro"
-                                  aria-label={`Sposta su la lezione «${lezione.titolo}»`}
-                                  disabled={indiceLezione === 0 || bloccato}
-                                  onClick={() =>
-                                    sposta(() =>
-                                      dispatch(
-                                        modificaLezione({ id: lezione.id, dati: { ordine: lezione.ordine - 1 } }),
-                                      ).unwrap(),
-                                    )
-                                  }
-                                >
-                                  ↑ Su
-                                </Pulsante>
-                                <Pulsante
-                                  variante="neutro"
-                                  aria-label={`Sposta giù la lezione «${lezione.titolo}»`}
-                                  disabled={indiceLezione === tappa.lezioni.length - 1 || bloccato}
-                                  onClick={() =>
-                                    sposta(() =>
-                                      dispatch(
-                                        modificaLezione({ id: lezione.id, dati: { ordine: lezione.ordine + 1 } }),
-                                      ).unwrap(),
-                                    )
-                                  }
-                                >
-                                  ↓ Giù
-                                </Pulsante>
-                                <Pulsante
-                                  variante="neutro"
-                                  aria-label={`Modifica la lezione «${lezione.titolo}»`}
-                                  onClick={() => apriForm({ tipo: 'modificaLezione', id: lezione.id })}
-                                >
-                                  Modifica
-                                </Pulsante>
-                                <Pulsante
-                                  variante="pericolo"
-                                  aria-label={`Elimina la lezione «${lezione.titolo}»`}
-                                  onClick={() => setDaCancellare({ tipo: 'lezione', lezione })}
-                                >
-                                  Elimina
-                                </Pulsante>
-                              </div>
-                            </>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
-                    {form?.tipo === 'nuovaLezione' && form.tappaId === tappa.id ? (
-                      <FormContenuto
-                        id={`nuova-lezione-${tappa.id}`}
-                        intestazione={`Nuova lezione in «${tappa.titolo}»`}
-                        testoInvio="Crea lezione"
-                        onSalva={(dati) => salva(() => dispatch(creaLezione({ tappaId: tappa.id, dati })).unwrap())}
-                        onAnnulla={() => setForm(null)}
-                      />
-                    ) : (
-                      <Pulsante
-                        variante="neutro"
-                        larghezzaPiena
-                        onClick={() => apriForm({ tipo: 'nuovaLezione', tappaId: tappa.id })}
-                      >
-                        + Aggiungi lezione
-                      </Pulsante>
-                    )}
-                  </div>
-                )}
-              </Scheda>
-            </li>
-          )
-        })}
-      </ol>
+      <div className={`col-12 col-lg-6 ${idLezioneScelta ? '' : 'd-none d-lg-block'}`}>
+        <EditorDomande
+          key={idLezioneScelta ?? 'nessuna'}
+          idLezione={idLezioneScelta}
+          perduta={sceltaPerduta}
+          onTorna={() => setIdLezioneScelta(null)}
+          onConteggio={aggiornaConteggio}
+        />
+      </div>
 
       <ConfermaCancellazione
         domanda={daCancellare ? domandaCancellazione(daCancellare) : null}
