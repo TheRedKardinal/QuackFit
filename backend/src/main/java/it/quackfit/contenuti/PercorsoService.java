@@ -67,18 +67,31 @@ public class PercorsoService {
 	}
 
 	/**
-	 * Il contenuto di una lezione da svolgere, senza soluzioni né spiegazioni. Controlli nell'ordine della spec:
-	 * 1. lezione inesistente o cancellata → 404 NON_TROVATO
-	 * 2. lezione senza domande attive → 404 NON_TROVATO (non si può avviare)
-	 * 3. lezione BLOCCATA per l'utente → 403 LEZIONE_BLOCCATA (una COMPLETATA si può rifare)
-	 * Domande mescolate a ogni richiesta; voci per tipo come in {@link #domanda}.
+	 * Il contenuto di una lezione da svolgere, senza soluzioni né spiegazioni, dopo i controlli di
+	 * {@link #lezioneAvviabile}. Domande mescolate a ogni richiesta; voci per tipo come in {@link #domanda}.
 	 */
 	@Transactional(readOnly = true)
 	public LezioneContenutoResponse lezione(UUID utenteId, UUID lezioneId) {
+		Lezione lezione = lezioneAvviabile(utenteId, lezioneId);
+		List<DomandaLezioneResponse> contenuto = mescolate(domandaRepository.findByLezioneOrderByOrdineAsc(lezione))
+				.stream()
+				.map(d -> domanda(d, casuale))
+				.toList();
+		return new LezioneContenutoResponse(lezione.getId(), lezione.getTitolo(), lezione.getDescrizione(), contenuto);
+	}
+
+	/**
+	 * La lezione, se l'utente può aprirla o avviarla: gli stessi controlli per il contenuto (percorso.md) e per
+	 * l'avvio di un tentativo (tentativi.md), scritti una volta sola. In ordine:
+	 * 1. lezione inesistente o cancellata → 404 NON_TROVATO
+	 * 2. lezione senza domande attive → 404 NON_TROVATO
+	 * 3. lezione BLOCCATA per l'utente → 403 LEZIONE_BLOCCATA (una COMPLETATA si può rifare)
+	 */
+	@Transactional(readOnly = true)
+	public Lezione lezioneAvviabile(UUID utenteId, UUID lezioneId) {
 		Lezione lezione = lezioneRepository.findById(lezioneId)
 				.orElseThrow(() -> new ApplicazioneException(CodiceErrore.NON_TROVATO, "Lezione non trovata"));
-		List<Domanda> domande = domandaRepository.findByLezioneOrderByOrdineAsc(lezione);
-		if (domande.isEmpty()) {
+		if (domandaRepository.countByLezione(lezione) == 0) {
 			throw new ApplicazioneException(CodiceErrore.NON_TROVATO, "Questa lezione non ha ancora domande");
 		}
 		StatoLezione stato = stati(utenteId, tappaRepository.findAllByOrderByOrdineAsc(), lezioniPerTappa())
@@ -86,8 +99,7 @@ public class PercorsoService {
 		if (stato != StatoLezione.COMPLETATA && stato != StatoLezione.SBLOCCATA) {
 			throw new ApplicazioneException(CodiceErrore.LEZIONE_BLOCCATA, "Completa prima le lezioni precedenti");
 		}
-		List<DomandaLezioneResponse> contenuto = mescolate(domande).stream().map(d -> domanda(d, casuale)).toList();
-		return new LezioneContenutoResponse(lezione.getId(), lezione.getTitolo(), lezione.getDescrizione(), contenuto);
+		return lezione;
 	}
 
 	/**

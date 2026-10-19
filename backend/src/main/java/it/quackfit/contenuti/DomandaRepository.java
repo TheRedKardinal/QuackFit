@@ -20,6 +20,13 @@ public interface DomandaRepository extends JpaRepository<Domanda, UUID> {
 
 	long countByLezione(Lezione lezione);
 
+	/**
+	 * Domande attive di una lezione create entro un istante: le domande di un tentativo (tentativi.md, Regole generali)
+	 * sono quelle attive e create prima dell'avvio.
+	 */
+	@Query("select count(d) from Domanda d where d.lezione.id = :lezioneId and d.createdAt <= :avvio")
+	long contaAttiveCreateEntro(@Param("lezioneId") UUID lezioneId, @Param("avvio") Instant avvio);
+
 	/** Id della lezione di una domanda attiva, senza caricare la domanda (si legge prima di bloccare la lezione). */
 	@Query("select d.lezione.id from Domanda d where d.id = :id")
 	Optional<UUID> lezioneIdDi(@Param("id") UUID id);
