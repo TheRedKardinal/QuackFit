@@ -312,7 +312,13 @@ function PaginaContenuti() {
                                     L{lezione.ordine} · {lezione.titolo}
                                   </span>
                                   <span className={stili.descrizioneTappa}>{lezione.descrizione}</span>
-                                  <span className={stili.conteggio}>{contaDomande(numeroDomande(lezione))}</span>
+                                  <span className={stili.conteggio}>
+                                    {contaDomande(numeroDomande(lezione))}
+                                    {/* admin.md, regola operativa: senza domande la lezione blocca chi ci arriva */}
+                                    {numeroDomande(lezione) === 0 && (
+                                      <span className={stili.senzaDomande}>senza domande</span>
+                                    )}
+                                  </span>
                                 </div>
                                 <div className={stili.azioniElemento}>
                                   <Pulsante

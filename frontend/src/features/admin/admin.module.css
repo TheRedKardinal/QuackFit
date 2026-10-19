@@ -642,3 +642,15 @@
   font-size: 0.875rem;
   font-weight: 700;
 }
+
+/* lezione senza domande (admin.md, regola operativa): blocca chi ci arriva nel percorso */
+.senzaDomande {
+  margin-left: 0.5rem;
+  padding: 0.0625rem 0.5rem;
+  border: 2px solid var(--colore-errore);
+  border-radius: 999px;
+  color: var(--colore-errore);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
