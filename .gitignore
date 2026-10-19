@@ -21,3 +21,8 @@ Thumbs.db
 
 # Impostazioni personali di Claude Code (quelle condivise sono in .claude/settings.json)
 .claude/settings.local.json
+
+# Documentazione di lavoro (CLAUDE.md, spec, progettazione, task): solo in locale, non su GitHub.
+# I README restano visibili, in qualsiasi cartella.
+*.md
+!README.md

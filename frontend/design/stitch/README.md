@@ -4,7 +4,7 @@ Schermate esportate dal progetto Stitch **"QuackLingo Frontend Draft"** (ID `147
 
 > **Solo riferimento visivo.** Il codice HTML esportato (Tailwind, CDN, icone esterne) **non si copia** nei componenti:
 > si riscrive in React + TypeScript con le nostre variabili CSS (`src/styles/tokens.css`), la struttura per funzionalità
-> e senza dipendenze nuove (vedi `frontend/CLAUDE.md`, "Riferimento grafico").
+> e senza dipendenze nuove.
 > Testi, numeri e dati delle schermate sono di esempio.
 
 ## Schermate
@@ -38,8 +38,7 @@ Si segue lo stile delle altre schermate.
 
 ## Elementi fuori perimetro presenti nelle schermate
 
-Le schermate contengono elementi che **non vanno realizzati** (vedi `frontend/CLAUDE.md`, "Fuori perimetro",
-e le spec del backend):
+Le schermate contengono elementi che **non vanno realizzati**:
 
 - XP e punti ("+15 XP", "420 XP", "Punti Quack"), livelli ("Livello Quack"), traguardi e badge
 - "Esame tappa", "Prossimo capitolo", banner "Streak in pericolo" con pulsante "Salva"

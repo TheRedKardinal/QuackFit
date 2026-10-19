@@ -7,10 +7,8 @@ tecnica degli esercizi e falsi miti da smontare.
 ```
 QuackFit/
 ├── backend/    Spring Boot (Java 25, PostgreSQL)
-│   └── docs/   progettazione e spec delle funzionalità
-├── frontend/   React + TypeScript (Vite)
-│   └── design/ schermate di riferimento (Stitch)
-└── docs/       elenco delle task del progetto
+└── frontend/   React + TypeScript (Vite)
+    └── design/ schermate di riferimento (Stitch)
 ```
 
 ## Avvio in locale (Windows)
