@@ -2,6 +2,7 @@ package it.quackfit.tentativi;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.quackfit.common.ApplicazioneException;
+import it.quackfit.common.ClockConfig;
 import it.quackfit.common.CodiceErrore;
 import it.quackfit.contenuti.Domanda;
 import it.quackfit.contenuti.DomandaRepository;
@@ -29,15 +31,17 @@ import it.quackfit.contenuti.TipoDomanda;
 import it.quackfit.tentativi.EsitoRispostaResponse.CoppiaSoluzioneResponse;
 import it.quackfit.tentativi.EsitoRispostaResponse.SoluzioneResponse;
 import it.quackfit.tentativi.RispostaRequest.CoppiaRequest;
+import it.quackfit.utente.Streak;
+import it.quackfit.utente.StreakRepository;
 import it.quackfit.utente.UtenteRepository;
 
 /**
- * Avvio di un tentativo e risposte (tentativi.md, Regole generali, Avvio, Risposta).
+ * Avvio di un tentativo, risposte e chiusura (tentativi.md, Regole generali, Avvio, Risposta, Chiusura).
  *
  * Dal tentativo e dalle risposte non si naviga verso i contenuti (possono essere cancellati): si usano query con gli id
  * (backend/CLAUDE.md, Soft delete). Le risposte leggono il tentativo con un lock pessimistico, così due risposte quasi
  * insieme vanno in fila e gli errori e la prima risposta salvata restano coerenti; le UNIQUE delle risposte restano
- * come rete di sicurezza.
+ * come rete di sicurezza. La chiusura blocca il tentativo e poi la streak (sempre in quest'ordine).
  */
 @Service
 public class TentativiService {
@@ -59,6 +63,8 @@ public class TentativiService {
 	static final String MSG_COPPIE_NON_VALIDE =
 			"Abbina ogni elemento di sinistra a un elemento di destra diverso, una sola volta";
 	static final String MSG_GIA_RISOLTA = "Domanda già risolta";
+	static final String MSG_NON_TUTTE_RISOLTE =
+			"Rispondi correttamente a tutte le domande prima di concludere la lezione";
 
 	private final TentativoLezioneRepository tentativoRepository;
 	private final RispostaOpzioneRepository rispostaOpzioneRepository;
@@ -66,6 +72,7 @@ public class TentativiService {
 	private final LezioneRepository lezioneRepository;
 	private final DomandaRepository domandaRepository;
 	private final UtenteRepository utenteRepository;
+	private final StreakRepository streakRepository;
 	private final PercorsoService percorsoService;
 	private final NamedParameterJdbcTemplate jdbc;
 	private final Clock clock;
@@ -73,14 +80,15 @@ public class TentativiService {
 	public TentativiService(TentativoLezioneRepository tentativoRepository,
 			RispostaOpzioneRepository rispostaOpzioneRepository,
 			RispostaAbbinamentoRepository rispostaAbbinamentoRepository, LezioneRepository lezioneRepository,
-			DomandaRepository domandaRepository, UtenteRepository utenteRepository, PercorsoService percorsoService,
-			NamedParameterJdbcTemplate jdbc, Clock clock) {
+			DomandaRepository domandaRepository, UtenteRepository utenteRepository, StreakRepository streakRepository,
+			PercorsoService percorsoService, NamedParameterJdbcTemplate jdbc, Clock clock) {
 		this.tentativoRepository = tentativoRepository;
 		this.rispostaOpzioneRepository = rispostaOpzioneRepository;
 		this.rispostaAbbinamentoRepository = rispostaAbbinamentoRepository;
 		this.lezioneRepository = lezioneRepository;
 		this.domandaRepository = domandaRepository;
 		this.utenteRepository = utenteRepository;
+		this.streakRepository = streakRepository;
 		this.percorsoService = percorsoService;
 		this.jdbc = jdbc;
 		this.clock = clock;
@@ -123,16 +131,8 @@ public class TentativiService {
 	 */
 	@Transactional
 	public EsitoRispostaResponse rispondi(UUID utenteId, UUID tentativoId, RispostaRequest richiesta) {
-		TentativoLezione tentativo = tentativoRepository.bloccaDellUtente(tentativoId, utenteId)
-				.orElseThrow(() -> new ApplicazioneException(CodiceErrore.NON_TROVATO, MSG_TENTATIVO_NON_TROVATO));
-		if (tentativo.getEsito() != EsitoTentativo.IN_CORSO) {
-			throw new ApplicazioneException(CodiceErrore.TENTATIVO_CHIUSO, MSG_TENTATIVO_CHIUSO);
-		}
-		UUID lezioneId = lezioneDel(tentativoId);
-		if (!lezioneRepository.existsById(lezioneId)
-				|| domandaRepository.contaAttiveCreateEntro(lezioneId, tentativo.getIniziatoAt()) == 0) {
-			throw new ApplicazioneException(CodiceErrore.NON_TROVATO, MSG_LEZIONE_NON_TROVATA);
-		}
+		TentativoLezione tentativo = bloccaInCorso(utenteId, tentativoId);
+		UUID lezioneId = lezioneAttivaDel(tentativo);
 
 		Domanda domanda = domandaDelTentativo(richiesta.domandaId(), lezioneId, tentativo.getIniziatoAt());
 		boolean opzioni = domanda.getTipo() != TipoDomanda.ABBINAMENTO;
@@ -140,6 +140,29 @@ public class TentativiService {
 
 		return opzioni ? rispondiConOpzione(tentativo, domanda, richiesta.opzioneId())
 				: rispondiConCoppie(tentativo, domanda, richiesta.coppie());
+	}
+
+	/**
+	 * Controlli comuni a risposta e chiusura, in ordine: tentativo inesistente o di un altro utente → 404 (stesso
+	 * messaggio); tentativo concluso → 409 TENTATIVO_CHIUSO. Il tentativo resta bloccato fino alla fine della transazione.
+	 */
+	private TentativoLezione bloccaInCorso(UUID utenteId, UUID tentativoId) {
+		TentativoLezione tentativo = tentativoRepository.bloccaDellUtente(tentativoId, utenteId)
+				.orElseThrow(() -> new ApplicazioneException(CodiceErrore.NON_TROVATO, MSG_TENTATIVO_NON_TROVATO));
+		if (tentativo.getEsito() != EsitoTentativo.IN_CORSO) {
+			throw new ApplicazioneException(CodiceErrore.TENTATIVO_CHIUSO, MSG_TENTATIVO_CHIUSO);
+		}
+		return tentativo;
+	}
+
+	/** Lezione cancellata, o nessuna domanda del tentativo ancora attiva → 404; altrimenti l'id della lezione. */
+	private UUID lezioneAttivaDel(TentativoLezione tentativo) {
+		UUID lezioneId = lezioneDel(tentativo.getId());
+		if (!lezioneRepository.existsById(lezioneId)
+				|| domandaRepository.contaAttiveCreateEntro(lezioneId, tentativo.getIniziatoAt()) == 0) {
+			throw new ApplicazioneException(CodiceErrore.NON_TROVATO, MSG_LEZIONE_NON_TROVATA);
+		}
+		return lezioneId;
 	}
 
 	/** Lezione del tentativo con una query sull'id (dal tentativo non si naviga verso la lezione, può essere cancellata). */
@@ -273,6 +296,49 @@ public class TentativiService {
 			tentativo.setEsito(EsitoTentativo.FALLITO);
 			tentativo.setFinitoAt(Instant.now(clock));
 		}
+	}
+
+	// --- chiusura ---
+
+	/**
+	 * Chiusura (tentativi.md, Chiusura). Controlli in ordine: tentativo inesistente o di un altro utente → 404;
+	 * concluso → 409; lezione cancellata o senza domande del tentativo → 404; non tutte le domande del tentativo (attive
+	 * e create entro l'avvio) risolte → 400. Poi SUPERATO e streak aggiornata, letta con un lock dopo il tentativo.
+	 */
+	@Transactional
+	public ChiusuraTentativoResponse chiudi(UUID utenteId, UUID tentativoId) {
+		TentativoLezione tentativo = bloccaInCorso(utenteId, tentativoId);
+		UUID lezioneId = lezioneAttivaDel(tentativo);
+		// le query delle risposte passano dalla domanda: quelle cancellate restano fuori da sole
+		Set<UUID> risolte = new HashSet<>(rispostaOpzioneRepository.domandeRisolte(tentativoId));
+		risolte.addAll(rispostaAbbinamentoRepository.domandeRisolte(tentativoId));
+		if (!risolte.containsAll(domandaRepository.idAttiveCreateEntro(lezioneId, tentativo.getIniziatoAt()))) {
+			throw new ApplicazioneException(CodiceErrore.VALIDAZIONE, MSG_NON_TUTTE_RISOLTE);
+		}
+
+		Instant adesso = Instant.now(clock);
+		tentativo.setEsito(EsitoTentativo.SUPERATO);
+		tentativo.setFinitoAt(adesso);
+		// ogni utente attivo ha la sua Streak (registrazione e seeder): se manca è un dato incoerente → 500
+		Streak streak = streakRepository.bloccaDellUtente(utenteId)
+				.orElseThrow(() -> new IllegalStateException("Streak mancante per l'utente " + utenteId));
+		aggiornaStreak(streak, LocalDate.ofInstant(adesso, ClockConfig.FUSO), adesso);
+		return ChiusuraTentativoResponse.da(tentativo, streak);
+	}
+
+	/**
+	 * Streak dopo una lezione superata oggi (fuso Europe/Rome): ultima attività oggi → invariata; ieri → +1; altrimenti
+	 * (mai o più vecchia) → 1. Poi record = max(record, valore) e ultima attività = oggi.
+	 */
+	static void aggiornaStreak(Streak streak, LocalDate oggi, Instant adesso) {
+		LocalDate ultima = streak.getUltimaAttivita();
+		if (oggi.equals(ultima)) {
+			return;
+		}
+		streak.setValore(oggi.minusDays(1).equals(ultima) ? streak.getValore() + 1 : 1);
+		streak.setRecord(Math.max(streak.getRecord(), streak.getValore()));
+		streak.setUltimaAttivita(oggi);
+		streak.setUpdatedAt(adesso);
 	}
 
 	private static ApplicazioneException campo(String campo, String messaggio) {

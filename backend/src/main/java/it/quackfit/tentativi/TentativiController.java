@@ -38,4 +38,9 @@ public class TentativiController {
 		return tentativiService.rispondi(utente.getId(), id, richiesta);
 	}
 
+	@PostMapping("/{id}/complete")
+	public ChiusuraTentativoResponse chiudi(@AuthenticationPrincipal Utente utente, @PathVariable("id") UUID id) {
+		return tentativiService.chiudi(utente.getId(), id);
+	}
+
 }

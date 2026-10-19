@@ -27,6 +27,10 @@ public interface DomandaRepository extends JpaRepository<Domanda, UUID> {
 	@Query("select count(d) from Domanda d where d.lezione.id = :lezioneId and d.createdAt <= :avvio")
 	long contaAttiveCreateEntro(@Param("lezioneId") UUID lezioneId, @Param("avvio") Instant avvio);
 
+	/** Id delle domande di un tentativo (attive e create entro l'avvio), per la chiusura. */
+	@Query("select d.id from Domanda d where d.lezione.id = :lezioneId and d.createdAt <= :avvio")
+	List<UUID> idAttiveCreateEntro(@Param("lezioneId") UUID lezioneId, @Param("avvio") Instant avvio);
+
 	/** Id della lezione di una domanda attiva, senza caricare la domanda (si legge prima di bloccare la lezione). */
 	@Query("select d.lezione.id from Domanda d where d.id = :id")
 	Optional<UUID> lezioneIdDi(@Param("id") UUID id);
