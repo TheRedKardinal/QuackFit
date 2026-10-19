@@ -1,7 +1,7 @@
 import { datiErrore } from '../../api/ApiError'
-import { richiesta } from '../../api/client'
+import { richiesta, type OpzioniRichiesta } from '../../api/client'
 import { createAppAsyncThunk } from '../../store/hooks'
-import type { Pagina, RuoloAssegnabile, UtenteAdmin } from './tipi'
+import type { DatiContenutoRequest, Pagina, RuoloAssegnabile, TappaAdmin, UtenteAdmin } from './tipi'
 
 interface ParametriLista {
   /** Pagina da 0. */
@@ -46,3 +46,65 @@ export const cambiaRuolo = createAppAsyncThunk(
     }
   },
 )
+
+// --- tappe e lezioni (admin.md, Tappe e Lezioni) ---
+
+/** Elenco di tutte le tappe con le loro lezioni (GET /api/admin/stages). */
+export const caricaTappe = createAppAsyncThunk('admin/caricaTappe', async (_: void, { getState, rejectWithValue }) => {
+  try {
+    return await richiesta<TappaAdmin[]>('/api/admin/stages', { token: getState().sessione.token })
+  } catch (errore) {
+    return rejectWithValue(datiErrore(errore))
+  }
+})
+
+/**
+ * Le operazioni sui contenuti hanno tutte la stessa forma: una chiamata e, se fallisce, l'errore del backend.
+ * La pagina poi rilegge l'elenco (creazione, cancellazione e riordino cambiano anche gli altri elementi).
+ */
+function operazione<A>(nome: string, chiamata: (argomento: A) => [string, OpzioniRichiesta]) {
+  return createAppAsyncThunk(`admin/${nome}`, async (argomento: A, { getState, rejectWithValue }) => {
+    const [percorso, opzioni] = chiamata(argomento)
+    try {
+      return await richiesta<{ id: string } | undefined>(percorso, { ...opzioni, token: getState().sessione.token })
+    } catch (errore) {
+      return rejectWithValue(datiErrore(errore))
+    }
+  })
+}
+
+export const creaTappa = operazione('creaTappa', (dati: DatiContenutoRequest) => [
+  '/api/admin/stages',
+  { metodo: 'POST', corpo: dati },
+])
+
+export const modificaTappa = operazione('modificaTappa', ({ id, dati }: { id: string; dati: DatiContenutoRequest }) => [
+  `/api/admin/stages/${id}`,
+  { metodo: 'PATCH', corpo: dati },
+])
+
+export const cancellaTappa = operazione('cancellaTappa', (id: string) => [
+  `/api/admin/stages/${id}`,
+  { metodo: 'DELETE' },
+])
+
+export const creaLezione = operazione(
+  'creaLezione',
+  ({ tappaId, dati }: { tappaId: string; dati: DatiContenutoRequest }) => [
+    `/api/admin/stages/${tappaId}/lessons`,
+    { metodo: 'POST', corpo: dati },
+  ],
+)
+
+export const modificaLezione = operazione(
+  'modificaLezione',
+  ({ id, dati }: { id: string; dati: DatiContenutoRequest }) => [
+    `/api/admin/lessons/${id}`,
+    { metodo: 'PATCH', corpo: dati },
+  ],
+)
+
+export const cancellaLezione = operazione('cancellaLezione', (id: string) => [
+  `/api/admin/lessons/${id}`,
+  { metodo: 'DELETE' },
+])
