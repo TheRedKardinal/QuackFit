@@ -8,7 +8,7 @@ import { messaggioErrore } from '../../common/messaggiErrore'
 import { salvaToken } from '../../store/sessione/tokenSalvato'
 import { creaStore } from '../../store/store'
 import { fetchFinto, profilo, rispostaErrore, rispostaJson } from '../../testUtili'
-import type { ContenutoLezione, DomandaLezione, EsitoRisposta } from './tipi'
+import type { ContenutoLezione, DomandaLezione, EsitoRisposta, RispostaRequest } from './tipi'
 
 beforeEach(() => {
   localStorage.clear()
@@ -47,15 +47,26 @@ const SM: DomandaLezione = {
 
 const AB: DomandaLezione = {
   id: 'ab',
-  testo: 'Abbina',
+  testo: 'Abbina ogni muscolo alla sua zona',
   tipo: 'ABBINAMENTO',
   opzioni: [],
-  sinistra: [{ id: 's1', testo: 'Pettorale' }],
-  destra: [{ id: 'd1', testo: 'Petto' }],
+  // mescolate ognuna per conto suo, come fa il backend
+  sinistra: [
+    { id: 's1', testo: 'Pettorale' },
+    { id: 's2', testo: 'Dorsale' },
+  ],
+  destra: [
+    { id: 'd2', testo: 'Schiena' },
+    { id: 'd1', testo: 'Petto' },
+  ],
 }
 
 /** Soluzioni del backend finto: chi risponde con queste ha risposto giusto. */
 const GIUSTE: Record<string, string> = { vf: 'vero', sm: 'bicipite' }
+const COPPIE_GIUSTE = [
+  { sinistroId: 's1', destroId: 'd1' },
+  { sinistroId: 's2', destroId: 'd2' },
+]
 
 const CHIUSURA = { esito: 'SUPERATO', errori: 1, streak: { valore: 4, record: 7 } }
 
@@ -98,13 +109,27 @@ function apri({ domande = [VF, SM], complete, risposta, contenuto, senzaTentativ
       if (risposta) {
         return risposta()
       }
-      const { domandaId, opzioneId } = JSON.parse(String(init?.body)) as { domandaId: string; opzioneId: string }
-      const corretta = GIUSTE[domandaId] === opzioneId
-      errori = corretta ? errori : Math.min(3, errori + 1)
+      const corpo = JSON.parse(String(init?.body)) as RispostaRequest
+      let corretta: boolean
+      if ('coppie' in corpo) {
+        // un errore per ogni coppia sbagliata, come il backend
+        const sbagliate = corpo.coppie.filter(
+          (c) => !COPPIE_GIUSTE.some((g) => g.sinistroId === c.sinistroId && g.destroId === c.destroId),
+        ).length
+        corretta = sbagliate === 0
+        errori = Math.min(3, errori + sbagliate)
+      } else {
+        corretta = GIUSTE[corpo.domandaId] === corpo.opzioneId
+        errori = corretta ? errori : Math.min(3, errori + 1)
+      }
+      const abbinamento = 'coppie' in corpo
       const esito: EsitoRisposta = {
         corretta,
-        soluzione: { opzioneId: GIUSTE[domandaId], coppie: [] },
-        spiegazione: `Spiegazione di ${domandaId}`,
+        soluzione: {
+          opzioneId: abbinamento ? null : GIUSTE[corpo.domandaId],
+          coppie: abbinamento ? COPPIE_GIUSTE : [],
+        },
+        spiegazione: `Spiegazione di ${corpo.domandaId}`,
         errori,
         esito: errori === 3 ? 'FALLITO' : 'IN_CORSO',
       }
@@ -275,21 +300,106 @@ describe('lezione: coda, riproposta e chiusura', () => {
 
     expect(await screen.findByRole('heading', { name: 'Percorso' })).toBeInTheDocument()
   })
+})
 
-  it('PROVVISORIO (task 44): l\'abbinamento mostra "Domanda in arrivo", Avanti non invia e la chiusura dà il 400', async () => {
+describe('lezione: abbinamento', () => {
+  /** La tessera con quel testo, collegata o no ("Petto" non deve trovare anche "Pettorale"). */
+  const tessera = (testo: string) => new RegExp(`^${testo}(,|$)`)
+
+  /** Collega un sinistro a un destro con due tocchi. */
+  async function collega(utente: ReturnType<typeof userEvent.setup>, sinistro: string, destro: string) {
+    await utente.click(await screen.findByRole('button', { name: tessera(sinistro) }))
+    await utente.click(screen.getByRole('button', { name: tessera(destro) }))
+  }
+
+  it('"Verifica" si attiva solo con tutte le coppie; le tessere collegate hanno lo stesso numero', async () => {
     const utente = userEvent.setup()
-    apri({ domande: [VF, AB], complete: () => rispostaErrore(400, 'VALIDAZIONE') })
+    apri({ domande: [AB] })
+
+    expect(await screen.findByText('0/2 coppie')).toBeInTheDocument()
+    // senza un sinistro selezionato i destri non si toccano
+    expect(screen.getByRole('button', { name: tessera('Petto') })).toBeDisabled()
+
+    await collega(utente, 'Pettorale', 'Petto')
+    expect(screen.getByText('1/2 coppie')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pettorale, coppia 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Petto, coppia 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Verifica' })).toBeDisabled()
+
+    await collega(utente, 'Dorsale', 'Schiena')
+    expect(screen.getByText('2/2 coppie')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Verifica' })).toBeEnabled()
+  })
+
+  it('spostare un destro già usato lascia il sinistro precedente senza coppia e disattiva "Verifica"', async () => {
+    const utente = userEvent.setup()
+    apri({ domande: [AB] })
+
+    await collega(utente, 'Pettorale', 'Petto')
+    await collega(utente, 'Dorsale', 'Schiena')
+    await collega(utente, 'Dorsale', 'Petto')
+
+    expect(screen.getByRole('button', { name: 'Pettorale' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dorsale, coppia 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Petto, coppia 1' })).toBeInTheDocument()
+    expect(screen.getByText('1/2 coppie')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Verifica' })).toBeDisabled()
+  })
+
+  it('invia tutte le coppie insieme, una volta sola anche con un doppio tocco', async () => {
+    const utente = userEvent.setup()
+    apri({ domande: [AB] })
+
+    await collega(utente, 'Dorsale', 'Schiena')
+    await collega(utente, 'Pettorale', 'Petto')
+    await utente.dblClick(screen.getByRole('button', { name: 'Verifica' }))
+
+    await screen.findByRole('dialog')
+    expect(chiamate('/answers')).toHaveLength(1)
+    expect(JSON.parse(String(chiamate('/answers')[0][1]?.body))).toEqual({
+      domandaId: 'ab',
+      coppie: [
+        { sinistroId: 's1', destroId: 'd1' },
+        { sinistroId: 's2', destroId: 'd2' },
+      ],
+    })
+  })
+
+  it('esito per coppia nel drawer e sulle tessere; la domanda sbagliata torna con le tessere vuote', async () => {
+    const utente = userEvent.setup()
+    apri({ domande: [AB] })
+
+    await collega(utente, 'Pettorale', 'Schiena')
+    await collega(utente, 'Dorsale', 'Petto')
+    await utente.click(screen.getByRole('button', { name: 'Verifica' }))
+
+    const drawer = await screen.findByRole('dialog', { name: /Risposta sbagliata/ })
+    expect(drawer).toHaveTextContent('Pettorale → Schiena, sbagliata (giusto: Petto)')
+    expect(drawer).toHaveTextContent('Dorsale → Petto, sbagliata (giusto: Schiena)')
+    expect(screen.getByText('Errori 2/3')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pettorale, coppia 1, sbagliata' })).toBeDisabled()
+
+    await utente.click(screen.getByRole('button', { name: 'Continua' }))
+
+    // riproposta: stessa domanda, nessuna coppia
+    expect(await screen.findByText('0/2 coppie')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pettorale' })).toBeEnabled()
+  })
+
+  it('una lezione con abbinamento si chiude e mostra la vittoria', async () => {
+    const utente = userEvent.setup()
+    apri({ domande: [VF, AB] })
 
     await rispondi(utente, 'Vero')
     await utente.click(await screen.findByRole('button', { name: 'Continua' }))
-    expect(await screen.findByText('Domanda in arrivo')).toBeInTheDocument()
-    await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+    await collega(utente, 'Pettorale', 'Petto')
+    await collega(utente, 'Dorsale', 'Schiena')
+    await utente.click(screen.getByRole('button', { name: 'Verifica' }))
+    expect(await screen.findByRole('dialog', { name: /Risposta giusta!/ })).toHaveTextContent('Pettorale → Petto, giusta')
+    await utente.click(screen.getByRole('button', { name: 'Continua' }))
 
-    expect(
-      await screen.findByText('Rispondi correttamente a tutte le domande prima di concludere la lezione.'),
-    ).toBeInTheDocument()
-    expect(chiamate('/answers')).toHaveLength(1)
-    expect(screen.getByRole('button', { name: 'Torna alla mappa' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Lezione completata!' })).toBeInTheDocument()
+    expect(chiamate('/complete')).toHaveLength(1)
   })
 })
 

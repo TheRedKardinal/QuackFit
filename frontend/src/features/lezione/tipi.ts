@@ -28,15 +28,19 @@ export interface ContenutoLezione {
   domande: DomandaLezione[]
 }
 
-export interface CoppiaSoluzione {
+/** Una coppia di un abbinamento: nella risposta inviata e nella soluzione. */
+export interface Coppia {
   sinistroId: string
   destroId: string
 }
 
+/** POST /api/attempts/{id}/answers: solo il campo del tipo (opzione oppure tutte le coppie insieme). */
+export type RispostaRequest = { domandaId: string; opzioneId: string } | { domandaId: string; coppie: Coppia[] }
+
 /** POST /api/attempts/{id}/answers → 200: la soluzione arriva solo qui, dopo la risposta. */
 export interface EsitoRisposta {
   corretta: boolean
-  soluzione: { opzioneId: string | null; coppie: CoppiaSoluzione[] }
+  soluzione: { opzioneId: string | null; coppie: Coppia[] }
   spiegazione: string
   errori: number
   esito: EsitoTentativo
