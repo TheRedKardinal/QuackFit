@@ -35,6 +35,22 @@ export const caricaProfilo = createAppAsyncThunk(
   { condition: (_, { getState }) => getState().sessione.caricamento !== 'in_corso' },
 )
 
+/**
+ * Rilettura silenziosa del profilo (es. dopo una lezione superata: streak e lezioni completate cambiano). Non tocca lo
+ * stato di caricamento, così le guardie non smontano la pagina. Se fallisce il profilo resta quello di prima, senza
+ * errori mostrati; un 401 fa comunque logout tramite il listener, come per ogni thunk.
+ */
+export const rileggiProfilo = createAppAsyncThunk(
+  'sessione/rileggiProfilo',
+  async (_: void, { getState, rejectWithValue }) => {
+    try {
+      return await richiesta<MeResponse>('/api/me', { token: getState().sessione.token })
+    } catch (errore) {
+      return rejectWithValue(datiErrore(errore))
+    }
+  },
+)
+
 const sessioneSlice = createSlice({
   name: 'sessione',
   initialState: statoSessioneVuoto,
@@ -86,6 +102,12 @@ const sessioneSlice = createSlice({
       .addCase(caricaProfilo.rejected, (stato, action) => {
         stato.caricamento = 'fallito'
         stato.errore = action.payload ?? datiErrore(action.error)
+      })
+      // solo il profilo: caricamento ed errore restano come sono
+      .addCase(rileggiProfilo.fulfilled, (stato, action) => {
+        if (stato.utente) {
+          stato.utente = action.payload
+        }
       })
   },
 })

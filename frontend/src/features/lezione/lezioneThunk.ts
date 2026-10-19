@@ -1,6 +1,7 @@
 import { datiErrore } from '../../api/ApiError'
 import { richiesta } from '../../api/client'
 import { createAppAsyncThunk } from '../../store/hooks'
+import { rileggiProfilo } from '../../store/sessione/sessioneSlice'
 import type { ChiusuraTentativo, ContenutoLezione, EsitoRisposta, RispostaRequest } from './tipi'
 
 /** Domande della lezione, già mescolate dal backend (GET /api/path/lessons/{id}). */
@@ -24,27 +25,34 @@ export const inviaRisposta = createAppAsyncThunk(
   async (risposta: RispostaRequest, { getState, rejectWithValue }) => {
     const { sessione, lezione } = getState()
     try {
-      return await richiesta<EsitoRisposta>(`/api/attempts/${lezione.tentativoId}/answers`, {
+      const esito = await richiesta<EsitoRisposta>(`/api/attempts/${lezione.tentativoId}/answers`, {
         metodo: 'POST',
         corpo: risposta,
         token: sessione.token,
       })
+      // l'istante dell'esito: con il terzo errore è la fine della lezione (tempo mostrato nella sconfitta)
+      return { esito, istante: Date.now() }
     } catch (errore) {
       return rejectWithValue(datiErrore(errore))
     }
   },
 )
 
-/** Chiusura come superata (POST /api/attempts/{id}/complete): 400 se non tutte le domande sono risolte. */
+/**
+ * Chiusura come superata (POST /api/attempts/{id}/complete): 400 se non tutte le domande sono risolte. Con il 200 parte
+ * la rilettura silenziosa del profilo (streak e lezioni completate di /api/me nella barra e nel profilo).
+ */
 export const chiudiTentativo = createAppAsyncThunk(
   'lezione/chiudiTentativo',
-  async (_: void, { getState, rejectWithValue }) => {
+  async (_: void, { getState, dispatch, rejectWithValue }) => {
     const { sessione, lezione } = getState()
     try {
-      return await richiesta<ChiusuraTentativo>(`/api/attempts/${lezione.tentativoId}/complete`, {
+      const chiusura = await richiesta<ChiusuraTentativo>(`/api/attempts/${lezione.tentativoId}/complete`, {
         metodo: 'POST',
         token: sessione.token,
       })
+      void dispatch(rileggiProfilo())
+      return { chiusura, istante: Date.now() }
     } catch (errore) {
       return rejectWithValue(datiErrore(errore))
     }
@@ -53,7 +61,8 @@ export const chiudiTentativo = createAppAsyncThunk(
 
 /**
  * "Riprova" dopo una sconfitta: nuovo tentativo sulla stessa lezione (POST /api/attempts). È una copia dell'avvio della
- * mappa: una feature non importa gli interni di un'altra. Restituisce anche l'istante di inizio per il timer.
+ * mappa: una feature non importa gli interni di un'altra. Restituisce anche l'istante di inizio per il timer e la
+ * streak di /api/me prima della lezione (per "+1 OGGI").
  */
 export const riavviaLezione = createAppAsyncThunk(
   'lezione/riavviaLezione',
@@ -64,7 +73,7 @@ export const riavviaLezione = createAppAsyncThunk(
         corpo: { lezioneId },
         token: getState().sessione.token,
       })
-      return { tentativoId, lezioneId, inizio: Date.now() }
+      return { tentativoId, lezioneId, inizio: Date.now(), streakPrima: getState().sessione.utente?.streak.valore ?? 0 }
     } catch (errore) {
       return rejectWithValue(datiErrore(errore))
     }

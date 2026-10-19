@@ -14,6 +14,7 @@ import { avanti, lezioneIniziata } from './lezioneSlice'
 import { caricaContenuto, chiudiTentativo, inviaRisposta, riavviaLezione } from './lezioneThunk'
 import SchermataSconfitta from './SchermataSconfitta'
 import SchermataVittoria from './SchermataVittoria'
+import { durata } from './tempo'
 import type { DomandaLezione, RispostaRequest, TipoDomanda } from './tipi'
 import stili from './lezione.module.css'
 
@@ -48,6 +49,7 @@ function PaginaLezione() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const lezione = useAppSelector((stato) => stato.lezione)
+  const streakAttuale = useAppSelector((stato) => stato.sessione.utente?.streak.valore ?? 0)
   const tentativoId = (location.state as { tentativoId?: string } | null)?.tentativoId ?? null
   const [selezionata, setSelezionata] = useState<string | null>(null)
   const [abbinamento, setAbbinamento] = useState(abbinamentoVuoto)
@@ -57,12 +59,13 @@ function PaginaLezione() {
   const chiusura = useInvioForm()
   const riavvio = useInvioForm()
 
-  // il tentativo del router diventa quello dello store (Date.now() qui: i reducer restano puri)
+  // il tentativo del router diventa quello dello store (Date.now() qui: i reducer restano puri); la streak di /api/me
+  // di adesso serve alla vittoria per decidere se mostrare "+1 OGGI"
   useEffect(() => {
     if (tentativoId && lezioneId && lezione.tentativoId !== tentativoId) {
-      dispatch(lezioneIniziata({ tentativoId, lezioneId, inizio: Date.now() }))
+      dispatch(lezioneIniziata({ tentativoId, lezioneId, inizio: Date.now(), streakPrima: streakAttuale }))
     }
-  }, [dispatch, tentativoId, lezioneId, lezione.tentativoId])
+  }, [dispatch, tentativoId, lezioneId, lezione.tentativoId, streakAttuale])
 
   // contenuto del tentativo appena iniziato (anche dopo "Riprova": il backend rimescola le domande)
   useEffect(() => {
@@ -168,7 +171,15 @@ function PaginaLezione() {
   if (lezione.chiusura) {
     return (
       <main className={stili.pagina}>
-        <SchermataVittoria streak={lezione.chiusura.streak} onContinua={() => tornaAllaMappa()} />
+        <SchermataVittoria
+          streak={lezione.chiusura.streak}
+          aumentata={lezione.chiusura.streak.valore > lezione.streakPrima}
+          errori={lezione.errori}
+          tempo={durata(lezione.inizio, lezione.fine)}
+          oggi={new Date(lezione.fine ?? 0)}
+          onContinua={() => tornaAllaMappa()}
+          onRivediRisposte={() => navigate(`/attempts/${lezione.tentativoId}`)}
+        />
       </main>
     )
   }
@@ -178,6 +189,7 @@ function PaginaLezione() {
       <main className={stili.pagina}>
         <SchermataSconfitta
           errori={lezione.errori}
+          tempo={durata(lezione.inizio, lezione.fine)}
           riavviando={riavvio.inviando}
           errore={errore}
           onRiprova={riprova}
