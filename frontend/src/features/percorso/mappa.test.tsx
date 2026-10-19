@@ -37,7 +37,8 @@ type Risposta = () => Response
 
 /**
  * Apre la mappa ("/") con un utente verificato. GET /api/path/stages risponde con le mappe date, una per lettura
- * (l'ultima si ripete), oppure con `erroreMappa`; POST /api/attempts con `avvio`.
+ * (l'ultima si ripete), oppure con `erroreMappa`; POST /api/attempts con `avvio`; il contenuto di una lezione con una
+ * domanda sola (per vedere che l'avvio porta alla lezione).
  */
 function apri(mappe: TappaPercorso[][], avvio?: Risposta, erroreMappa?: Risposta) {
   let letture = 0
@@ -50,6 +51,10 @@ function apri(mappe: TappaPercorso[][], avvio?: Risposta, erroreMappa?: Risposta
     if (percorso === '/api/path/stages') {
       letture++
       return erroreMappa ? erroreMappa() : rispostaJson(200, mappe[Math.min(letture - 1, mappe.length - 1)])
+    }
+    if (percorso.startsWith('/api/path/lessons/')) {
+      const domanda = { id: 'd1', testo: 'Prima domanda', tipo: 'VERO_FALSO', opzioni: [], sinistra: [], destra: [] }
+      return rispostaJson(200, { id: 'a2', titolo: 'Lezione a2', descrizione: 'D', domande: [domanda] })
     }
     if (percorso === '/api/attempts' && metodo === 'POST' && avvio) {
       return avvio()
@@ -96,7 +101,7 @@ describe('mappa del percorso', () => {
     await utente.click(await screen.findByRole('button', { name: /Lezione a2: da fare/ }))
 
     expect(avvii()).toEqual([{ lezioneId: 'a2' }])
-    expect(await screen.findByRole('heading', { name: 'Lezione' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Prima domanda' })).toBeInTheDocument()
   })
 
   it('si può rifare una lezione completata', async () => {

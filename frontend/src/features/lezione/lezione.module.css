@@ -1,0 +1,191 @@
+/* Lezione: pagina a sé (fuori dal guscio dell'app), colonna centrata come le altre. */
+
+.pagina {
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  /* spazio in fondo per il drawer dell'esito */
+  padding: 1rem 1rem 16rem;
+}
+
+/* --- barra in alto --- */
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.chiudi {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid var(--colore-bordo);
+  border-bottom-width: 4px;
+  border-radius: 0.75rem;
+  background-color: var(--colore-superficie);
+  font-weight: 800;
+}
+
+.avanzamento {
+  flex: 1;
+  height: 0.875rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: var(--colore-bordo);
+}
+
+.riempimento {
+  height: 100%;
+  border-radius: 999px;
+  background-color: var(--colore-successo);
+  transition: width 0.3s ease-out;
+}
+
+.errori {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border: 2px solid var(--colore-bordo);
+  border-radius: 999px;
+  background-color: var(--colore-superficie);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.pallini {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.pallino {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background-color: var(--colore-bordo);
+}
+
+.pallinoPieno {
+  background-color: var(--colore-errore);
+}
+
+/* --- domanda --- */
+
+.tipo {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  background-color: var(--colore-primario);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.testoDomanda {
+  margin-bottom: 1.5rem;
+  font-size: 1.375rem;
+  font-weight: 800;
+}
+
+.opzioni {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.veroFalso {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.opzione {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--colore-bordo);
+  border-bottom-width: 4px;
+  border-radius: 1rem;
+  background-color: var(--colore-superficie);
+  font-weight: 600;
+  text-align: left;
+}
+
+.opzioneGrande {
+  justify-content: center;
+  min-height: 6rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.opzione:focus-visible {
+  outline: 3px solid var(--colore-streak);
+  outline-offset: 2px;
+}
+
+.opzione:disabled {
+  color: inherit;
+  cursor: default;
+}
+
+.lettera {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background-color: var(--colore-sfondo);
+  font-weight: 800;
+}
+
+.testoOpzione {
+  flex: 1;
+}
+
+.scelta {
+  border-color: var(--colore-primario-scuro);
+  background-color: var(--colore-primario-chiaro);
+}
+
+.giusta {
+  border-color: var(--colore-successo-scuro);
+  background-color: color-mix(in srgb, var(--colore-successo), white 80%);
+}
+
+.sbagliata {
+  border-color: var(--colore-errore);
+  background-color: color-mix(in srgb, var(--colore-errore), white 88%);
+}
+
+/* --- fine lezione --- */
+
+.fine {
+  padding-top: 2rem;
+  text-align: center;
+}
+
+.titoloFine {
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 900;
+}
+
+.valoreFine {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.azioniFine {
+  display: grid;
+  gap: 0.75rem;
+}
