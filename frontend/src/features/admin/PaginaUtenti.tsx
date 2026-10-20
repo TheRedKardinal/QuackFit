@@ -183,6 +183,10 @@ function PaginaUtenti() {
       </form>
 
       <MessaggioErrore codice={erroreAzione ?? erroreCaricamento ?? undefined} />
+      {/* solo se è fallito il caricamento della lista (rete o 500), non per gli errori delle azioni: come nella mappa */}
+      {erroreCaricamento && !erroreAzione && !caricamento && (
+        <Pulsante onClick={() => setRicarica((n) => n + 1)}>Riprova</Pulsante>
+      )}
       {esito && (
         <p role="status" className={stili.esito}>
           {esito}

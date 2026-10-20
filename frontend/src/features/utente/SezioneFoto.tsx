@@ -121,9 +121,6 @@ function SezioneFoto() {
           </>
         )}
       </div>
-      <p className={`${stili.nota} mt-3 mb-0`}>
-        JPG, PNG o WEBP. La foto viene ritagliata al centro e ridotta a 512×512 prima dell'invio.
-      </p>
     </Scheda>
   )
 }

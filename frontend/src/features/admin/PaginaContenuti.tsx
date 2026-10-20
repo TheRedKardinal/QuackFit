@@ -191,6 +191,8 @@ function PaginaContenuti() {
         </div>
 
         <MessaggioErrore codice={errore ?? erroreCaricamento ?? undefined} />
+        {/* solo se è fallito il caricamento dell'elenco (rete o 500), non per gli errori delle azioni: come nella mappa */}
+        {erroreCaricamento && !errore && !caricamento && <Pulsante onClick={rileggi}>Riprova</Pulsante>}
 
         {form?.tipo === 'nuovaTappa' && (
           <Scheda>

@@ -1,6 +1,7 @@
 .drawer {
   --drawer-colore: var(--colore-successo);
   --drawer-colore-scuro: var(--colore-successo-scuro);
+  --drawer-testo: var(--colore-successo-testo);
 
   position: fixed;
   right: 0;
@@ -22,11 +23,13 @@
 .successo {
   --drawer-colore: var(--colore-successo);
   --drawer-colore-scuro: var(--colore-successo-scuro);
+  --drawer-testo: var(--colore-successo-testo);
 }
 
 .errore {
   --drawer-colore: var(--colore-errore);
   --drawer-colore-scuro: var(--colore-errore-scuro);
+  --drawer-testo: var(--colore-errore);
 }
 
 .contenuto {
@@ -36,7 +39,7 @@
 
 .titolo {
   margin-bottom: 0.75rem;
-  color: var(--drawer-colore-scuro);
+  color: var(--drawer-testo);
   font-size: 1.375rem;
   font-weight: 900;
 }

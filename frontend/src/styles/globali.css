@@ -38,7 +38,8 @@ body {
 .btn-push-successo {
   --push-colore: var(--colore-successo);
   --push-ombra: var(--colore-successo-scuro);
-  color: var(--colore-superficie);
+  /* testo scuro: il bianco sul verde non arriva al contrasto minimo (2,1:1 contro 4,5:1) */
+  color: var(--bs-body-color);
 }
 
 .btn-push-neutro {
