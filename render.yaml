@@ -1,0 +1,46 @@
+# Blueprint di Render: il servizio del backend (task 49). Su Render: New → Blueprint → questo repository.
+# Il database è su Neon, fuori da Render: qui arriva solo con le variabili DB_*.
+# I segreti NON stanno in questo file: con `sync: false` Render chiede il valore alla creazione del Blueprint e lo
+# conserva solo sulla piattaforma (vedi backend/CLAUDE.md, Configurazione e Deploy).
+services:
+  - type: web
+    name: quackfit-backend
+    runtime: docker
+    # cartella del backend: Dockerfile e contesto di build sono relativi a questa
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: frankfurt
+    plan: free
+    branch: main
+    # profilo prod, porta da PORT e limiti di memoria della JVM sono già nel Dockerfile
+    envVars:
+      # database (Neon): DB_URL nel formato jdbc:postgresql://<host>/<database>?sslmode=require
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # sicurezza
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      # superadmin creato al primo avvio
+      - key: SUPERADMIN_EMAIL
+        sync: false
+      - key: SUPERADMIN_PASSWORD
+        sync: false
+      # email con Brevo (MAIL_MITTENTE deve essere un mittente verificato su Brevo)
+      - key: MAIL_MITTENTE
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      # foto profilo con Cloudinary (in prod l'app non parte senza le tre chiavi)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
