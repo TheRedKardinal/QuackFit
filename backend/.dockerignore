@@ -1,0 +1,8 @@
+# Fuori dal contesto di build di Docker: file compilati, segreti locali e file degli editor.
+target/
+env.properties
+.env*
+*.md
+.idea/
+.vscode/
+*.iml
