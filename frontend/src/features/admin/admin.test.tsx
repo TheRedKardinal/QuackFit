@@ -243,3 +243,36 @@ describe('gestione utenti', () => {
     await vi.waitFor(() => expect(chiamate('/api/admin/users?')).toHaveLength(2))
   })
 })
+
+describe('gestione utenti: caricamento fallito', () => {
+  it('rete o 500 sulla lista: messaggio e "Riprova", che rilegge e mostra la lista', async () => {
+    const utenteUi = userEvent.setup()
+    let letture = 0
+    fetchFinto.mockImplementation(async (url) => {
+      const indirizzo = String(url)
+      if (indirizzo.endsWith('/api/me')) {
+        return rispostaJson(200, admin)
+      }
+      if (indirizzo.includes('/api/admin/users?')) {
+        letture++
+        return letture === 1 ? rispostaErrore(500, 'ERRORE_INTERNO') : rispostaJson(200, pagina([utente()]))
+      }
+      throw new Error(`chiamata inattesa: ${indirizzo}`)
+    })
+    salvaToken('token-valido')
+    render(
+      <Provider store={creaStore()}>
+        <MemoryRouter initialEntries={['/admin/users']}>
+          <App />
+        </MemoryRouter>
+      </Provider>,
+    )
+
+    expect(await screen.findByText(messaggioErrore('ERRORE_INTERNO'))).toBeInTheDocument()
+    await utenteUi.click(screen.getByRole('button', { name: 'Riprova' }))
+
+    expect((await screen.findAllByText(/Giulia/)).length).toBeGreaterThan(0)
+    expect(letture).toBe(2)
+    expect(screen.queryByRole('button', { name: 'Riprova' })).not.toBeInTheDocument()
+  })
+})

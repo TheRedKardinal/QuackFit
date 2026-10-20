@@ -238,3 +238,48 @@ describe('cancellazione', () => {
     expect(chiamate('/api/admin/lessons/b1', 'DELETE')).toHaveLength(0)
   })
 })
+
+describe('caricamento fallito', () => {
+  it('rete o 500 sull\'elenco: messaggio e "Riprova", che rilegge e mostra le tappe', async () => {
+    const utente = userEvent.setup()
+    let letture = 0
+    fetchFinto.mockImplementation(async (url) => {
+      const percorso = String(url).replace(/^https?:\/\/[^/]+/, '')
+      if (percorso === '/api/me') {
+        return rispostaJson(200, profilo({ ruolo: 'ADMIN' }))
+      }
+      if (percorso === '/api/admin/stages') {
+        letture++
+        return letture === 1 ? rispostaErrore(500, 'ERRORE_INTERNO') : rispostaJson(200, [tappa('A', 1, [lezione('a1', 1)])])
+      }
+      return vuota()
+    })
+    salvaToken('token-valido')
+    render(
+      <Provider store={creaStore()}>
+        <MemoryRouter initialEntries={['/admin/content']}>
+          <App />
+        </MemoryRouter>
+      </Provider>,
+    )
+
+    expect(await screen.findByText(messaggioErrore('ERRORE_INTERNO'))).toBeInTheDocument()
+    await utente.click(screen.getByRole('button', { name: 'Riprova' }))
+
+    expect(await screen.findByRole('button', { name: /Tappa A/, expanded: true })).toBeInTheDocument()
+    expect(letture).toBe(2)
+    expect(screen.queryByRole('button', { name: 'Riprova' })).not.toBeInTheDocument()
+  })
+
+  it('un errore di un\'azione (non del caricamento) non mostra "Riprova"', async () => {
+    const utente = userEvent.setup()
+    apri([[tappa('A', 1, [lezione('a1', 1)]), tappa('B', 2)]], {
+      'PATCH /api/admin/stages/B': () => rispostaErrore(400, 'VALIDAZIONE'),
+    })
+
+    await utente.click(await screen.findByRole('button', { name: /Sposta su la tappa «Tappa B»/ }))
+
+    expect(await screen.findByText(messaggioErrore('VALIDAZIONE'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Riprova' })).not.toBeInTheDocument()
+  })
+})
