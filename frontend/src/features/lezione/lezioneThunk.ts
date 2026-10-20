@@ -2,7 +2,7 @@ import { datiErrore } from '../../api/ApiError'
 import { richiesta } from '../../api/client'
 import { createAppAsyncThunk } from '../../store/hooks'
 import { rileggiProfilo } from '../../store/sessione/sessioneSlice'
-import type { ChiusuraTentativo, ContenutoLezione, EsitoRisposta, RispostaRequest } from './tipi'
+import type { ChiusuraTentativo, ContenutoLezione, EsitoRisposta, Resoconto, RispostaRequest } from './tipi'
 
 /** Domande della lezione, già mescolate dal backend (GET /api/path/lessons/{id}). */
 export const caricaContenuto = createAppAsyncThunk(
@@ -74,6 +74,18 @@ export const riavviaLezione = createAppAsyncThunk(
         token: getState().sessione.token,
       })
       return { tentativoId, lezioneId, inizio: Date.now(), streakPrima: getState().sessione.utente?.streak.valore ?? 0 }
+    } catch (errore) {
+      return rejectWithValue(datiErrore(errore))
+    }
+  },
+)
+
+/** Resoconto di un tentativo (GET /api/attempts/{id}): 404 se non esiste o è di un altro utente. */
+export const caricaResoconto = createAppAsyncThunk(
+  'lezione/caricaResoconto',
+  async (tentativoId: string, { getState, rejectWithValue }) => {
+    try {
+      return await richiesta<Resoconto>(`/api/attempts/${tentativoId}`, { token: getState().sessione.token })
     } catch (errore) {
       return rejectWithValue(datiErrore(errore))
     }

@@ -138,6 +138,28 @@ function apri({ domande = [VF, SM], complete, risposta, contenuto, senzaTentativ
       }
       return rispostaJson(200, esito)
     }
+    if (percorso === '/api/attempts/t1' && metodo === 'GET') {
+      return rispostaJson(200, {
+        id: 't1',
+        esito: 'SUPERATO',
+        errori: 0,
+        iniziatoAt: '2026-10-19T10:00:00Z',
+        finitoAt: '2026-10-19T10:02:00Z',
+        lezione: { id: 'l1', titolo: 'I muscoli' },
+        domande: [
+          {
+            id: 'vf',
+            testo: 'Lo squat allena le gambe.',
+            tipo: 'VERO_FALSO',
+            spiegazione: 'Spiegazione di vf',
+            corretta: true,
+            risposta: { id: 'vero', testo: 'Vero' },
+            soluzione: { id: 'vero', testo: 'Vero' },
+            coppie: [],
+          },
+        ],
+      })
+    }
     if (percorso.endsWith('/complete')) {
       chiusa = true
       return complete ? complete() : rispostaJson(200, CHIUSURA)
@@ -474,14 +496,15 @@ describe('lezione: vittoria e streak', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
-  it('PROVVISORIO (task 46): "Rivedi risposte" porta a /attempts/:id con il tentativo; "Torna alla mappa" funziona', async () => {
+  it('"Rivedi risposte" porta al resoconto del tentativo; "Torna alla mappa" funziona', async () => {
     const utente = userEvent.setup()
     apri()
 
     await vinci(utente)
     await utente.click(screen.getByRole('button', { name: 'Rivedi risposte' }))
 
-    expect(await screen.findByText('Resoconto in arrivo: presto potrai rivedere qui le tue risposte.')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Resoconto' })).toBeInTheDocument()
+    expect(await screen.findByText('I muscoli')).toBeInTheDocument()
     expect(screen.getByTestId('percorso')).toHaveTextContent('/attempts/t1')
     await utente.click(screen.getByRole('button', { name: 'Torna alla mappa' }))
     expect(await screen.findByRole('heading', { name: 'Percorso' })).toBeInTheDocument()
