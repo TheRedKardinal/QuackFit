@@ -365,6 +365,41 @@ describe('lezione: abbinamento', () => {
     expect(screen.getByRole('button', { name: 'Verifica' })).toBeEnabled()
   })
 
+  it('la frase guida e le etichette dicono che cosa toccare: sinistro selezionato, destri attivi solo allora', async () => {
+    const utente = userEvent.setup()
+    apri({ domande: [AB] })
+
+    expect(await screen.findByText('Tocca un elemento a sinistra')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: tessera('Petto') })).toBeDisabled()
+
+    await utente.click(screen.getByRole('button', { name: 'Pettorale' }))
+    const scelto = screen.getByRole('button', { name: 'Pettorale, selezionato' })
+    expect(scelto).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText("Ora scegli a destra l'abbinamento per «Pettorale»")).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Petto' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Schiena' })).toBeEnabled()
+
+    // toccarlo di nuovo lo deseleziona: si torna alla frase iniziale e i destri si disattivano
+    await utente.click(scelto)
+    expect(screen.getByRole('button', { name: 'Pettorale' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText('Tocca un elemento a sinistra')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Petto' })).toBeDisabled()
+  })
+
+  it("dopo il collegamento il sinistro non è più selezionato; dopo l'esito la frase guida sparisce", async () => {
+    const utente = userEvent.setup()
+    apri({ domande: [AB] })
+
+    await collega(utente, 'Pettorale', 'Petto')
+    expect(screen.getByRole('button', { name: 'Pettorale, coppia 1' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText('Tocca un elemento a sinistra')).toBeInTheDocument()
+
+    await collega(utente, 'Dorsale', 'Schiena')
+    await utente.click(screen.getByRole('button', { name: 'Verifica' }))
+    await screen.findByRole('dialog')
+    expect(screen.queryByText('Tocca un elemento a sinistra')).not.toBeInTheDocument()
+  })
+
   it('spostare un destro già usato lascia il sinistro precedente senza coppia e disattiva "Verifica"', async () => {
     const utente = userEvent.setup()
     apri({ domande: [AB] })

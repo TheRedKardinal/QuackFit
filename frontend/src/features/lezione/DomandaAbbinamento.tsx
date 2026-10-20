@@ -17,25 +17,35 @@ interface Props {
  * Domanda di ABBINAMENTO: due colonne di tessere, a sinistra e a destra (mescolate dal backend ognuna per conto suo).
  * Si tocca un sinistro e poi un destro: le due tessere collegate mostrano lo stesso numero (1, 2, 3… nell'ordine dei
  * sinistri, vedi abbinamento.ts). Lo stato non è affidato al solo colore: numero, aria-pressed ed etichette.
+ * Il sinistro selezionato è giallo con una freccia; mentre è selezionato i destri, che solo allora si possono toccare,
+ * hanno il bordo tratteggiato. Una frase guida dice che cosa toccare adesso.
  */
 function DomandaAbbinamento({ domanda, stato, bloccata, soluzione, onToccaSinistro, onToccaDestro }: Props) {
   const sinistri = domanda.sinistra.map((voce) => voce.id)
   const numero = numeri(stato, sinistri)
   const giusto = (sinistroId: string) => soluzione?.find((coppia) => coppia.sinistroId === sinistroId)?.destroId
+  const selezionato = domanda.sinistra.find((voce) => voce.id === stato.selezionato)
+  const destriAttivi = !bloccata && selezionato !== undefined
 
   return (
     <div>
       <p className={stili.contatoreCoppie} aria-live="polite">
         {quanteCoppie(stato)}/{sinistri.length} coppie
       </p>
+      {!bloccata && (
+        <p className={stili.guidaAbbinamento} aria-live="polite">
+          {selezionato ? `Ora scegli a destra l'abbinamento per «${selezionato.testo}»` : 'Tocca un elemento a sinistra'}
+        </p>
+      )}
       <div className={stili.abbinamento}>
         <ul className={stili.colonna} aria-label="Elementi da abbinare">
           {domanda.sinistra.map((voce) => {
             const n = numero[voce.id]
             const esito = soluzione ? (giusto(voce.id) === stato.coppie[voce.id] ? 'giusta' : 'sbagliata') : null
+            const scelto = stato.selezionato === voce.id
             const classi = [
               stili.tessera,
-              stato.selezionato === voce.id ? stili.scelta : '',
+              scelto ? stili.selezionata : '',
               esito === 'giusta' ? stili.giusta : '',
               esito === 'sbagliata' ? stili.sbagliata : '',
             ]
@@ -46,14 +56,14 @@ function DomandaAbbinamento({ domanda, stato, bloccata, soluzione, onToccaSinist
                 <button
                   type="button"
                   className={classi}
-                  aria-pressed={stato.selezionato === voce.id}
-                  aria-label={`${voce.testo}${n ? `, coppia ${n}` : ''}${esito ? `, ${esito}` : ''}`}
+                  aria-pressed={scelto}
+                  aria-label={`${voce.testo}${scelto ? ', selezionato' : ''}${n ? `, coppia ${n}` : ''}${esito ? `, ${esito}` : ''}`}
                   disabled={bloccata}
                   onClick={() => onToccaSinistro(voce.id)}
                 >
                   <span className={stili.testoOpzione}>{voce.testo}</span>
                   <span className={stili.numeroCoppia} aria-hidden="true">
-                    {esito === 'giusta' ? '✓' : esito === 'sbagliata' ? '✗' : (n ?? '·')}
+                    {esito === 'giusta' ? '✓' : esito === 'sbagliata' ? '✗' : scelto ? '→' : (n ?? '·')}
                   </span>
                 </button>
               </li>
@@ -67,9 +77,11 @@ function DomandaAbbinamento({ domanda, stato, bloccata, soluzione, onToccaSinist
               <li key={voce.id}>
                 <button
                   type="button"
-                  className={`${stili.tessera} ${n ? stili.collegata : ''}`}
+                  className={[stili.tessera, n ? stili.collegata : '', destriAttivi ? stili.selezionabile : '']
+                    .filter(Boolean)
+                    .join(' ')}
                   aria-label={`${voce.testo}${n ? `, coppia ${n}` : ''}`}
-                  disabled={bloccata || stato.selezionato === null}
+                  disabled={!destriAttivi}
                   onClick={() => onToccaDestro(voce.id)}
                 >
                   <span className={stili.numeroCoppia} aria-hidden="true">

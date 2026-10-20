@@ -21,6 +21,10 @@
   /* Verde per il TESTO su sfondo chiaro: il verde base sul bianco non arriva al contrasto minimo (WCAG AA 4,5:1) */
   --colore-successo-testo: color-mix(in srgb, var(--colore-successo), black 45%);
 
+  /* Giallo scuro per i BORDI che segnalano uno stato (tessere dell'abbinamento): il giallo base e quello "scuro" sul
+     bianco restano sotto il 3:1 richiesto agli indicatori (WCAG 1.4.11); così circa 4,6:1 sul bianco */
+  --colore-primario-bordo: color-mix(in srgb, var(--colore-primario), black 45%);
+
   /* Tonalità ricavate per la mascotte: pancia più chiara e interno del becco aperto */
   --colore-primario-chiaro: color-mix(in srgb, var(--colore-primario), white 55%);
   --colore-streak-scuro: color-mix(in srgb, var(--colore-streak), black 30%);
