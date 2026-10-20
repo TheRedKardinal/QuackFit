@@ -99,7 +99,12 @@
   gap: 0.75rem;
 }
 
+/* "Mostra"/"Nascondi": almeno 24×24 px da toccare (WCAG 2.5.8), senza cambiare l'aspetto del link */
 .mostra {
+  display: inline-flex;
+  align-items: center;
+  min-width: 24px;
+  min-height: 24px;
   padding: 0;
   border: none;
   background: none;
@@ -107,7 +112,11 @@
   text-decoration: underline;
 }
 
+/* link delle pagine di accesso: almeno 24 px di altezza da toccare (WCAG 2.5.8) */
 .link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   color: inherit;
   font-weight: 700;
 }
