@@ -10,6 +10,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Limite di 20 richieste al minuto per IP su /api/auth/** e sugli endpoint che chiedono la password attuale
@@ -22,6 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * Non è un bean (come JwtFiltro): lo crea SecurityConfig, altrimenti verrebbe eseguito due volte.
  */
+@Slf4j
 public class LimiteIpFiltro extends OncePerRequestFilter {
 
 	private static final String RADICE_AUTH = "/api/auth/";
@@ -51,6 +53,11 @@ public class LimiteIpFiltro extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
+		// TEMPORANEO (task 49b): diagnosi dell'IP reale dietro il proxy di Render. Solo tre valori: l'IP contato, quello
+		// che resta di X-Forwarded-For dopo la RemoteIpValve e True-Client-IP. Nessun altro header, nessun dato
+		// dell'utente. Da togliere nel commit della correzione.
+		log.info("DIAGNOSI IP (temporaneo, task 49b): contato={} x-forwarded-for={} true-client-ip={}",
+				request.getRemoteAddr(), request.getHeader("X-Forwarded-For"), request.getHeader("True-Client-IP"));
 		if (!limite.consenti(request.getRemoteAddr())) {
 			gestoreErrori.scrivi(response, CodiceErrore.TROPPE_RICHIESTE);
 			return;
