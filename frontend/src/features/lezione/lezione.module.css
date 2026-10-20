@@ -311,7 +311,7 @@
 
 .giornoAttivo {
   background-color: var(--colore-streak);
-  color: var(--colore-superficie);
+  color: var(--bs-body-color);
 }
 
 .giornoOggi {
@@ -367,7 +367,7 @@
 }
 
 .esitoGiusto {
-  color: var(--colore-successo-scuro);
+  color: var(--colore-successo-testo);
 }
 
 .esitoSbagliato {

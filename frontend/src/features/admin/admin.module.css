@@ -287,7 +287,7 @@
 }
 
 .verificata {
-  color: var(--colore-successo-scuro);
+  color: var(--colore-successo-testo);
 }
 
 .nonVerificata {
@@ -583,7 +583,7 @@
   flex-shrink: 0;
   padding: 0.125rem 0.5rem;
   border-radius: 999px;
-  background-color: var(--colore-successo-scuro);
+  background-color: var(--colore-successo-testo);
   color: var(--colore-superficie);
   font-size: 0.75rem;
   font-weight: 800;

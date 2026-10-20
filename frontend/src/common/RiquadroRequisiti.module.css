@@ -24,6 +24,6 @@
 }
 
 .requisitoOk {
-  color: var(--colore-successo-scuro);
+  color: var(--colore-successo-testo);
   font-weight: 700;
 }

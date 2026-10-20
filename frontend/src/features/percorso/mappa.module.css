@@ -101,7 +101,8 @@
 .COMPLETATA {
   background-color: var(--colore-successo);
   border-bottom-color: var(--colore-successo-scuro);
-  color: var(--colore-superficie);
+  /* spunta scura: la bianca sul verde non arriva a 3:1 */
+  color: var(--bs-body-color);
 }
 
 .SBLOCCATA {
