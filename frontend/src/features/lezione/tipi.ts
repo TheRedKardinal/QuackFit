@@ -52,3 +52,38 @@ export interface ChiusuraTentativo {
   errori: number
   streak: { valore: number; record: number }
 }
+
+/** GET /api/attempts/{id} (tentativi.md, Resoconto): solo le domande già risposte, nell'ordine dell'admin. */
+export interface Resoconto {
+  id: string
+  esito: EsitoTentativo
+  errori: number
+  iniziatoAt: string
+  /** null se il tentativo è in corso. */
+  finitoAt: string | null
+  lezione: { id: string; titolo: string }
+  domande: DomandaResoconto[]
+}
+
+/**
+ * La prima risposta data. `risposta` e `soluzione` sono null per l'abbinamento; `coppie` è vuota per le domande a
+ * opzioni. `corretta`: la prima risposta era giusta.
+ */
+export interface DomandaResoconto {
+  id: string
+  testo: string
+  tipo: TipoDomanda
+  spiegazione: string
+  corretta: boolean
+  risposta: Voce | null
+  soluzione: Voce | null
+  coppie: CoppiaResoconto[]
+}
+
+/** Una coppia della prima risposta, con il destro giusto per quel sinistro. */
+export interface CoppiaResoconto {
+  sinistro: Voce
+  destro: Voce
+  soluzione: Voce
+  corretta: boolean
+}

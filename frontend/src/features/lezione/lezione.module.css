@@ -345,3 +345,68 @@
   font-size: 1.25rem;
   font-weight: 900;
 }
+
+/* --- resoconto --- */
+
+.intestazioneDomanda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.intestazioneDomanda .tipo {
+  margin-bottom: 0;
+}
+
+.esitoGiusto,
+.esitoSbagliato {
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.esitoGiusto {
+  color: var(--colore-successo-scuro);
+}
+
+.esitoSbagliato {
+  color: var(--colore-errore);
+}
+
+.titoloLezioneResoconto {
+  margin-bottom: 0.25rem;
+  font-size: 1.375rem;
+  font-weight: 900;
+}
+
+.testoDomandaResoconto {
+  margin: 0.5rem 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.rigaRisposta {
+  padding: 0.625rem 0.75rem;
+  border: 2px solid var(--colore-bordo);
+  border-radius: 0.75rem;
+}
+
+.coppieResoconto {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.coppieResoconto .rigaRisposta {
+  margin: 0;
+}
+
+.spiegazione {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background-color: var(--colore-sfondo);
+}

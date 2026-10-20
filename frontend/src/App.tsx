@@ -7,7 +7,7 @@ import PaginaRegistrazione from './features/auth/PaginaRegistrazione'
 import PaginaReimpostaPassword from './features/auth/PaginaReimpostaPassword'
 import PaginaVerificaEmail from './features/auth/PaginaVerificaEmail'
 import PaginaLezione from './features/lezione/PaginaLezione'
-import PaginaResocontoInArrivo from './features/lezione/PaginaResocontoInArrivo'
+import PaginaResoconto from './features/lezione/PaginaResoconto'
 import PaginaMappa from './features/percorso/PaginaMappa'
 import LayoutAdmin from './features/admin/LayoutAdmin'
 import PaginaContenuti from './features/admin/PaginaContenuti'
@@ -41,8 +41,8 @@ function App() {
         <Route element={<RichiedeEmailVerificata />}>
           <Route element={<LayoutApp />}>
             <Route path="/" element={<PaginaMappa />} />
-            {/* PROVVISORIO (task 46): "Rivedi risposte" porta qui; la 46 mette il resoconto vero */}
-            <Route path="/attempts/:id" element={<PaginaResocontoInArrivo />} />
+            {/* resoconto di un tentativo ("Rivedi risposte" dalla vittoria) */}
+            <Route path="/attempts/:id" element={<PaginaResoconto />} />
             <Route path="/profile" element={<PaginaProfilo />} />
             <Route path="/profile/edit" element={<PaginaModificaProfilo />} />
           </Route>
