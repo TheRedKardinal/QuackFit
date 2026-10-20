@@ -193,7 +193,7 @@
 /* --- abbinamento --- */
 
 .contatoreCoppie {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   font-size: 0.875rem;
   font-weight: 700;
   text-align: right;
@@ -244,6 +244,32 @@
 
 .collegata {
   border-color: var(--colore-primario-scuro);
+}
+
+/* Frase guida sopra le colonne: dice che cosa toccare adesso */
+.guidaAbbinamento {
+  margin-bottom: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+/* Sinistro in attesa del suo destro: giallo pieno, bordo scuro e freccia nel pallino (non solo il colore) */
+.selezionata {
+  border-color: var(--colore-primario-bordo);
+  background-color: var(--colore-primario);
+}
+
+/* Destri che si possono toccare mentre un sinistro è selezionato: bordo tratteggiato (non solo il colore) */
+.selezionabile {
+  border-style: dashed;
+  border-color: var(--colore-primario-bordo);
+  background-color: var(--colore-primario-chiaro);
+}
+
+/* Hover solo dove esiste davvero (mouse): sul telefono un tocco non deve lasciare la tessera "accesa" */
+@media (hover: hover) {
+  .tessera:not(:disabled, .selezionata):hover {
+    background-color: var(--colore-primario-chiaro);
+  }
 }
 
 .numeroCoppia {
