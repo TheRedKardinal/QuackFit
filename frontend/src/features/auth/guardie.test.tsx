@@ -33,6 +33,32 @@ function apri(percorso: string, token: string | null = null) {
   return store
 }
 
+describe('layout delle pagine di accesso', () => {
+  const copyright = '© 2026 Claudio Giasi · Tutti i diritti riservati'
+
+  it('login e verifica email mostrano la riga del copyright (scritta una volta sola nel layout)', async () => {
+    apri('/login')
+    expect(await screen.findByRole('heading', { name: 'Login' })).toBeInTheDocument()
+    expect(screen.getByRole('contentinfo')).toHaveTextContent(copyright)
+  })
+
+  it("anche la verifica email, che sta sotto un'altra guardia, ha la riga del copyright", async () => {
+    fetchFinto.mockResolvedValue(rispostaJson(200, profilo({ emailVerificata: false })))
+    apri('/verify-email', 'token-valido')
+
+    expect(await screen.findByRole('heading', { name: 'Verifica la tua email' })).toBeInTheDocument()
+    expect(screen.getByText(copyright)).toBeInTheDocument()
+  })
+
+  it("le pagine dell'app (es. profilo) non hanno la riga del copyright", async () => {
+    fetchFinto.mockResolvedValue(rispostaJson(200, profilo()))
+    apri('/profile', 'token-valido')
+
+    expect(await screen.findByRole('heading', { name: 'Mario Rossi' })).toBeInTheDocument()
+    expect(screen.queryByText(copyright)).not.toBeInTheDocument()
+  })
+})
+
 describe('guardie delle rotte', () => {
   it('senza token una pagina protetta porta al login', async () => {
     apri('/profile')

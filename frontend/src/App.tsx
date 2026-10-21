@@ -15,6 +15,7 @@ import PaginaUtenti from './features/admin/PaginaUtenti'
 import RichiedeAdmin from './features/auth/RichiedeAdmin'
 import RichiedeAutenticazione from './features/auth/RichiedeAutenticazione'
 import RichiedeEmailVerificata from './features/auth/RichiedeEmailVerificata'
+import LayoutAccesso from './features/auth/LayoutAccesso'
 import SoloOspite from './features/auth/SoloOspite'
 import PaginaModificaProfilo from './features/utente/PaginaModificaProfilo'
 import PaginaProfilo from './features/utente/PaginaProfilo'
@@ -29,15 +30,20 @@ import PaginaProfilo from './features/utente/PaginaProfilo'
 function App() {
   return (
     <Routes>
+      {/* LayoutAccesso: rotta di layout senza percorso, aggiunge la riga del copyright alle pagine di accesso */}
       <Route element={<SoloOspite />}>
-        <Route path="/login" element={<PaginaLogin />} />
-        <Route path="/register" element={<PaginaRegistrazione />} />
-        <Route path="/forgot-password" element={<PaginaPasswordDimenticata />} />
-        <Route path="/reset-password" element={<PaginaReimpostaPassword />} />
+        <Route element={<LayoutAccesso />}>
+          <Route path="/login" element={<PaginaLogin />} />
+          <Route path="/register" element={<PaginaRegistrazione />} />
+          <Route path="/forgot-password" element={<PaginaPasswordDimenticata />} />
+          <Route path="/reset-password" element={<PaginaReimpostaPassword />} />
+        </Route>
       </Route>
 
       <Route element={<RichiedeAutenticazione />}>
-        <Route path="/verify-email" element={<PaginaVerificaEmail />} />
+        <Route element={<LayoutAccesso />}>
+          <Route path="/verify-email" element={<PaginaVerificaEmail />} />
+        </Route>
         <Route element={<RichiedeEmailVerificata />}>
           <Route element={<LayoutApp />}>
             <Route path="/" element={<PaginaMappa />} />
