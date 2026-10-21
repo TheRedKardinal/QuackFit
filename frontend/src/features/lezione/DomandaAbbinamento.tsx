@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { numeri, quanteCoppie, type StatoAbbinamento } from './abbinamento'
 import type { Coppia, DomandaLezione } from './tipi'
 import stili from './lezione.module.css'
@@ -37,7 +38,11 @@ function DomandaAbbinamento({ domanda, stato, bloccata, soluzione, onToccaSinist
           {selezionato ? `Ora scegli a destra l'abbinamento per «${selezionato.testo}»` : 'Tocca un elemento a sinistra'}
         </p>
       )}
-      <div className={stili.abbinamento}>
+      {/* le due liste condividono le righe della griglia (subgrid): ogni sinistro sta in linea con il destro accanto */}
+      <div
+        className={stili.abbinamento}
+        style={{ '--righe': Math.max(domanda.sinistra.length, domanda.destra.length) } as CSSProperties}
+      >
         <ul className={stili.colonna} aria-label="Elementi da abbinare">
           {domanda.sinistra.map((voce) => {
             const n = numero[voce.id]

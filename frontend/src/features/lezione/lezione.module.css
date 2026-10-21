@@ -206,20 +206,31 @@
   text-align: right;
 }
 
+/* Due colonne che condividono le stesse righe: le liste (due <ul>) usano subgrid, così la riga di una tessera ha
+   l'altezza della più alta delle due e sinistra e destra restano in linea anche con testi lunghi. Dove subgrid non
+   c'è (browser vecchi) le colonne tornano indipendenti, come prima. --righe arriva da DomandaAbbinamento. */
 .abbinamento {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(var(--righe, 1), auto);
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
 
 .colonna {
   display: grid;
+  grid-row: 1 / -1;
+  grid-template-rows: subgrid;
   gap: 0.75rem;
   align-content: start;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* la tessera riempie tutta l'altezza della riga */
+.colonna > li {
+  display: flex;
 }
 
 .tessera {
