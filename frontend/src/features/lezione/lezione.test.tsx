@@ -386,6 +386,15 @@ describe('lezione: abbinamento', () => {
     expect(screen.getByRole('button', { name: 'Petto' })).toBeDisabled()
   })
 
+  it('le due colonne condividono le righe (una per coppia), così sinistra e destra restano in linea', async () => {
+    apri({ domande: [AB] })
+
+    const sinistra = await screen.findByRole('list', { name: 'Elementi da abbinare' })
+    // il contenitore delle due liste dichiara il numero di righe usato dalla griglia (subgrid nel CSS)
+    expect(sinistra.parentElement).toHaveStyle({ '--righe': '2' })
+    expect(screen.getByRole('list', { name: 'Elementi con cui abbinarli' }).parentElement).toBe(sinistra.parentElement)
+  })
+
   it("dopo il collegamento il sinistro non è più selezionato; dopo l'esito la frase guida sparisce", async () => {
     const utente = userEvent.setup()
     apri({ domande: [AB] })
