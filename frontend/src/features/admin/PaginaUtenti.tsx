@@ -47,7 +47,9 @@ function Azione({ azione, onScegli }: PropsAzione) {
     return <span className={stili.motivo}>{azione.motivo}</span>
   }
   return azione.tipo === 'promuovi' ? (
-    <Pulsante onClick={() => onScegli('promuovi')}>Promuovi ad ADMIN</Pulsante>
+    <Pulsante variante="neutro" onClick={() => onScegli('promuovi')}>
+      Promuovi ad ADMIN
+    </Pulsante>
   ) : (
     <Pulsante variante="neutro" onClick={() => onScegli('retrocedi')}>
       Retrocedi a UTENTE
@@ -260,7 +262,10 @@ function PaginaUtenti() {
                           {utente.nome} {utente.cognome}
                           {eSeStesso(chiamante, utente) && <span className={stili.tu}>Tu</span>}
                         </span>
-                        <span className={stili.email}>{utente.email}</span>
+                        <span className={stili.email}>
+                          {utente.email.split('@')[0]}@<wbr />
+                          {utente.email.split('@').slice(1).join('@')}
+                        </span>
                       </span>
                     </span>
                     <EtichettaRuolo utente={utente} />
