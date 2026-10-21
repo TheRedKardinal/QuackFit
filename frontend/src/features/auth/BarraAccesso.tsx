@@ -4,12 +4,15 @@ interface Props {
   titolo: string
 }
 
-/** Barra in alto delle pagine di accesso: titolo della pagina e marchio. */
+/**
+ * Barra in alto delle pagine di accesso, come quella dell'app: il marchio in evidenza e sotto il nome della pagina
+ * (che resta l'h1 della pagina, per gli screen reader).
+ */
 function BarraAccesso({ titolo }: Props) {
   return (
     <header className={stili.barra}>
-      <h1 className={stili.titoloBarra}>{titolo}</h1>
       <span className={stili.marchio}>QuackFit</span>
+      <h1 className={stili.titoloBarra}>{titolo}</h1>
     </header>
   )
 }

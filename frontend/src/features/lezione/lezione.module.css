@@ -36,11 +36,19 @@
   background-color: var(--colore-bordo);
 }
 
+/* il riempimento è largo quanto la barra e scorre da sinistra (translateX): si anima senza ricalcolare il layout e,
+   a differenza di scaleX, non schiaccia gli angoli arrotondati; la barra (overflow: hidden) taglia la parte fuori */
 .riempimento {
   height: 100%;
   border-radius: 999px;
   background-color: var(--colore-successo);
-  transition: width 0.3s ease-out;
+  transition: transform 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .riempimento {
+    transition: none;
+  }
 }
 
 .errori {

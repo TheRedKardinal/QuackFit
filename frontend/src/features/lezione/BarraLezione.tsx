@@ -27,7 +27,7 @@ function BarraLezione({ risolte, totale, errori, onChiudi }: Props) {
         aria-valuemax={totale}
         aria-valuenow={risolte}
       >
-        <div className={stili.riempimento} style={{ width: `${percentuale}%` }} />
+        <div className={stili.riempimento} style={{ transform: `translateX(${percentuale - 100}%)` }} />
       </div>
       <div className={stili.errori}>
         <span aria-hidden="true" className={stili.pallini}>
