@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test end to end (Playwright): valori di prova, log del backend e rapporti
+e2e/.env.e2e
+# il file di esempio (solo i nomi) va in Git: la regola .env* della radice lo escluderebbe
+!e2e/.env.e2e.example
+e2e/.tmp/
+test-results/
+playwright-report/
+blob-report/

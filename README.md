@@ -110,6 +110,20 @@ npm run lint
 npm run build
 ```
 
+### Test end to end
+Prove con Playwright sullo stack locale completo, in Chromium su telefono (390×844, touch) e desktop (1280×800):
+registrazione con codice di verifica, login sbagliato, lezione completa con vittoria e resoconto, sconfitta e
+"Riprova", conferma della ✕, pannello admin.
+
+Una volta sola:
+1. creare in PostgreSQL un database vuoto `quackfit_e2e` (stesso utente di `backend/env.properties`);
+2. copiare `frontend/e2e/.env.e2e.example` in `frontend/e2e/.env.e2e` (escluso da Git) e compilare il superadmin di
+   prova;
+3. `cd frontend` e `npx playwright install chromium`.
+
+Poi `npm run e2e`: Playwright avvia da solo backend (porta 8081, database `quackfit_e2e`, email solo nel log) e
+frontend (porta 5174), esegue le prove e li spegne. Non serve fermare backend e frontend di sviluppo.
+
 ## Deploy
 - **Database**: PostgreSQL su Neon (regione Frankfurt, connessione diretta).
 - **Backend**: servizio web su Render costruito dal `backend/Dockerfile`, in due fasi:
