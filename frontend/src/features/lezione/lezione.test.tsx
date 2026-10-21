@@ -557,14 +557,56 @@ describe('lezione: vittoria e streak', () => {
 })
 
 describe('lezione: uscite ed errori', () => {
-  it('la chiusura in alto esce senza chiamare il backend', async () => {
+  it('la ✕ senza nessuna risposta esce subito, senza conferma e senza chiamare il backend', async () => {
     const utente = userEvent.setup()
     apri()
 
     await utente.click(await screen.findByRole('button', { name: 'Esci dalla lezione' }))
 
     expect(await screen.findByRole('heading', { name: 'Percorso' })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(chiamate('/answers')).toHaveLength(0)
+  })
+
+  it("la ✕ dopo una risposta apre la conferma al posto dell'esito e non esce", async () => {
+    const utente = userEvent.setup()
+    apri()
+    await rispondi(utente, 'Vero')
+    await screen.findByRole('dialog', { name: /Risposta giusta/ })
+
+    await utente.click(screen.getByRole('button', { name: 'Esci dalla lezione' }))
+
+    const conferma = screen.getByRole('dialog', { name: /Vuoi uscire dalla lezione\?/ })
+    expect(conferma).toHaveTextContent("Se esci, la lezione ripartirà dall'inizio.")
+    expect(screen.queryByRole('dialog', { name: /Risposta giusta/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Percorso' })).not.toBeInTheDocument()
+  })
+
+  it('"Resta nella lezione" chiude la conferma e torna all\'esito della risposta', async () => {
+    const utente = userEvent.setup()
+    apri()
+    await rispondi(utente, 'Vero')
+    await screen.findByRole('dialog', { name: /Risposta giusta/ })
+    await utente.click(screen.getByRole('button', { name: 'Esci dalla lezione' }))
+
+    await utente.click(screen.getByRole('button', { name: 'Resta nella lezione' }))
+
+    expect(screen.queryByRole('dialog', { name: /Vuoi uscire/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: /Risposta giusta/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Lo squat allena le gambe.' })).toBeInTheDocument()
+  })
+
+  it('"Esci" nella conferma lascia la lezione e torna alla mappa', async () => {
+    const utente = userEvent.setup()
+    apri()
+    await rispondi(utente, 'Vero')
+    await screen.findByRole('dialog', { name: /Risposta giusta/ })
+    await utente.click(screen.getByRole('button', { name: 'Esci dalla lezione' }))
+
+    await utente.click(screen.getByRole('button', { name: 'Esci' }))
+
+    expect(await screen.findByRole('heading', { name: 'Percorso' })).toBeInTheDocument()
+    expect(chiamate('/answers')).toHaveLength(1)
   })
 
   it('409 TENTATIVO_CHIUSO su una risposta: si torna alla mappa con il messaggio', async () => {

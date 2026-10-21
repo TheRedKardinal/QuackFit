@@ -55,6 +55,8 @@ function PaginaLezione() {
   const [abbinamento, setAbbinamento] = useState(abbinamentoVuoto)
   const [errore, setErrore] = useState<string | null>(null)
   const [erroreChiusura, setErroreChiusura] = useState<string | null>(null)
+  /** Conferma della ✕ aperta (solo dopo almeno una risposta). */
+  const [confermaUscita, setConfermaUscita] = useState(false)
   const invio = useInvioForm()
   const chiusura = useInvioForm()
   const riavvio = useInvioForm()
@@ -202,14 +204,28 @@ function PaginaLezione() {
   const idCorrente = domandaCorrente(lezione.coda)
   const domanda = lezione.domande.find((d) => d.id === idCorrente)
   const ultima = lezione.ultimaRisposta
+  const domandeRisolte = risolte(lezione.coda, lezione.domande.length)
+
+  /**
+   * ✕ della barra: prima di qualsiasi risposta esce subito; dopo almeno una chiede conferma, perché un tocco per sbaglio
+   * farebbe perdere il tentativo (il backend non lo riprende: al prossimo avvio la lezione riparte dall'inizio).
+   */
+  function chiudiLezione() {
+    const haRisposto = lezione.errori > 0 || domandeRisolte > 0 || ultima !== null
+    if (haRisposto) {
+      setConfermaUscita(true)
+    } else {
+      tornaAllaMappa()
+    }
+  }
 
   return (
     <main className={stili.pagina}>
       <BarraLezione
-        risolte={risolte(lezione.coda, lezione.domande.length)}
+        risolte={domandeRisolte}
         totale={lezione.domande.length}
         errori={lezione.errori}
-        onChiudi={() => tornaAllaMappa()}
+        onChiudi={chiudiLezione}
       />
 
       <h1 className="visually-hidden">{lezione.titolo}</h1>
@@ -264,8 +280,26 @@ function PaginaLezione() {
         </section>
       )}
 
+      {/* conferma di uscita: copre l'esito eventualmente aperto, che torna con "Resta nella lezione" */}
       <Drawer
-        aperto={ultima !== null}
+        aperto={confermaUscita}
+        tono="errore"
+        titolo="Vuoi uscire dalla lezione?"
+        onChiudi={() => setConfermaUscita(false)}
+      >
+        <p>Se esci, la lezione ripartirà dall'inizio.</p>
+        <div className={stili.azioniFine}>
+          <Pulsante variante="successo" larghezzaPiena onClick={() => setConfermaUscita(false)}>
+            Resta nella lezione
+          </Pulsante>
+          <Pulsante variante="neutro" larghezzaPiena onClick={() => tornaAllaMappa()}>
+            Esci
+          </Pulsante>
+        </div>
+      </Drawer>
+
+      <Drawer
+        aperto={ultima !== null && !confermaUscita}
         tono={ultima?.esito.corretta ? 'successo' : 'errore'}
         titolo={ultima?.esito.corretta ? 'Risposta giusta!' : 'Risposta sbagliata'}
       >
