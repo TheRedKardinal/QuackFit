@@ -3,6 +3,11 @@ body {
   background-color: var(--colore-sfondo);
 }
 
+/* Safari su iOS dà ai <button> il blu di sistema: testo e icone (currentColor) prendono il colore della pagina */
+button {
+  color: inherit;
+}
+
 /*
  * Pulsante "push": bordo inferiore in rilievo che si abbassa quando si preme.
  * Varianti: .btn-push-primario (default), .btn-push-successo, .btn-push-neutro, .btn-push-pericolo.
