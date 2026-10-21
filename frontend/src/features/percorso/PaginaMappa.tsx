@@ -5,6 +5,7 @@ import Icona from '../../common/Icona'
 import MessaggioErrore from '../../common/MessaggioErrore'
 import Pulsante from '../../common/Pulsante'
 import Scheda from '../../common/Scheda'
+import SentieroTappa from './SentieroTappa'
 import { useAppDispatch } from '../../store/hooks'
 import { avviaLezione, caricaMappa } from './percorsoThunk'
 import type { LezionePercorso, StatoLezione, TappaPercorso } from './tipi'
@@ -167,35 +168,46 @@ function PaginaMappa() {
                 {tappa.titolo}
               </h2>
               <p className={stili.descrizioneTappa}>{tappa.descrizione}</p>
+              <div className={stili.barraTappa} aria-hidden="true">
+                {tappa.lezioni.map((lezione) => (
+                  <span key={lezione.id} className={`${stili.segmento} ${stili[`segmento${lezione.stato}`]}`} />
+                ))}
+              </div>
             </Scheda>
 
-            <ol className={stili.nodi}>
-              {tappa.lezioni.map((lezione, indice) => (
-                <li key={lezione.id} className={`${stili.voce} ${ZIG_ZAG[indice % ZIG_ZAG.length]}`}>
-                  <button
-                    type="button"
-                    ref={lezione.id === idDaFare ? nodoDaFare : undefined}
-                    className={`${stili.nodo} ${stili[lezione.stato]}`}
-                    disabled={lezione.stato === 'BLOCCATA' || inAvvio !== null}
-                    aria-label={`Lezione ${lezione.ordine}, ${lezione.titolo}: ${TESTO_STATO[lezione.stato]}`}
-                    onClick={() => avvia(lezione)}
+            <SentieroTappa stati={tappa.lezioni.map((lezione) => lezione.stato)}>
+              <ol className={stili.nodi}>
+                {tappa.lezioni.map((lezione, indice) => (
+                  <li
+                    key={lezione.id}
+                    className={`${stili.voce} ${ZIG_ZAG[indice % ZIG_ZAG.length]} ${lezione.stato === 'BLOCCATA' ? stili.voceBloccata : ''}`}
                   >
-                    <Icona
-                      nome={lezione.stato === 'COMPLETATA' ? 'spunta' : lezione.stato === 'BLOCCATA' ? 'lucchetto' : 'manubrio'}
-                      dimensione={32}
-                    />
-                  </button>
-                  {lezione.stato === 'SBLOCCATA' && (
-                    <span className={stili.inizia} aria-hidden="true">
-                      {inAvvio === lezione.id ? 'Avvio…' : 'Inizia'}
+                    <button
+                      type="button"
+                      data-nodo
+                      ref={lezione.id === idDaFare ? nodoDaFare : undefined}
+                      className={`${stili.nodo} ${stili[lezione.stato]}`}
+                      disabled={lezione.stato === 'BLOCCATA' || inAvvio !== null}
+                      aria-label={`Lezione ${lezione.ordine}, ${lezione.titolo}: ${TESTO_STATO[lezione.stato]}`}
+                      onClick={() => avvia(lezione)}
+                    >
+                      <Icona
+                        nome={lezione.stato === 'COMPLETATA' ? 'spunta' : lezione.stato === 'BLOCCATA' ? 'lucchetto' : 'manubrio'}
+                        dimensione={32}
+                      />
+                    </button>
+                    {lezione.stato === 'SBLOCCATA' && (
+                      <span className={stili.inizia} aria-hidden="true">
+                        {inAvvio === lezione.id ? 'Avvio…' : 'Inizia'}
+                      </span>
+                    )}
+                    <span className={stili.titoloLezione} aria-hidden="true">
+                      <strong>Lezione {lezione.ordine}</strong> · {lezione.titolo}
                     </span>
-                  )}
-                  <span className={stili.titoloLezione} aria-hidden="true">
-                    <strong>Lezione {lezione.ordine}</strong> · {lezione.titolo}
-                  </span>
-                </li>
-              ))}
-            </ol>
+                  </li>
+                ))}
+              </ol>
+            </SentieroTappa>
           </section>
         )
       })}
