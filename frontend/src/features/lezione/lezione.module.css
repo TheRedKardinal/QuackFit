@@ -157,12 +157,16 @@
   background-color: var(--colore-primario-chiaro);
 }
 
-.giusta {
-  border-color: var(--colore-successo-scuro);
+/* .tessera.* : le tessere (abbinamento) definiscono sfondo e bordo più avanti, l'esito deve vincere comunque */
+.giusta,
+.tessera.giusta {
+  /* verde "testo" anche per il bordo: quello scuro sullo sfondo resta sotto il 3:1 degli indicatori */
+  border-color: var(--colore-successo-testo);
   background-color: color-mix(in srgb, var(--colore-successo), white 80%);
 }
 
-.sbagliata {
+.sbagliata,
+.tessera.sbagliata {
   border-color: var(--colore-errore);
   background-color: color-mix(in srgb, var(--colore-errore), white 88%);
 }
@@ -258,11 +262,11 @@
   background-color: var(--colore-primario);
 }
 
-/* Destri che si possono toccare mentre un sinistro è selezionato: bordo tratteggiato (non solo il colore) */
+/* Destri che si possono toccare mentre un sinistro è selezionato: solo bordo tratteggiato (non solo il colore),
+   così il giallo pieno resta al sinistro selezionato */
 .selezionabile {
   border-style: dashed;
   border-color: var(--colore-primario-bordo);
-  background-color: var(--colore-primario-chiaro);
 }
 
 /* Hover solo dove esiste davvero (mouse): sul telefono un tocco non deve lasciare la tessera "accesa" */

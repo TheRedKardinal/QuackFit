@@ -220,7 +220,7 @@ function SezioneCambioEmail() {
           />
           {messaggioAvviso}
           <div className={stili.pulsanti}>
-            <Pulsante type="submit" variante="successo" disabled={conferma.bloccato}>
+            <Pulsante type="submit" variante="primario" disabled={conferma.bloccato}>
               <TestoPulsante testo="Conferma nuova email" inviando={conferma.inviando} secondiAttesa={0} />
             </Pulsante>
             <Pulsante variante="neutro" onClick={nuovoCodice} disabled={reinvio.bloccato}>
