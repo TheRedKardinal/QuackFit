@@ -25,6 +25,10 @@
      bianco restano sotto il 3:1 richiesto agli indicatori (WCAG 1.4.11); così circa 4,6:1 sul bianco */
   --colore-primario-bordo: color-mix(in srgb, var(--colore-primario), black 45%);
 
+  /* Grigio per ciò che è bloccato ma va letto (lucchetto e titolo delle lezioni bloccate della mappa): il grigio scuro
+     dei bordi sul grigio del nodo resta a 1,4:1; questo arriva a 4,5:1 sul nodo e oltre 5:1 sul bianco */
+  --colore-attenuato: color-mix(in srgb, var(--colore-bordo), black 55%);
+
   /* Tonalità ricavate per la mascotte: pancia più chiara e interno del becco aperto */
   --colore-primario-chiaro: color-mix(in srgb, var(--colore-primario), white 55%);
   --colore-streak-scuro: color-mix(in srgb, var(--colore-streak), black 30%);

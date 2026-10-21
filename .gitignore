@@ -26,3 +26,6 @@ Thumbs.db
 # I README restano visibili, in qualsiasi cartella.
 *.md
 !README.md
+
+# Impeccable (rifinitura grafica, task 50c): configurazione, resoconti e screenshot solo in locale
+.impeccable/

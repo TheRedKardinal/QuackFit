@@ -45,6 +45,7 @@ function DomandaAbbinamento({ domanda, stato, bloccata, soluzione, onToccaSinist
             const scelto = stato.selezionato === voce.id
             const classi = [
               stili.tessera,
+              n ? stili.collegata : '',
               scelto ? stili.selezionata : '',
               esito === 'giusta' ? stili.giusta : '',
               esito === 'sbagliata' ? stili.sbagliata : '',
@@ -63,7 +64,7 @@ function DomandaAbbinamento({ domanda, stato, bloccata, soluzione, onToccaSinist
                 >
                   <span className={stili.testoOpzione}>{voce.testo}</span>
                   <span className={stili.numeroCoppia} aria-hidden="true">
-                    {esito === 'giusta' ? '✓' : esito === 'sbagliata' ? '✗' : scelto ? '→' : (n ?? '·')}
+                    {esito === 'giusta' ? '✓' : esito === 'sbagliata' ? '✗' : scelto ? '→' : n}
                   </span>
                 </button>
               </li>
@@ -85,7 +86,7 @@ function DomandaAbbinamento({ domanda, stato, bloccata, soluzione, onToccaSinist
                   onClick={() => onToccaDestro(voce.id)}
                 >
                   <span className={stili.numeroCoppia} aria-hidden="true">
-                    {n ?? '·'}
+                    {n}
                   </span>
                   <span className={stili.testoOpzione}>{voce.testo}</span>
                 </button>

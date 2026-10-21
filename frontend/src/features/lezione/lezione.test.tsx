@@ -285,7 +285,7 @@ describe('lezione: coda, riproposta e chiusura', () => {
     await utente.click(await screen.findByRole('button', { name: 'Continua' }))
 
     expect(await screen.findByRole('heading', { name: 'Lezione completata!' })).toBeInTheDocument()
-    expect(screen.getByText('Streak: 4 giorni')).toBeInTheDocument()
+    expect(streakVittoria()).toHaveTextContent('4 giorni di streak')
     expect(screen.getByText('Record: 7 giorni')).toBeInTheDocument()
     expect(chiamate('/complete')).toHaveLength(1)
 
@@ -482,16 +482,17 @@ describe('lezione: vittoria e streak', () => {
     await screen.findByRole('heading', { name: 'Lezione completata!' })
   }
 
-  it('vittoria: streak e record dalla risposta, "+1 oggi" perché è salita, tracker, esito, errori e tempo', async () => {
+  it('vittoria: streak e record dalla risposta, "+1 oggi" perché è salita, tracker, errori e tempo (niente esito)', async () => {
     const utente = userEvent.setup()
     apri()
 
     await vinci(utente)
 
-    expect(screen.getByText('Streak: 4 giorni')).toBeInTheDocument()
+    expect(streakVittoria()).toHaveTextContent('4 giorni di streak')
     expect(screen.getByText('+1 oggi')).toBeInTheDocument()
     expect(screen.getByRole('list', { name: 'Giorni di streak di questa settimana' })).toBeInTheDocument()
-    expect(screen.getByText('Superata')).toBeInTheDocument()
+    // l'esito lo dice già il titolo: nel riquadro restano tempo ed errori
+    expect(screen.queryByText('Esito')).not.toBeInTheDocument()
     expect(screen.getByText('1/3', { selector: 'dd' })).toBeInTheDocument()
     expect(screen.getByText(/^\d+s$/)).toBeInTheDocument()
   })
@@ -503,7 +504,7 @@ describe('lezione: vittoria e streak', () => {
 
     await vinci(utente)
 
-    expect(screen.getByText('Streak: 2 giorni')).toBeInTheDocument()
+    expect(streakVittoria()).toHaveTextContent('2 giorni di streak')
     expect(screen.queryByText('+1 oggi')).not.toBeInTheDocument()
   })
 
@@ -580,3 +581,8 @@ describe('lezione: uscite ed errori', () => {
     expect(screen.getByRole('heading', { name: 'Percorso' })).toBeInTheDocument()
   })
 })
+
+/** Il numero grande della streak nella vittoria, con la sua unità ("4 giorni di streak"). */
+function streakVittoria() {
+  return screen.getByText(/di streak$/).closest('p')
+}

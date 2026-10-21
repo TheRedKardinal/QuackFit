@@ -50,7 +50,58 @@
   margin: 0;
 }
 
+/* barra della tappa: un segmento per lezione, nel colore del suo stato (il testo "x/y completate" dice lo stesso) */
+.barraTappa {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 1rem;
+}
+
+.segmento {
+  flex: 1;
+  height: 0.5rem;
+  border-radius: 999px;
+  background-color: var(--colore-bordo);
+}
+
+.segmentoCOMPLETATA {
+  background-color: var(--colore-successo);
+}
+
+.segmentoSBLOCCATA {
+  background-color: var(--colore-primario);
+}
+
+/* sentiero tratteggiato dietro ai nodi (SentieroTappa) */
+.contenitoreSentiero {
+  position: relative;
+}
+
+.sentiero {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sentiero path {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 0 14;
+}
+
+.trattoRaggiunto {
+  stroke: var(--colore-successo);
+}
+
+.trattoBloccato {
+  stroke: var(--colore-bordo-scuro);
+}
+
 .nodi {
+  position: relative;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -60,7 +111,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 1.25rem;
+  /* spazio tra le voci: lascia vedere il sentiero tratteggiato tra un'etichetta e il nodo successivo */
+  margin-bottom: 2.25rem;
 }
 
 /* zig-zag: i nodi si spostano a destra e a sinistra del centro (con il padding, senza uscire dalla colonna) */
@@ -114,7 +166,7 @@
 .BLOCCATA {
   background-color: var(--colore-bordo);
   border-bottom-color: var(--colore-bordo-scuro);
-  color: var(--colore-bordo-scuro);
+  color: var(--colore-attenuato);
 }
 
 /* durante un avvio i nodi sono disattivati: si attenuano solo quelli non bloccati */
@@ -135,6 +187,12 @@
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+/* titolo di una lezione bloccata: attenuato, ma sempre leggibile (oltre 5:1) */
+.voceBloccata .titoloLezione {
+  background-color: var(--colore-sfondo);
+  color: var(--colore-attenuato);
 }
 
 .titoloLezione {

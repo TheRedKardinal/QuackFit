@@ -125,7 +125,7 @@ function SezioneCambioPassword() {
         </p>
         <MessaggioErrore testo={erroreGenerale} />
 
-        <Pulsante type="submit" variante="successo" larghezzaPiena disabled={bloccato}>
+        <Pulsante type="submit" variante="primario" larghezzaPiena disabled={bloccato}>
           <TestoPulsante testo="Aggiorna password" inviando={inviando} secondiAttesa={secondiAttesa} />
         </Pulsante>
       </form>

@@ -36,11 +36,19 @@
   background-color: var(--colore-bordo);
 }
 
+/* il riempimento è largo quanto la barra e scorre da sinistra (translateX): si anima senza ricalcolare il layout e,
+   a differenza di scaleX, non schiaccia gli angoli arrotondati; la barra (overflow: hidden) taglia la parte fuori */
 .riempimento {
   height: 100%;
   border-radius: 999px;
   background-color: var(--colore-successo);
-  transition: width 0.3s ease-out;
+  transition: transform 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .riempimento {
+    transition: none;
+  }
 }
 
 .errori {
@@ -157,12 +165,16 @@
   background-color: var(--colore-primario-chiaro);
 }
 
-.giusta {
-  border-color: var(--colore-successo-scuro);
+/* .tessera.* : le tessere (abbinamento) definiscono sfondo e bordo più avanti, l'esito deve vincere comunque */
+.giusta,
+.tessera.giusta {
+  /* verde "testo" anche per il bordo: quello scuro sullo sfondo resta sotto il 3:1 degli indicatori */
+  border-color: var(--colore-successo-testo);
   background-color: color-mix(in srgb, var(--colore-successo), white 80%);
 }
 
-.sbagliata {
+.sbagliata,
+.tessera.sbagliata {
   border-color: var(--colore-errore);
   background-color: color-mix(in srgb, var(--colore-errore), white 88%);
 }
@@ -178,11 +190,6 @@
   margin-bottom: 1.5rem;
   font-size: 1.75rem;
   font-weight: 900;
-}
-
-.valoreFine {
-  font-size: 1.25rem;
-  font-weight: 800;
 }
 
 .azioniFine {
@@ -258,11 +265,11 @@
   background-color: var(--colore-primario);
 }
 
-/* Destri che si possono toccare mentre un sinistro è selezionato: bordo tratteggiato (non solo il colore) */
+/* Destri che si possono toccare mentre un sinistro è selezionato: solo bordo tratteggiato (non solo il colore),
+   così il giallo pieno resta al sinistro selezionato */
 .selezionabile {
   border-style: dashed;
   border-color: var(--colore-primario-bordo);
-  background-color: var(--colore-primario-chiaro);
 }
 
 /* Hover solo dove esiste davvero (mouse): sul telefono un tocco non deve lasciare la tessera "accesa" */
@@ -302,8 +309,33 @@
   gap: 0.5rem;
 }
 
-.rigaStreak .valoreFine {
+/* streak della vittoria: numero grande con la fiamma, il momento da ricordare */
+.eroeStreak {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin: 0;
+}
+
+.fiammaStreak {
+  display: inline-flex;
+  color: var(--colore-streak);
+}
+
+.numeroStreak {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.unitaStreak {
+  font-weight: 800;
+}
+
+.recordStreak {
+  margin: 0.25rem 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
 }
 
 .piuUno {

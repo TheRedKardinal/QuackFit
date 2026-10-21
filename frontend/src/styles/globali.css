@@ -25,6 +25,11 @@ body {
   transition: transform 0.05s, border-bottom-width 0.05s;
 }
 
+.btn-push:focus-visible {
+  outline: 3px solid var(--colore-streak);
+  outline-offset: 2px;
+}
+
 .btn-push:active:not(:disabled) {
   transform: translateY(2px);
   border-bottom-width: 2px;

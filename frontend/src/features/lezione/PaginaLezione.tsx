@@ -292,7 +292,7 @@ function PaginaLezione() {
           </ul>
         )}
         <p>{ultima?.esito.spiegazione}</p>
-        <Pulsante variante={ultima?.esito.corretta ? 'successo' : 'pericolo'} larghezzaPiena onClick={continua}>
+        <Pulsante variante={ultima?.esito.corretta ? 'successo' : 'primario'} larghezzaPiena onClick={continua}>
           Continua
         </Pulsante>
       </Drawer>

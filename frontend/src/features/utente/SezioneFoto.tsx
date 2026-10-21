@@ -98,7 +98,7 @@ function SezioneFoto() {
       <div className={stili.pulsanti}>
         {anteprima ? (
           <>
-            <Pulsante variante="successo" onClick={salva} disabled={bloccato}>
+            <Pulsante variante="primario" onClick={salva} disabled={bloccato}>
               <TestoPulsante testo="Salva foto" inviando={inviando} secondiAttesa={secondiAttesa} />
             </Pulsante>
             <Pulsante variante="neutro" onClick={() => setAnteprima(null)} disabled={inviando}>
