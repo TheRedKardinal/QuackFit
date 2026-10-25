@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 import stili from './accesso.module.css'
 
 /**
@@ -10,7 +10,12 @@ function LayoutAccesso() {
   return (
     <>
       <Outlet />
-      <footer className={stili.copyright}>© 2026 Claudio Giasi · Tutti i diritti riservati</footer>
+      <footer className={stili.copyright}>
+        © 2026 Claudio Giasi · Tutti i diritti riservati ·{' '}
+        <Link to="/privacy" className={stili.linkPiede}>
+          Privacy e Termini
+        </Link>
+      </footer>
     </>
   )
 }

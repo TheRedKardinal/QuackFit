@@ -35,12 +35,13 @@ button {
   outline-offset: 2px;
 }
 
-.btn-push:active:not(:disabled) {
+.btn-push:active:not(:disabled, [aria-disabled='true']) {
   transform: translateY(2px);
   border-bottom-width: 2px;
 }
 
-.btn-push:disabled {
+.btn-push:disabled,
+.btn-push[aria-disabled='true'] {
   opacity: 0.5;
   cursor: not-allowed;
 }

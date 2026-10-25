@@ -39,6 +39,10 @@ function PaginaRegistrazione() {
   const [emailGiaUsata, setEmailGiaUsata] = useState(false)
   const [erroreGenerale, setErroreGenerale] = useState<string | null>(null)
   const [mostraPassword, setMostraPassword] = useState(false)
+  /** Casella "Ho letto Privacy e Termini": obbligatoria per registrarsi (task 51c, solo frontend). */
+  const [consenso, setConsenso] = useState(false)
+  const [erroreConsenso, setErroreConsenso] = useState(false)
+  const casellaConsenso = useRef<HTMLInputElement | null>(null)
   const campi = useRef<Partial<Record<Campo, HTMLInputElement | null>>>({})
 
 
@@ -82,9 +86,15 @@ function PaginaRegistrazione() {
     }
     setErroreGenerale(null)
     const erroriLocali = validaRegistrazione(dati)
+    // senza la casella non si invia: messaggio sotto la casella (anche insieme agli errori dei campi)
+    setErroreConsenso(!consenso)
     if (Object.keys(erroriLocali).length > 0) {
       setEmailGiaUsata(false)
       mostraErrori(erroriLocali)
+      return
+    }
+    if (!consenso) {
+      casellaConsenso.current?.focus()
       return
     }
     const errore = await invia(() => dispatch(registra(dati)).unwrap())
@@ -185,10 +195,39 @@ function PaginaRegistrazione() {
           <p className={stili.nota}>Registrandoti riceverai un codice a 6 cifre via email per verificare il tuo indirizzo.</p>
         </div>
 
+        <div className={stili.consenso}>
+          <input
+            ref={casellaConsenso}
+            id="consenso-privacy"
+            type="checkbox"
+            className={stili.casella}
+            checked={consenso}
+            aria-invalid={erroreConsenso || undefined}
+            aria-describedby={erroreConsenso ? 'errore-consenso' : undefined}
+            onChange={(evento) => {
+              setConsenso(evento.target.checked)
+              setErroreConsenso(false)
+            }}
+          />
+          <label htmlFor="consenso-privacy">
+            Ho letto{' '}
+            <Link to="/privacy" target="_blank" rel="noopener noreferrer" className={stili.link}>
+              Privacy e Termini
+            </Link>
+          </label>
+        </div>
+        {erroreConsenso && (
+          <p id="errore-consenso" className={stili.erroreConsenso}>
+            Per creare l'account devi spuntare "Ho letto Privacy e Termini".
+          </p>
+        )}
+
         <MessaggioErrore testo={erroreGenerale} />
 
         <div className={stili.pulsantiera}>
-          <Pulsante type="submit" disabled={bloccato}>
+          {/* aria-disabled e non disabled finché manca la casella: il pulsante appare disattivo ma resta raggiungibile
+              da tastiera e, se lo si preme, spiega cosa manca invece di non fare nulla */}
+          <Pulsante type="submit" disabled={bloccato} aria-disabled={!consenso || undefined}>
             <TestoPulsante testo="Crea account" inviando={inviando} secondiAttesa={secondiAttesa} />
           </Pulsante>
         </div>

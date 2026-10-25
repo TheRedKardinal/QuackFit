@@ -47,7 +47,7 @@ describe('layout delle pagine di accesso', () => {
     apri('/verify-email', 'token-valido')
 
     expect(await screen.findByRole('heading', { name: 'Verifica la tua email' })).toBeInTheDocument()
-    expect(screen.getByText(copyright)).toBeInTheDocument()
+    expect(screen.getByRole('contentinfo')).toHaveTextContent(copyright)
   })
 
   it("le pagine dell'app (es. profilo) non hanno la riga del copyright", async () => {
