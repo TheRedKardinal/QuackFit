@@ -16,6 +16,7 @@ import RichiedeAdmin from './features/auth/RichiedeAdmin'
 import RichiedeAutenticazione from './features/auth/RichiedeAutenticazione'
 import RichiedeEmailVerificata from './features/auth/RichiedeEmailVerificata'
 import LayoutAccesso from './features/auth/LayoutAccesso'
+import PaginaPrivacy from './features/privacy/PaginaPrivacy'
 import SoloOspite from './features/auth/SoloOspite'
 import PaginaModificaProfilo from './features/utente/PaginaModificaProfilo'
 import PaginaProfilo from './features/utente/PaginaProfilo'
@@ -30,6 +31,9 @@ import PaginaProfilo from './features/utente/PaginaProfilo'
 function App() {
   return (
     <Routes>
+      {/* Privacy e Termini: pubblica, con o senza accesso (nessuna guardia) */}
+      <Route path="/privacy" element={<PaginaPrivacy />} />
+
       {/* LayoutAccesso: rotta di layout senza percorso, aggiunge la riga del copyright alle pagine di accesso */}
       <Route element={<SoloOspite />}>
         <Route element={<LayoutAccesso />}>

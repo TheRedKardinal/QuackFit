@@ -1,0 +1,57 @@
+/* Privacy e Termini: colonna centrata come le pagine di accesso. */
+
+.pagina {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2rem;
+}
+
+.barra {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.marchio {
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.sezione {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.titolo {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+  font-weight: 900;
+}
+
+.titoloSezione {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.titoloSezione:first-child {
+  margin-top: 0;
+}
+
+.ultimo {
+  margin-bottom: 0;
+}
+
+.link {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.ritorno {
+  text-align: center;
+}

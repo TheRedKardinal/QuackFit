@@ -48,6 +48,7 @@ async function compilaRegistrazione(utente: ReturnType<typeof userEvent.setup>) 
   await utente.type(screen.getByLabelText('Cognome'), 'Rossi')
   await utente.type(screen.getByLabelText('Email'), 'mario@example.com')
   await utente.type(screen.getByLabelText('Password'), 'Password1!')
+  await utente.click(screen.getByRole('checkbox', { name: 'Ho letto Privacy e Termini' }))
 }
 
 async function compilaLogin(utente: ReturnType<typeof userEvent.setup>) {
@@ -143,6 +144,99 @@ describe('registrazione', () => {
     expect(await screen.findByText(messaggioErrore('EMAIL_GIA_USATA'))).toBeInTheDocument()
     await utente.click(screen.getByRole('link', { name: 'Password dimenticata?' }))
     expect(await screen.findByRole('heading', { name: 'Password dimenticata' })).toBeInTheDocument()
+  })
+})
+
+describe('registrazione: casella Privacy e Termini', () => {
+  const MESSAGGIO_CONSENSO = `Per creare l'account devi spuntare "Ho letto Privacy e Termini".`
+
+  it("la casella ha un'etichetta accessibile e il link alla pagina /privacy", async () => {
+    apri('/register')
+
+    const casella = await screen.findByRole('checkbox', { name: 'Ho letto Privacy e Termini' })
+    expect(casella).not.toBeChecked()
+    // due link: quello della casella e quello nel piede della pagina, entrambi verso /privacy
+    for (const link of screen.getAllByRole('link', { name: 'Privacy e Termini' })) {
+      expect(link).toHaveAttribute('href', '/privacy')
+    }
+    expect(casella.closest('div')?.querySelector('a')).toHaveAttribute('href', '/privacy')
+  })
+
+  it('"Crea account" resta disattivo finché la casella non è spuntata', async () => {
+    const utente = userEvent.setup()
+    apri('/register')
+    const pulsante = await screen.findByRole('button', { name: 'Crea account' })
+    expect(pulsante).toHaveAttribute('aria-disabled', 'true')
+
+    await utente.click(screen.getByRole('checkbox', { name: 'Ho letto Privacy e Termini' }))
+
+    expect(pulsante).not.toHaveAttribute('aria-disabled')
+  })
+
+  it('inviando senza la casella non parte nulla: messaggio chiaro e cursore sulla casella', async () => {
+    const utente = userEvent.setup()
+    apri('/register')
+    await utente.type(screen.getByLabelText('Nome'), 'Mario')
+    await utente.type(screen.getByLabelText('Cognome'), 'Rossi')
+    await utente.type(screen.getByLabelText('Email'), 'mario@example.com')
+    await utente.type(screen.getByLabelText('Password'), 'Password1!')
+
+    await utente.click(screen.getByRole('button', { name: 'Crea account' }))
+
+    expect(fetchFinto).not.toHaveBeenCalled()
+    const casella = screen.getByRole('checkbox', { name: 'Ho letto Privacy e Termini' })
+    expect(casella).toHaveAccessibleDescription(MESSAGGIO_CONSENSO)
+    expect(casella).toHaveFocus()
+  })
+
+  it('da tastiera: spazio sulla casella la spunta, il messaggio sparisce e la registrazione parte', async () => {
+    const utente = userEvent.setup()
+    fetchFinto.mockResolvedValueOnce(rispostaJson(201, { token: 'token-nuovo' }))
+    fetchFinto.mockResolvedValue(rispostaJson(200, profilo({ emailVerificata: false })))
+    apri('/register')
+    await utente.type(screen.getByLabelText('Nome'), 'Mario')
+    await utente.type(screen.getByLabelText('Cognome'), 'Rossi')
+    await utente.type(screen.getByLabelText('Email'), 'mario@example.com')
+    await utente.type(screen.getByLabelText('Password'), 'Password1!')
+    await utente.click(screen.getByRole('button', { name: 'Crea account' }))
+    expect(screen.getByText(MESSAGGIO_CONSENSO)).toBeInTheDocument()
+
+    // il cursore è già sulla casella: la spunta la barra spaziatrice
+    await utente.keyboard(' ')
+    expect(screen.getByRole('checkbox', { name: 'Ho letto Privacy e Termini' })).toBeChecked()
+    expect(screen.queryByText(MESSAGGIO_CONSENSO)).not.toBeInTheDocument()
+
+    await utente.click(screen.getByRole('button', { name: 'Crea account' }))
+    expect(chiamateA('/api/auth/register')).toHaveLength(1)
+  })
+})
+
+describe('Privacy e Termini', () => {
+  it('la pagina /privacy si apre senza accesso, con titolare, dati, servizi e contatto', async () => {
+    apri('/privacy')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Privacy e Termini' })).toBeInTheDocument()
+    expect(screen.getByText(/Claudio Giasi/)).toBeInTheDocument()
+    expect(screen.getByText(/progetto didattico/)).toBeInTheDocument()
+    expect(screen.getByText(/indirizzo IP, usato solo per limitare i tentativi di accesso/)).toBeInTheDocument()
+    expect(screen.getByText(/localStorage/)).toBeInTheDocument()
+    for (const servizio of ['Render', 'Neon', 'Brevo', 'Cloudinary']) {
+      expect(screen.getByText(servizio)).toBeInTheDocument()
+    }
+    expect(screen.getByRole('link', { name: 'github.com/TheRedKardinal' })).toHaveAttribute(
+      'href',
+      'https://github.com/TheRedKardinal',
+    )
+    expect(fetchFinto).not.toHaveBeenCalled()
+  })
+
+  it('il piede delle pagine di accesso porta a Privacy e Termini', async () => {
+    const utente = userEvent.setup()
+    apri('/login')
+
+    await utente.click(await screen.findByRole('link', { name: 'Privacy e Termini' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Privacy e Termini' })).toBeInTheDocument()
   })
 })
 

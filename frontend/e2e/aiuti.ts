@@ -47,6 +47,7 @@ export async function registraEVerifica(page: Page, utente: UtenteProva) {
   await page.getByLabel('Cognome', { exact: true }).fill(utente.cognome)
   await page.getByLabel('Email', { exact: true }).fill(utente.email)
   await page.getByLabel('Password', { exact: true }).fill(utente.password)
+  await page.getByRole('checkbox', { name: 'Ho letto Privacy e Termini' }).check()
   await page.getByRole('button', { name: 'Crea account' }).click()
 
   await expect(page.getByRole('heading', { name: 'Verifica la tua email' })).toBeVisible()

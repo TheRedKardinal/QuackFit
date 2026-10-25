@@ -7,6 +7,38 @@
 }
 
 /* riga del copyright sotto le pagine di accesso (LayoutAccesso): piccola, testo attenuato oltre 5:1 sullo sfondo */
+/* casella "Ho letto Privacy e Termini" nella registrazione */
+.consenso {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 1rem 0 0.25rem;
+}
+
+.casella {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  accent-color: var(--colore-primario-bordo);
+}
+
+.casella:focus-visible {
+  outline: 3px solid var(--colore-streak);
+  outline-offset: 2px;
+}
+
+.erroreConsenso {
+  margin-bottom: 0.5rem;
+  color: var(--colore-errore);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.linkPiede {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .copyright {
   max-width: 480px;
   margin: 0 auto;
