@@ -75,7 +75,7 @@ export async function avviaLezione1(page: Page) {
  * Risposte della Lezione 1 dei contenuti iniziali (ContenutiIniziali), per testo della domanda: giusta e sbagliata.
  * Le domande arrivano mescolate dal backend, quindi si riconoscono dal testo.
  */
-const LEZIONE_1: { testo: string; giusta: string[][] | string; sbagliata: string[][] | string }[] = [
+export const LEZIONE_1: { testo: string; giusta: string[][] | string; sbagliata: string[][] | string }[] = [
   { testo: 'Il quadricipite si trova', giusta: 'Vero', sbagliata: 'Falso' },
   { testo: 'Gli addominali servono solo', giusta: 'Falso', sbagliata: 'Vero' },
   { testo: 'Quale muscolo piega il gomito?', giusta: 'Il bicipite', sbagliata: 'Il tricipite' },
@@ -99,7 +99,7 @@ const LEZIONE_1: { testo: string; giusta: string[][] | string; sbagliata: string
 ]
 
 /** Tessera dell'abbinamento per testo, collegata o no ("Petto" non deve trovare anche "Pettorale"). */
-function tessera(page: Page, testo: string) {
+export function tessera(page: Page, testo: string) {
   return page.getByRole('button', { name: new RegExp(`^${testo}(,|$)`) })
 }
 
