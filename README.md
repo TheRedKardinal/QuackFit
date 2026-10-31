@@ -10,6 +10,14 @@ Progetto Capstone del corso Epicode.
 (il backend usa il piano gratuito di Render e dopo 15 minuti senza richieste si addormenta: al primo accesso può
 servire circa un minuto perché risponda).
 
+<p align="center">
+  <img src="docs/screenshots/percorso.png" width="220" alt="Percorso: la Tappa 1 con la prima lezione completata, la seconda da iniziare e la terza bloccata">
+  <img src="docs/screenshots/domanda.png" width="220" alt="Domanda di abbinamento a metà: due coppie collegate e un muscolo selezionato">
+  <img src="docs/screenshots/spiegazione.png" width="220" alt="Risposta giusta a una scelta multipla, con la spiegazione nel pannello in basso">
+  <img src="docs/screenshots/resoconto.png" width="220" alt="Lezione completata: Coach Quack contento, streak di un giorno, tempo ed errori">
+  <img src="docs/screenshots/profilo.png" width="220" alt="Profilo di Mario Rossi con streak, record e lezioni completate">
+</p>
+
 ## Funzionalità
 - **Account**: registrazione con codice di verifica via email, login, recupero e reimpostazione della password,
   limite di richieste per indirizzo IP e blocco temporaneo dopo troppi login sbagliati.
@@ -123,6 +131,9 @@ Una volta sola:
 
 Poi `npm run e2e`: Playwright avvia da solo backend (porta 8081, database `quackfit_e2e`, email solo nel log) e
 frontend (porta 5174), esegue le prove e li spegne. Non serve fermare backend e frontend di sviluppo.
+
+Gli screenshot qui sopra si rigenerano con `npm run screenshots` (stesso stack, solo telefono, file in
+`docs/screenshots/`); lo script non fa parte di `npm run e2e`.
 
 ## Deploy
 - **Database**: PostgreSQL su Neon (regione Frankfurt, connessione diretta).
